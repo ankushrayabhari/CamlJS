@@ -24,6 +24,7 @@ and expr =
   | Ternary of expr * expr * expr option
   | Function of pattern list * expr
   | Sequential of expr * expr
-  | ValueName of value_name
+  | LetBinding of let_binding * expr
+  | VarName of value_name
 
 val parse : Tokenizer.token list -> expr

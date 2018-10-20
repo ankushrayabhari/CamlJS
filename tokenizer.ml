@@ -13,7 +13,7 @@ type token =
   (* Special character sequences. *)
   | FunctionArrow | LParen | RParen | SemiColon
   (* Keywords *)
-  | If | Then | Else | Function | Let | Rec | In
+  | If | Then | Else | Fun | Let | Rec | In
 
 (**
  * [regexp_of_token tok] is the regexp that matches strings that [tok]
@@ -40,7 +40,7 @@ let regexp_of_token tok = regexp (match tok with
   | If -> "if"
   | Then -> "then"
   | Else -> "else"
-  | Function -> "fun"
+  | Fun -> "fun"
   | SemiColon -> ";"
   | Let -> "let"
   | Rec -> "rec"
@@ -61,7 +61,7 @@ let precedence = [
   SemiColon;
 
   (* Keywords. *)
-  If; Then; Else; Function; Let; Rec; In;
+  If; Then; Else; Fun; Let; Rec; In;
 
   (* Constants *)
   Int 0;

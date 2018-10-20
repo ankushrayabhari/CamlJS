@@ -12,7 +12,7 @@ type token =
   (* Special character sequences. *)
   | FunctionArrow | LParen | RParen | SemiColon
   (* Keywords *)
-  | If | Then | Else | Function | Let | Rec | In
+  | If | Then | Else | Fun | Let | Rec | In
 
 (**
  * [tokenize str] is the list of tokens from [str].

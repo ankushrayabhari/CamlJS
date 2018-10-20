@@ -1,4 +1,4 @@
-MODULES=tokenizer
+MODULES=tokenizer parser
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -15,7 +15,10 @@ build:
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
-.PHONY: test
+
+test-debug:
+	$(OCAMLBUILD) -tag 'debug' $(TEST) && ocamldebug ./$(TEST)
+.PHONY: test, test-debug
 
 docs: docs-public docs-private
 
