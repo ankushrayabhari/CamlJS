@@ -15,24 +15,6 @@ type token =
   (* Keywords *)
   | If | Then | Else | Function | Let | Rec | In
 
-let precedence = [
-  (* Two letter operators. *)
-  NotEqual; GreaterThanOrEqual; LessThanOrEqual; FunctionArrow; Negation;
-
-  (* Single letter operators. *)
-  Plus; Minus; Times; Divide; GreaterThan; LessThan; Equal; LParen; RParen;
-  SemiColon;
-
-  (* Keywords. *)
-  If; Then; Else; Function; Let; Rec; In;
-
-  (* Constants *)
-  Int 0;
-
-  (* Identifiers *)
-  LowercaseIdent "";
-]
-
 let regexp_of_token tok = regexp (match tok with
   | Int _ ->  "[0-9]+"
   | Plus -> "\\+"
@@ -60,13 +42,34 @@ let regexp_of_token tok = regexp (match tok with
   | In -> "in"
 )
 
+let precedence = [
+  (* Two letter operators. *)
+  NotEqual; GreaterThanOrEqual; LessThanOrEqual; FunctionArrow; Negation;
+
+  (* Single letter operators. *)
+  Plus; Minus; Times; Divide; GreaterThan; LessThan; Equal; LParen; RParen;
+  SemiColon;
+
+  (* Keywords. *)
+  If; Then; Else; Function; Let; Rec; In;
+
+  (* Constants *)
+  Int 0;
+
+  (* Identifiers *)
+  LowercaseIdent "";
+]
+
 let token_of_string str tok = match tok with
   | Int _ -> Int (int_of_string str)
   | LowercaseIdent _ -> LowercaseIdent str
   | t -> t
 
-let rec tokenize_rec str start_index tok_lst =
-  if start_index >= String.length str then tok_lst
+let rec tokenize_rec str start tok_lst =
+  let whitespace_regex = Str.regexp "[ \n\r\t]*" in
+  let _ = Str.string_match whitespace_regex str start in
+  let start_index = start + (String.length (Str.matched_string str)) in
+  if start_index >= (String.length str) then tok_lst
   else
     let token = List.fold_left (fun acc curr_tok -> match acc with
         | (Some _, _) -> acc
@@ -86,4 +89,4 @@ let rec tokenize_rec str start_index tok_lst =
         failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
 
 let tokenize str =
-  failwith "unimplemented"
+  tokenize_rec str 0 [] |> List.rev
