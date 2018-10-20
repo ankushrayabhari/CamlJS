@@ -83,11 +83,7 @@ let rec tokenize_rec str start_index tok_lst =
     match token with
     | (Some tok, len) -> tokenize_rec str (start_index + len) (tok::tok_lst)
     | (None, _) ->
-        failwith (
-          "Unknown character sequence at " ^
-          string_of_int start_index ^
-          "."
-        )
+        failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
 
 let tokenize str =
   failwith "unimplemented"
