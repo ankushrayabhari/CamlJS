@@ -15,8 +15,13 @@ type token =
   (* Keywords *)
   | If | Then | Else | Function | Let | Rec | In
 
+(**
+ * [regexp_of_token tok] is the regexp that matches strings that [tok]
+ * represents. For example, [regexp_of_token (Int 0)] matches any integer like
+ * 0 or 009001.
+ *)
 let regexp_of_token tok = regexp (match tok with
-  | Int _ ->  "[0-9]+"
+  | Int _ -> "[0-9]+"
   | Plus -> "\\+"
   | Minus -> "-"
   | Times -> "\\*"
@@ -42,6 +47,11 @@ let regexp_of_token tok = regexp (match tok with
   | In -> "in"
 )
 
+(**
+ * [precendence] is the ordered list of tokens in decreasing order of
+ * precendence. The head of the list should take priority over the tail of the
+ * list if two tokens match a given string.
+ *)
 let precedence = [
   (* Two letter operators. *)
   NotEqual; GreaterThanOrEqual; LessThanOrEqual; FunctionArrow; Negation;
@@ -60,16 +70,25 @@ let precedence = [
   LowercaseIdent "";
 ]
 
+(**
+ * [token_of_string str tok] is [tok] parametrized with the information in
+ * [str]. For example, [token_of_string "000123" (Int 0)] is [Int 123].
+ *)
 let token_of_string str tok = match tok with
   | Int _ -> Int (int_of_string str)
   | LowercaseIdent _ -> LowercaseIdent str
   | t -> t
 
+(**
+ * [tokenize_rec str start tok_lst] is the list of tokens in [str] starting at
+ * the index of [start]. Any whitespace is ignored.
+ * @raise Failure if a symbol is encountered that doesn't match any tokens.
+ *)
 let rec tokenize_rec str start tok_lst =
   let whitespace_regex = Str.regexp "[ \n\r\t]*" in
   let _ = Str.string_match whitespace_regex str start in
   let start_index = start + (String.length (Str.matched_string str)) in
-  if start_index >= (String.length str) then tok_lst
+  if start_index >= (String.length str) then tok_lst |> List.rev
   else
     let token = List.fold_left (fun acc curr_tok -> match acc with
         | (Some _, _) -> acc
@@ -89,4 +108,4 @@ let rec tokenize_rec str start tok_lst =
         failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
 
 let tokenize str =
-  tokenize_rec str 0 [] |> List.rev
+  tokenize_rec str 0 []
