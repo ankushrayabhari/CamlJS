@@ -7,6 +7,9 @@ MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 PKGS=oUnit,str
 
+default: build
+	utop
+
 build:
 	$(OCAMLBUILD) $(OBJECTS)
 
