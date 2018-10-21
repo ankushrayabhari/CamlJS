@@ -28,31 +28,31 @@ and expr =
   | VarName of value_name
 
 let token_to_varid = Tokenizer.(function
-  | Int _ -> [1; 40]
-  | Plus -> [24]
-  | Minus -> [2]
-  | Times -> [3]
-  | Divide -> [4]
-  | GreaterThan -> [5]
-  | LessThan -> [6]
-  | GreaterThanOrEqual -> [7]
-  | LessThanOrEqual -> [8]
-  | NotEqual -> [9]
-  | Equal -> [10]
-  | Negation -> [11]
-  | LowercaseIdent _ -> [12; 33; 41; 40]
-  | FunctionArrow -> [13]
-  | LParen -> [14]
-  | RParen -> [15]
-  | If -> [16]
-  | Then -> [17]
-  | Else -> [18]
-  | Fun -> [19]
-  | SemiColon -> [20]
-  | Let -> [21]
-  | Rec -> [22]
-  | In -> [23]
-)
+    | Int _ -> [1; 25]
+    | Plus -> [2]
+    | Minus -> [3]
+    | Times -> [4]
+    | Divide -> [5]
+    | GreaterThan -> [6]
+    | LessThan -> [7]
+    | GreaterThanOrEqual -> [8]
+    | LessThanOrEqual -> [9]
+    | NotEqual -> [10]
+    | Equal -> [11]
+    | Negation -> [12]
+    | LowercaseIdent _ -> [13;25]
+    | FunctionArrow -> [14]
+    | LParen -> [15]
+    | RParen -> [16]
+    | If -> [17]
+    | Then -> [18]
+    | Else -> [19]
+    | Fun -> [20]
+    | SemiColon -> [21]
+    | Let -> [22]
+    | Rec -> [23]
+    | In -> [24]
+  )
 
 let rules = [
   [(40, 15)]; (* 25 *)
@@ -79,20 +79,20 @@ let parse tok_arr =
   let dp = Array.init n (fun _ -> Array.init n (fun _ -> (Array.make 42 false))) in
   for s = 0 to n - 1 do
     List.iter (fun v ->
-      dp.(s).(s).(v) <- true
-    ) (token_to_varid tok_arr.(s))
+        dp.(s).(s).(v) <- true
+      ) (token_to_varid tok_arr.(s))
   done;
 
   for l = 1 to n - 1 do
     for s = 0 to n - 1 - l do
       for m = s to s + l - 1 do
         List.iteri (fun a el ->
-          let a = a + 25 in
-          List.iter (fun (b, c) ->
-            if not dp.(s).(s + l).(a) && dp.(s).(m).(b) && dp.(m + 1).(s + l).(c)
-            then dp.(s).(s + l).(a) <- true;
-          ) el
-        ) rules
+            let a = a + 25 in
+            List.iter (fun (b, c) ->
+                if not dp.(s).(s + l).(a) && dp.(s).(m).(b) && dp.(m + 1).(s + l).(c)
+                then dp.(s).(s + l).(a) <- true;
+              ) el
+          ) rules
       done
     done
   done;
