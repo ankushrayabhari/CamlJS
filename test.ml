@@ -38,6 +38,7 @@ let parser_tests = Parser.[
 ]
 
 let suite = "test suite"  >::: List.flatten [
+  tokenizer_tests;
   parser_tests;
 ]
 
