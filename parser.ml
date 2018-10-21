@@ -75,9 +75,14 @@ let rules = [
 
 type variable_tree = Cons of int * int * int * variable_tree * variable_tree | Nil
 
-let variable_tree_to_expr  = function
+let variable_tree_to_constant tok_arr = function
   | Nil -> failwith "don't call"
-  | Cons (v, s, e, l, r) -> failwith "asdf"
+  | Cons (v, s, e, l, r) -> match v with
+    | 1 -> begin match tok_arr.(s) with
+      | Tokenizer.Int s -> Int s
+      | _ -> failwith "failed to parse constant"
+    end
+    | _ -> failwith "argument is not a constant"
 
 
 let parse tok_arr =
