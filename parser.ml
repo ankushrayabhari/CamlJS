@@ -95,5 +95,15 @@ let parse tok_arr =
       done
     done
   done;
-  if not dp.(n - 1).(n - 1).(40) then failwith "asdf"
+  for i = 0 to n - 1 do
+    print_endline (string_of_int i ^ ": ");
+    for j = 0 to n - 1 do
+      print_string ("\t" ^ string_of_int j ^ ": ");
+      for k = 1 to 41 do
+        if dp.(i).(j).(k) then print_string (string_of_int k ^ "; ")
+      done;
+      print_endline ""
+    done
+  done;
+  if not dp.(n - 1).(n - 1).(25) then failwith "asdf"
   else failwith "yayyyyy"
