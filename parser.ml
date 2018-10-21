@@ -85,12 +85,12 @@ let parse tok_arr =
 
   for l = 1 to n - 1 do
     for s = 0 to n - 1 - l do
-      for m = s to n - 1 do
+      for m = s to s + l - 1 do
         List.iteri (fun a el ->
           let a = a + 25 in
           List.iter (fun (b, c) ->
-            if dp.(s).(m).(b) && dp.(m).(s + l).(c)
-            then dp.(s).(s + l).(a) <- true
+            if not dp.(s).(s + l).(a) && dp.(s).(m).(b) && dp.(m + 1).(s + l).(c)
+            then dp.(s).(s + l).(a) <- true;
           ) el
         ) rules
       done
