@@ -88,6 +88,7 @@ let parse_infix_op tok_arr = function
   | Cons (_, s, _, _, _) ->
       begin match tok_arr.(s) with
         | Tokenizer.Plus -> Plus
+        (* implement rest of infix operators *)
         | _ -> failwith "infix operation not supported"
       end
 
