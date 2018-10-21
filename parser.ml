@@ -73,12 +73,21 @@ let rules = [
   [(24, 25)]; (* 40 *)
 ]
 
+type variable_tree = Cons of int * int * int * variable_tree * variable_tree | Nil
+
+let variable_tree_to_expr  = function
+  | Nil -> failwith "don't call"
+  | Cons (v, s, e, l, r) -> failwith "asdf"
+
+
 let parse tok_arr =
   let n = Array.length tok_arr in
   let dp = Array.init n (fun _ -> Array.init n (fun _ -> (Array.make 42 false))) in
+  let prev = Array.init n (fun _ -> Array.init n (fun _ -> (Array.make 42 (-1, -1, -1)))) in
   for s = 0 to n - 1 do
     List.iter (fun v ->
-        dp.(s).(s).(v) <- true
+        dp.(s).(s).(v) <- true;
+        prev.(s).(s).(v) <- (-1, -1, -1)
       ) (token_to_varid tok_arr.(s))
   done;
 
@@ -89,12 +98,13 @@ let parse tok_arr =
             let a = a + 25 in
             List.iter (fun (b, c) ->
                 if not dp.(s).(s + l).(a) && dp.(s).(m).(b) && dp.(m + 1).(s + l).(c)
-                then dp.(s).(s + l).(a) <- true;
+                then dp.(s).(s + l).(a) <- true; prev.(s).(s+l).(a) <- (b, m, c)
               ) el
           ) rules
       done
     done
   done;
+
   for i = 0 to n - 1 do
     print_endline (string_of_int i ^ ": ");
     for j = 0 to n - 1 do
@@ -105,5 +115,13 @@ let parse tok_arr =
       print_endline ""
     done
   done;
-  if not dp.(n - 1).(n - 1).(25) then failwith "asdf"
-  else failwith "yayyyyy"
+  if not dp.(n - 1).(n - 1).(25) then failwith "Invalid program."
+  else
+    let rec generate_var_tree s e v =
+      if (s = -1 || e = -1) then Nil else
+      let (left_var, middle_index, right_var) = prev.(s).(e).(v) in
+      let left_parse_tree = generate_var_tree s middle_index left_var in
+      let right_parse_tree = generate_var_tree (middle_index + 1) e right_var in
+      Cons (v, s, e, left_parse_tree, right_parse_tree)
+    in
+    generate_var_tree 0 (n - 1) 25
