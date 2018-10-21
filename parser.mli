@@ -27,4 +27,4 @@ and expr =
   | LetBinding of let_binding * expr
   | VarName of value_name
 
-val parse : Tokenizer.token list -> expr
+val parse : Tokenizer.token array -> expr
