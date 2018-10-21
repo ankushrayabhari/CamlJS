@@ -55,7 +55,7 @@ let token_to_varid = Tokenizer.(function
   )
 
 let rules = [
-  [(40, 15)]; (* 25 *)
+  [(15, 26); (12, 25); (25, 27); (17, 28); (20, 32); (25, 35); (22, 36); (22, 37); (25, 25)]; (* 25 *)
   [(40, 40); (40, 26)]; (* 26 *)
   [(24, 40); (2, 40); (3, 40); (4, 40); (5, 40); (6, 40); (7, 40); (8, 40); (9, 40); (10, 40);]; (* 27 *)
   [(40, 29)]; (* 28 *)
@@ -94,6 +94,17 @@ let parse tok_arr =
               ) el
           ) rules
       done
+    done
+  done;
+
+  for i = 0 to n - 1 do
+    print_endline (string_of_int i ^ ": ");
+    for j = 0 to n - 1 do
+      print_string ("\t" ^ string_of_int j ^ ": ");
+      for k = 1 to 41 do
+        if dp.(i).(j).(k) then print_string (string_of_int k ^ "; ")
+      done;
+      print_endline ""
     done
   done;
   if not dp.(n - 1).(n - 1).(40) then failwith "asdf"
