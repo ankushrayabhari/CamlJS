@@ -33,9 +33,15 @@ let rec render_let_binding = function
       "let " ^ function_name ^ " = (" ^ arguments ^ ") =>" ^
         function_body ^  ";"
 
+and render_prefix_op = function
+  | Negation -> "-"
+
 and render_expr = function
   | Constant c -> render_constant c
-  | PrefixOp (prefix, expr) -> failwith "prefix op not implemented"
+  | PrefixOp (prefix, expr) ->
+      let rendered_op = render_prefix_op prefix in
+      let rendered_expr = render_expr expr in
+      "(() => " ^ rendered_op ^ "(" ^ rendered_expr ^ "))()"
   | InfixOp (l_expr, op, r_expr) ->
       let rendered_l = render_expr l_expr in
       let rendered_r = render_expr r_expr in
