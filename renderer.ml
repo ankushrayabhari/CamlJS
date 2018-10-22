@@ -51,25 +51,35 @@ and render_ternary condition_expr true_expr false_expr =
     rendered_false_expr ^
   ")()"
 
+and render_prefix_expr prefix expr =
+  let rendered_op = render_prefix_op prefix in
+  let rendered_expr = render_expr expr in
+  "(() => " ^ rendered_op ^ "(" ^ rendered_expr ^ "))()"
+
+and render_infix_expr l_expr op r_expr =
+  let rendered_l = render_expr l_expr in
+  let rendered_r = render_expr r_expr in
+  let rendered_op = render_infix_op op in
+  "(() => (" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ "))()"
+
+and render_sequential_expr expr_1 expr_2 =
+  let rendered_1 = render_expr expr_1 in
+  let rendered_2 = render_expr expr_2 in
+  "(() => {" ^ rendered_1 ^ "; return " ^ rendered_2 ^ "})()"
+
+and render_let_binding_expr assign expr =
+  let rendered_assign = render_let_binding assign in
+  let rendered_in_expr = render_expr expr in
+  "(() => {" ^ rendered_assign ^ "return " ^ rendered_in_expr ^ "})()"
+
 and render_expr = function
   | Constant c -> render_constant c
-  | PrefixOp (prefix, expr) ->
-      let rendered_op = render_prefix_op prefix in
-      let rendered_expr = render_expr expr in
-      "(() => " ^ rendered_op ^ "(" ^ rendered_expr ^ "))()"
-  | InfixOp (l_expr, op, r_expr) ->
-      let rendered_l = render_expr l_expr in
-      let rendered_r = render_expr r_expr in
-      let rendered_op = render_infix_op op in
-      "(() => (" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ "))()"
-  | Ternary (condition, true_expr, false_expr) -> render_ternary condition true_expr false_expr
+  | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
+  | InfixOp (l, op, r) -> render_infix_expr l op r
+  | Ternary (c, t, f) -> render_ternary c t f
   | Function (arg_list, body_expr) -> render_fun arg_list body_expr
-  | Sequential (expr_1, expr_2) ->
-      "(() => {" ^ render_expr expr_1 ^ "; return " ^ render_expr expr_2 ^ "})()"
-  | LetBinding (assign, expr) ->
-      let rendered_assign = render_let_binding assign in
-      let rendered_in_expr = render_expr expr in
-      "(() => {" ^ rendered_assign ^ "return " ^ rendered_in_expr ^ "})()"
+  | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
+  | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName (val_name) -> render_value_name val_name
 
 let render exp =
