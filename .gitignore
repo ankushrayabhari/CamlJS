@@ -11,6 +11,7 @@ doc.private
 *.native
 *.byte
 _build
+camljs
 
 # temporary files
 *.swp

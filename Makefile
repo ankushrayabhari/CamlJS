@@ -1,4 +1,4 @@
-MODULES=tokenizer parser renderer
+MODULES=tokenizer parser renderer main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -6,12 +6,16 @@ TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 PKGS=oUnit,str
+EXEC=camljs
 
 default: build
 	utop
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
+
+bin:
+	$(OCAMLBUILD) $(MAIN) && mv $(MAIN) $(EXEC)
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
