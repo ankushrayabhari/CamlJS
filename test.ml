@@ -37,9 +37,21 @@ let parser_tests = Parser.[
   )
 ]
 
+let renderer_tests = Renderer.[
+  "basic_test" >:: (fun _ ->
+      Tokenizer.tokenize "let x = 1 in x + 100"
+      |> Array.of_list
+      |> Parser.parse
+      |> render
+      |> assert_equal
+          "(() => {let x = (() => 1)();return (() => (x)+((() => 100)()))()})()"
+  )
+]
+
 let suite = "test suite"  >::: List.flatten [
   tokenizer_tests;
   parser_tests;
+  renderer_tests;
 ]
 
 let _ = run_test_tt_main suite
