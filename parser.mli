@@ -26,5 +26,6 @@ and expr =
   | Sequential of expr * expr
   | LetBinding of let_binding * expr
   | VarName of value_name
+type ast = expr
 
-val parse : Tokenizer.token array -> expr
+val parse : Tokenizer.token array -> ast
