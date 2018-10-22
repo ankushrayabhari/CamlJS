@@ -89,7 +89,15 @@ let parse_infix_op tok_arr = function
   | Cons (_, s, _, _, _) ->
       begin match tok_arr.(s) with
         | Tokenizer.Plus -> Plus
-        (* implement rest of infix operators *)
+        | Tokenizer.Minus -> Minus
+        | Tokenizer.Times -> Times
+        | Tokenizer.Divide -> Divide
+        | Tokenizer.GreaterThan -> GreaterThan
+        | Tokenizer.LessThan -> LessThan
+        | Tokenizer.GreaterThanOrEqual -> GreaterThanOrEqual
+        | Tokenizer.LessThanOrEqual -> LessThanOrEqual
+        | Tokenizer.NotEqual -> NotEqual
+        | Tokenizer.Equal -> Equal
         | _ -> failwith "infix operation not supported"
       end
 
