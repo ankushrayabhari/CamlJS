@@ -102,6 +102,14 @@ let parse_infix_op tok_arr = function
         | _ -> failwith "infix operation not supported"
       end
 
+let parse_prefix_op tok_arr = function
+  | Nil -> failwith "should not be called on nil"
+  | Cons (_, s, _, _, _) ->
+    begin match tok_arr.(s) with
+      | Tokenizer.Negation -> Negation
+      | _ -> failwith "prefix operation not supported"
+    end
+
 let parse_token_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_, s, _, _, _) ->
@@ -119,6 +127,13 @@ let rec parse_infix_expr tok_arr = function
       let right_operand = parse_expr tok_arr rr in
       InfixOp (left_operand, operator, right_operand)
   | _ -> failwith "not an infix expr"
+
+and parse_prefix_expr tok_arr = function
+  | Nil -> failwith "should not be called on nil"
+  | Cons (_, _, _, l, r) ->
+    let right_operand = parse_expr tok_arr r in
+    let operator = parse_prefix_op tok_arr l in
+    PrefixOp (operator, right_operand)
 
 and parse_paren_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
@@ -158,7 +173,7 @@ and parse_expr tok_arr = function
       match production_of_root_of_parse_tree t with
         | None -> parse_token_expr tok_arr t
         | Some (15, 26) -> parse_paren_expr tok_arr t
-        | Some (12, 25) -> failwith "prefix op not implemented"
+        | Some (12, 25) -> parse_prefix_expr tok_arr t
         | Some (25, 27) -> parse_infix_expr tok_arr t
         | Some (17, 28) -> failwith "if expr not implemented"
         | Some (20, 32) -> failwith "fun expr not implemented"
