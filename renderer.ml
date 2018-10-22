@@ -38,6 +38,19 @@ and render_fun arg_list body_expr =
 and render_prefix_op = function
   | Negation -> "-"
 
+and render_ternary condition_expr true_expr false_expr =
+  let rendered_condition_expr = render_expr condition_expr in
+  let rendered_true_expr = render_expr true_expr in
+  let rendered_false_expr = match false_expr with
+    | None -> "(() => {})()"
+    | Some expr -> render_expr expr
+  in
+  "(() => " ^
+    rendered_condition_expr ^ "? " ^
+    rendered_true_expr ^ " : " ^
+    rendered_false_expr ^
+  ")()"
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) ->
@@ -49,7 +62,7 @@ and render_expr = function
       let rendered_r = render_expr r_expr in
       let rendered_op = render_infix_op op in
       "(() => (" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ "))()"
-  | Ternary (condition, true_expr, false_expr) -> failwith "ternary not implemented"
+  | Ternary (condition, true_expr, false_expr) -> render_ternary condition true_expr false_expr
   | Function (arg_list, body_expr) -> render_fun arg_list body_expr
   | Sequential (expr_1, expr_2) ->
       "(() => {" ^ render_expr expr_1 ^ "; return " ^ render_expr expr_2 ^ "})()"
