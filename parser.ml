@@ -119,6 +119,13 @@ let parse_token_expr tok_arr = function
         | _ -> failwith "unsupported token expr value"
       end
 
+let rec get_params tok_arr s e (params:pattern list) =
+  let next_param = match tok_arr.(s) with
+    | Tokenizer.LowercaseIdent n -> ValueName (LowercaseIdent n)
+    | _ -> failwith "not a valid function parameter" in
+  if s=e then List.rev(next_param::params)
+  else get_params tok_arr (s+1) e (next_param::params)
+
 let rec parse_infix_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_, _, _, l, Cons (_, _, _, lr, rr)) ->
@@ -140,6 +147,13 @@ and parse_paren_expr tok_arr = function
   | Cons (_, _, _, _, Cons (_, _, _, lr, _)) ->
       parse_expr tok_arr lr
   | _ -> failwith "not a parenthesized expr"
+
+and parse_fun_expr tok_arr = function
+  | Nil -> failwith "should not be called on nil"
+  | Cons (_, _, _, _,
+          Cons (_, _, _, Cons (_, s, e, _, _), Cons (_, _, _, _, ex))) ->
+    Function (get_params tok_arr s e [], (parse_expr tok_arr ex))
+  | _ -> failwith "not a function expr"
 
 and parse_let_binding_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
@@ -167,6 +181,30 @@ and parse_let_binding_expr tok_arr = function
     (* implement function let assign *)
     | _ -> failwith "not a let assign expr"
 
+and parse_rec_expr tok_arr = function
+  | Nil -> failwith "should not be called on nil"
+  | Cons (_, _, _, _,
+          Cons (_, _, _, _,
+                Cons (_, _, _,
+                      Cons (_, _, _,
+                            Cons (_, s, e, _, _),
+                            Cons (_, _, _, _, equals_expr)
+                           ),
+                      Cons (_, _, _, _, in_expr)
+                     )
+               )
+         ) ->
+    let first = begin match tok_arr.(s) with
+      | Tokenizer.LowercaseIdent n -> LowercaseIdent n
+      | _ -> failwith "invalid function name"
+    end in
+    let params = if s=e then [] else get_params tok_arr (s+1) e [] in
+    LetBinding (FunctionAssignment (first, true, params,
+                                    parse_expr tok_arr equals_expr),
+                parse_expr tok_arr in_expr)
+  | _ -> failwith "not a rec expr"
+
+
 and parse_semicolon_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_, _, _, pre_semicolon_tree, Cons (_, _, _, _, post_semicolon_tree)) ->
@@ -185,9 +223,9 @@ and parse_expr tok_arr = function
         | Some (12, 25) -> parse_prefix_expr tok_arr t
         | Some (25, 27) -> parse_infix_expr tok_arr t
         | Some (17, 28) -> failwith "if expr not implemented"
-        | Some (20, 32) -> failwith "fun expr not implemented"
+        | Some (20, 32) -> parse_fun_expr tok_arr t
         | Some (25, 35) -> parse_semicolon_expr tok_arr t
-        | Some (22, 36) -> failwith "let rec not implemented"
+        | Some (22, 36) -> parse_rec_expr tok_arr t
         | Some (22, 37) -> parse_let_binding_expr tok_arr t
         | Some (25, 25) -> failwith "function call not implemented"
         | _ -> failwith "invalid production rule"
