@@ -23,10 +23,10 @@ and expr =
   | InfixOp of expr * infix_op * expr
   | Ternary of expr * expr * expr option
   | Function of pattern list * expr
-  | Sequential of expr * expr
+  | SequentialWithValue of expr * expr
   | LetBinding of let_binding * expr
   | VarName of value_name
-  | ExprList of expr list
+  | Sequential of expr * expr
 type ast = expr
 
 val parse : Tokenizer.token array -> ast
