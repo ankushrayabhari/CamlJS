@@ -8,8 +8,7 @@ OCAMLBUILD=ocamlbuild -use-ocamlfind
 PKGS=oUnit,str
 EXEC=camljs
 
-default: build
-	utop
+default: bin
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
