@@ -78,10 +78,10 @@ and render_expr = function
   | InfixOp (l, op, r) -> render_infix_expr l op r
   | Ternary (c, t, f) -> render_ternary c t f
   | Function (arg_list, body_expr) -> render_fun arg_list body_expr
-  | SequentialWithValue (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
+  | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName (val_name) -> render_value_name val_name
-  | Sequential (expr_1, expr_2) -> failwith "sequential overall not implemented"
+  | FunctionCall (expr_1, expr_2) -> failwith "function call not implemented"
 
 let render exp =
   render_expr exp
