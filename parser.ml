@@ -26,6 +26,7 @@ and expr =
   | Sequential of expr * expr
   | LetBinding of let_binding * expr
   | VarName of value_name
+  | ExprList of expr list
 type ast = expr
 
 let token_to_varid = Tokenizer.(function

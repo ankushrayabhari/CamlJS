@@ -81,6 +81,7 @@ and render_expr = function
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName (val_name) -> render_value_name val_name
+  | ExprList lst -> failwith "expr list not implemented"
 
 let render exp =
   render_expr exp
