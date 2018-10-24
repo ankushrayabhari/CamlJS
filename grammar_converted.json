@@ -40,7 +40,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "LetExpr": [
       ["Let", "LetDecl"],
@@ -54,7 +56,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "LetRecDecl": [
       ["Rec", "LetDecl"]
@@ -81,7 +85,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "FunctionDecl": [
       ["OneOrMoreLowercaseIdent _", "FunctionBody"]
@@ -102,7 +108,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "SemiColonExprEnd": [
       ["SemiColon", "SemiColonExpr"]
@@ -115,7 +123,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "IfElseExprBody": [
       ["IfExpr", "IfElseExprThen"]
@@ -137,7 +147,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "ComparisonExprEnd": [
       ["Equal", "AddExpr"],
@@ -153,7 +165,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "AddExprEnd": [
       ["Plus", "TimesExpr"],
@@ -164,7 +178,9 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "TimesExprEnd": [
       ["Times", "FunctionCallExpr"],
@@ -174,19 +190,25 @@
       ["FunctionCallExpr", "ParenExpr"],
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "ParenExpr": [
       ["LParen", "ParenExprEnd"],
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ],
     "ParenExprEnd": [
       ["ParenExpr", "RParen"]
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
+      ["Negation", "Expr"],
+      ["LowercaseIdent _"],
+      ["Int _"]
     ]
   }
 }

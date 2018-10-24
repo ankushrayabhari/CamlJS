@@ -54,8 +54,8 @@ PrefixExpr: 51
 *)
 
 let token_to_varid = Tokenizer.(function
-    | Int _ -> [0;24]
-    | LowercaseIdent _ -> [1;24;34]
+    | Int _ -> [0;24;24;25;31;35;37;42;44;46;48;49;51]
+    | LowercaseIdent _ -> [1;24;24;25;31;34;35;37;42;44;46;48;49;51]
     | Plus -> [2]
     | Minus -> [3]
     | Times -> [4]
@@ -112,6 +112,8 @@ let rules = [
 ]
 
 let start_variable = 24
+
+let num_tokens = 24
 
 let num_variables = 52
 

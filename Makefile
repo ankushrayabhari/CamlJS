@@ -25,7 +25,7 @@ test-debug:
 
 docs: docs-public docs-private
 
-update-grammar:
+grammar:
 	node converter.js > grammar.ml
 
 docs-public: build

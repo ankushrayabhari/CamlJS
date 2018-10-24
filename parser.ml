@@ -30,54 +30,6 @@ and expr =
   | ParenExpr of expr
 type ast = expr
 
-let token_to_varid = Tokenizer.(function
-    | Int _ -> [1; 25]
-    | Plus -> [2]
-    | Minus -> [3]
-    | Times -> [4]
-    | Divide -> [5]
-    | GreaterThan -> [6]
-    | LessThan -> [7]
-    | GreaterThanOrEqual -> [8]
-    | LessThanOrEqual -> [9]
-    | NotEqual -> [10]
-    | Equal -> [11]
-    | Negation -> [12]
-    | LowercaseIdent _ -> [13;25;33]
-    | FunctionArrow -> [14]
-    | LParen -> [15]
-    | RParen -> [16]
-    | If -> [17]
-    | Then -> [18]
-    | Else -> [19]
-    | Fun -> [20]
-    | SemiColon -> [21]
-    | Let -> [22]
-    | Rec -> [23]
-    | In -> [24]
-  )
-
-let rules = [
-  [(15, 26); (12, 25); (25, 27); (17, 28); (20, 32); (25, 35); (22, 36);
-   (22, 37); (25, 25)]; (* 25 *)
-  [(25, 16)]; (* 26 *)
-  [(2, 25); (3, 25); (4, 25); (5, 25); (6, 25); (7, 25); (8, 25); (9, 25);
-   (10, 25); (11, 25)]; (* 27 *)
-  [(25, 29)]; (* 28 *)
-  [(18, 25); (18, 30)]; (* 29 *)
-  [(25, 31)]; (* 30 *)
-  [(19, 25)]; (* 31 *)
-  [(33, 34)]; (* 32 *)
-  [(13, 33)]; (* 33 *)
-  [(14, 25)]; (* 34 *)
-  [(21, 25)]; (* 35 *)
-  [(23, 37)]; (* 36 *)
-  [(38, 40)]; (* 37 *)
-  [(13, 39); (33, 39)]; (* 38 *)
-  [(11, 25)]; (* 39 *)
-  [(24, 25)]; (* 40 *)
-]
-
 type parse_tree =
   | Cons of int * int * int * parse_tree * parse_tree
   | Nil
@@ -318,23 +270,23 @@ let rec fix_expr_tree = function
 
 let iterate_over_productions f =
   List.iteri (fun a el ->
-    let a = a + 25 in
+    let a = a + Grammar.num_tokens in
     List.iter (fun (b, c) ->
         f (a,b,c)
     ) el
-  ) rules
+  ) Grammar.rules
 
 let parse tok_arr =
   let n = Array.length tok_arr in
   let dp = Array.init n
-    (fun _ -> Array.init n (fun _ -> (Array.make 42 false))) in
+    (fun _ -> Array.init n (fun _ -> (Array.make Grammar.num_variables false))) in
   let prev = Array.init n
-    (fun _ -> Array.init n (fun _ -> (Array.make 42 (-1, -1, -1)))) in
+    (fun _ -> Array.init n (fun _ -> (Array.make Grammar.num_variables (-1, -1, -1)))) in
   for s = 0 to n - 1 do
     List.iter (fun v ->
         dp.(s).(s).(v) <- true;
         prev.(s).(s).(v) <- (-1, -1, -1)
-      ) (token_to_varid tok_arr.(s))
+      ) (Grammar.token_to_varid tok_arr.(s))
   done;
 
   for l = 1 to n - 1 do
@@ -353,7 +305,18 @@ let parse tok_arr =
     done
   done;
 
-  if not dp.(0).(n - 1).(25) then failwith "Invalid program."
+  for i = 0 to n - 1 do
+    print_endline (string_of_int i ^ ": ");
+    for j = 0 to n - 1 do
+      print_string ("\t" ^ string_of_int j ^ ": ");
+      for k = 0 to Grammar.num_variables - 1 do
+        if dp.(i).(j).(k) then print_string (string_of_int k ^ "; ")
+      done;
+      print_endline ""
+    done
+  done;
+
+  if not dp.(0).(n - 1).(Grammar.start_variable) then failwith "Invalid program."
   else
     let rec generate_var_tree s e v =
       if (s = e) then Cons (v, s, e, Nil, Nil) else
@@ -362,6 +325,6 @@ let parse tok_arr =
       let right_parse_tree = generate_var_tree (middle_index + 1) e right_var in
       Cons (v, s, e, left_parse_tree, right_parse_tree)
     in
-    let expr_var_tree = generate_var_tree 0 (n - 1) 25 in
+    let expr_var_tree = generate_var_tree 0 (n - 1) Grammar.start_variable in
     let tr = parse_expr tok_arr expr_var_tree in
     fix_expr_tree tr
