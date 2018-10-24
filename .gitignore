@@ -12,6 +12,7 @@ doc.private
 *.byte
 _build
 camljs
+*.js
 
 # temporary files
 *.swp
