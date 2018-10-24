@@ -13,7 +13,7 @@ default: bin
 build:
 	$(OCAMLBUILD) $(OBJECTS)
 
-bin:
+bin: build
 	$(OCAMLBUILD) $(MAIN) && mv $(MAIN) $(EXEC)
 
 test:
@@ -21,7 +21,7 @@ test:
 
 test-debug:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ocamldebug ./$(TEST)
-.PHONY: test, test-debug
+.PHONY: test, test-debug, bin
 
 docs: docs-public docs-private
 
