@@ -173,7 +173,7 @@ let renderer_tests = Renderer.[
       |> render
       |> assert_equal
           "(() => {let x = (() => 1)();return (() => (x)+((() => 100)()))()})()"
-  )
+  );
 ]
 
 let suite = "test suite"  >::: List.flatten [

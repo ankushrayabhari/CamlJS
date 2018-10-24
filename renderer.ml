@@ -32,8 +32,13 @@ let rec render_let_binding = function
 
 and render_fun arg_list body_expr =
   let function_body = render_expr body_expr in
-  let arguments = List.map render_pattern arg_list |> String.concat "," in
-  "((" ^ arguments ^ ") =>" ^ function_body ^ ")"
+  let arguments =
+    List.map render_pattern arg_list |>
+    List.fold_left (fun acc el ->
+      acc ^ "(" ^ el ^ ") => "
+    ) ""
+  in
+  "(" ^ arguments ^ function_body ^ ")"
 
 and render_prefix_op = function
   | Negation -> "-"
