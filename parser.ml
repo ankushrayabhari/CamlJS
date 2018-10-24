@@ -27,6 +27,7 @@ and expr =
   | LetBinding of let_binding * expr
   | VarName of value_name
   | FunctionCall of expr * expr
+  | ParenExpr of expr
 type ast = expr
 
 let token_to_varid = Tokenizer.(function
@@ -145,7 +146,7 @@ and parse_prefix_expr tok_arr = function
 and parse_paren_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_, _, _, _, Cons (_, _, _, lr, _)) ->
-      parse_expr tok_arr lr
+      ParenExpr (parse_expr tok_arr lr)
   | _ -> failwith "not a parenthesized expr"
 
 and parse_fun_expr tok_arr = function
@@ -268,6 +269,36 @@ and parse_expr tok_arr = function
         | Some (25, 25) -> parse_function_call_expr tok_arr t
         | _ -> failwith "invalid production rule"
 
+let rec fix_infix_op_order = function
+  | InfixOp (exp1, op1, InfixOp (exp2, op2, exp3)) ->
+      fix_infix_op_order (InfixOp (InfixOp (exp1, op1, exp2), op2, exp3))
+  | PrefixOp (prefix, expr) -> PrefixOp (prefix, fix_infix_op_order expr)
+  | Ternary (cond_expr, true_expr, Some false_expr) ->
+      Ternary (
+        fix_infix_op_order cond_expr,
+        fix_infix_op_order true_expr,
+        Some (fix_infix_op_order false_expr)
+      )
+  | Function (pattern_lst, body_expr) ->
+      Function (pattern_lst, fix_infix_op_order body_expr)
+  | Sequential (exp1, exp2) ->
+      Sequential (fix_infix_op_order exp1, fix_infix_op_order exp2)
+  | LetBinding (VarAssignment (pat, assign_expr), in_expr) ->
+      LetBinding (
+        VarAssignment (pat, fix_infix_op_order assign_expr),
+        fix_infix_op_order in_expr
+      )
+  | LetBinding (FunctionAssignment (n, is_rec, pat_lst, ass_expr), in_expr) ->
+      LetBinding (
+        FunctionAssignment (
+          n, is_rec, pat_lst, fix_infix_op_order ass_expr
+        ),
+        fix_infix_op_order in_expr
+      )
+  | FunctionCall (fun_expr, arg_expr) ->
+      FunctionCall (fix_infix_op_order fun_expr, fix_infix_op_order arg_expr)
+  | t -> t
+
 let iterate_over_productions f =
   List.iteri (fun a el ->
     let a = a + 25 in
@@ -315,4 +346,5 @@ let parse tok_arr =
       Cons (v, s, e, left_parse_tree, right_parse_tree)
     in
     let expr_var_tree = generate_var_tree 0 (n - 1) 25 in
-    parse_expr tok_arr expr_var_tree
+    let tr = parse_expr tok_arr expr_var_tree in
+    fix_infix_op_order tr

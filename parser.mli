@@ -27,6 +27,7 @@ and expr =
   | LetBinding of let_binding * expr
   | VarName of value_name
   | FunctionCall of expr * expr
+  | ParenExpr of expr
 type ast = expr
 
 val parse : Tokenizer.token array -> ast

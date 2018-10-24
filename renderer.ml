@@ -72,6 +72,10 @@ and render_let_binding_expr assign expr =
   let rendered_in_expr = render_expr expr in
   "(() => {" ^ rendered_assign ^ "return " ^ rendered_in_expr ^ "})()"
 
+and render_paren_expr expr =
+  let rendered_expr = render_expr expr in
+  "(" ^ rendered_expr ^ ")"
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
@@ -82,6 +86,7 @@ and render_expr = function
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName (val_name) -> render_value_name val_name
   | FunctionCall (expr_1, expr_2) -> failwith "function call not implemented"
+  | ParenExpr (expr) -> render_paren_expr expr
 
 let render exp =
   render_expr exp

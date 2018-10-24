@@ -57,7 +57,34 @@ let parser_tests = Parser.[
         )
       ) in
     assert_equal expected_tree parse_tree
-  )
+  );
+
+  "order of ops in infix expression parentheiszed" >:: (fun _ ->
+    let tokenized_program = Tokenizer.tokenize "let x = 1 in (x - 100) - (200 - x)"
+                            |> Array.of_list in
+    let parse_tree = parse tokenized_program in
+    let expected_tree =
+      LetBinding (
+        VarAssignment (
+          ValueName (LowercaseIdent "x"),
+          Constant (Int 1)
+        ),
+        InfixOp (
+          ParenExpr (InfixOp (
+            VarName (LowercaseIdent "x"),
+            Minus,
+            Constant (Int 100)
+          )),
+          Minus,
+          ParenExpr (InfixOp (
+            Constant (Int 200),
+            Minus,
+            VarName (LowercaseIdent "x")
+          ))
+        )
+      ) in
+    assert_equal expected_tree parse_tree
+  );
 ]
 
 let renderer_tests = Renderer.[
