@@ -78,12 +78,6 @@ let rules = [
 ]
 
 type parse_tree =
-  (*Where elements of the parse tree are
-    (grammar ID (found in doc),
-    begin token range,
-    end token range,
-    left subtree,
-    right subtree)*)
   | Cons of int * int * int * parse_tree * parse_tree
   | Nil
 
@@ -175,24 +169,6 @@ and parse_let_binding_expr tok_arr = function
 
 and parse_semicolon_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
-(*let x be input tuple, don't care about x[0], x[1], x[2] are the start
-  and end indexes that the tree x represents covers within tok_arr,
-  x[3] is the left subtree (a token tree of expression),
-  x[r] is the right subtree (a token tree of semicolon expression).
-  x is of the form:
-  (#expression,
-  ?,
-  ?,
-  (#expression (which may be a semicolon expression of multiple semicolon expr tokens in a row),
-  ?,
-  ?,
-  ?,
-  ?),
-  (#semicolon terminal,
-  ?,
-  ?,
-  #expression,
-  some post semicolon expr))*)
   | Cons (_, _, _, pre_semicolon_tree, Cons (_, _, _, _, post_semicolon_tree)) ->
     let pre_semicolon_expr = parse_expr tok_arr pre_semicolon_tree in
     let post_semicolon_expr = parse_expr tok_arr post_semicolon_tree in
@@ -210,7 +186,7 @@ and parse_expr tok_arr = function
         | Some (25, 27) -> parse_infix_expr tok_arr t
         | Some (17, 28) -> failwith "if expr not implemented"
         | Some (20, 32) -> failwith "fun expr not implemented"
-        | Some (25, 35) -> failwith "semicolon expr not implemented"
+        | Some (25, 35) -> parse_semicolon_expr tok_arr t
         | Some (22, 36) -> failwith "let rec not implemented"
         | Some (22, 37) -> parse_let_binding_expr tok_arr t
         | Some (25, 25) -> failwith "function call not implemented"
