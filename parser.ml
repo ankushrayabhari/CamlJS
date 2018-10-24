@@ -43,7 +43,7 @@ let token_to_varid = Tokenizer.(function
     | NotEqual -> [10]
     | Equal -> [11]
     | Negation -> [12]
-    | LowercaseIdent _ -> [13;25]
+    | LowercaseIdent _ -> [13;25;33]
     | FunctionArrow -> [14]
     | LParen -> [15]
     | RParen -> [16]
@@ -302,6 +302,13 @@ let rec fix_expr_tree = function
           n, is_rec, pat_lst, fix_expr_tree ass_expr
         ),
         fix_expr_tree in_expr
+      )
+  | FunctionCall (fun_expr, FunctionCall (fun2_expr, arg_expr)) ->
+      fix_expr_tree (
+        FunctionCall (
+          FunctionCall (fix_expr_tree fun_expr, fix_expr_tree fun2_expr),
+          fix_expr_tree arg_expr
+        )
       )
   | FunctionCall (fun_expr, arg_expr) ->
       FunctionCall (fix_expr_tree fun_expr, fix_expr_tree arg_expr)

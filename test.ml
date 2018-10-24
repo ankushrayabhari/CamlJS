@@ -89,7 +89,7 @@ let parser_tests = Parser.[
     assert_equal expected_tree parse_tree
   );
 
-  "order of ops in infix expression parentheiszed " >:: (fun _ ->
+  "order of ops in infix expression parentheiszed nested" >:: (fun _ ->
     let tokenized_program =
       Tokenizer.tokenize "let x = 1 in (x - 100 - 300) - (200 - x)"
       |> Array.of_list
@@ -119,6 +119,46 @@ let parser_tests = Parser.[
             Minus,
             VarName (LowercaseIdent "x")
           ))
+        )
+      ) in
+    assert_equal expected_tree parse_tree
+  );
+
+  "function call" >:: (fun _ ->
+    let tokenized_program =
+      Tokenizer.tokenize "let rec x a b c = a * b * c in x 1 2 3"
+      |> Array.of_list
+    in
+    let parse_tree = parse tokenized_program in
+    let expected_tree =
+      LetBinding (
+        FunctionAssignment (
+          LowercaseIdent "x",
+          true,
+          [
+            ValueName (LowercaseIdent "a");
+            ValueName (LowercaseIdent "b");
+            ValueName (LowercaseIdent "c");
+          ],
+          InfixOp (
+            InfixOp (
+              VarName (LowercaseIdent "a"),
+              Times,
+              VarName (LowercaseIdent "b")
+            ),
+            Times,
+            VarName (LowercaseIdent "c")
+          )
+        ),
+        FunctionCall (
+          FunctionCall (
+            FunctionCall (
+              VarName (LowercaseIdent "x"),
+              Constant (Int 1)
+            ),
+            Constant (Int 2)
+          ),
+          Constant (Int 3)
         )
       ) in
     assert_equal expected_tree parse_tree
