@@ -269,43 +269,43 @@ and parse_expr tok_arr = function
         | Some (25, 25) -> parse_function_call_expr tok_arr t
         | _ -> failwith "invalid production rule"
 
-let rec fix_infix_op_order = function
+let rec fix_expr_tree = function
   | InfixOp (exp1, op1, InfixOp (exp2, op2, exp3)) ->
-      fix_infix_op_order (InfixOp (InfixOp (exp1, op1, exp2), op2, exp3))
+      fix_expr_tree (InfixOp (InfixOp (exp1, op1, exp2), op2, exp3))
   | InfixOp (exp1, op, exp2) ->
-      InfixOp (fix_infix_op_order exp1, op, fix_infix_op_order exp2)
-  | PrefixOp (prefix, expr) -> PrefixOp (prefix, fix_infix_op_order expr)
+      InfixOp (fix_expr_tree exp1, op, fix_expr_tree exp2)
+  | PrefixOp (prefix, expr) -> PrefixOp (prefix, fix_expr_tree expr)
   | Ternary (cond_expr, true_expr, Some false_expr) ->
       Ternary (
-        fix_infix_op_order cond_expr,
-        fix_infix_op_order true_expr,
-        Some (fix_infix_op_order false_expr)
+        fix_expr_tree cond_expr,
+        fix_expr_tree true_expr,
+        Some (fix_expr_tree false_expr)
       )
   | Ternary (cond_expr, true_expr, None) ->
       Ternary (
-        fix_infix_op_order cond_expr,
-        fix_infix_op_order true_expr,
+        fix_expr_tree cond_expr,
+        fix_expr_tree true_expr,
         None
       )
   | Function (pattern_lst, body_expr) ->
-      Function (pattern_lst, fix_infix_op_order body_expr)
+      Function (pattern_lst, fix_expr_tree body_expr)
   | Sequential (exp1, exp2) ->
-      Sequential (fix_infix_op_order exp1, fix_infix_op_order exp2)
+      Sequential (fix_expr_tree exp1, fix_expr_tree exp2)
   | LetBinding (VarAssignment (pat, assign_expr), in_expr) ->
       LetBinding (
-        VarAssignment (pat, fix_infix_op_order assign_expr),
-        fix_infix_op_order in_expr
+        VarAssignment (pat, fix_expr_tree assign_expr),
+        fix_expr_tree in_expr
       )
   | LetBinding (FunctionAssignment (n, is_rec, pat_lst, ass_expr), in_expr) ->
       LetBinding (
         FunctionAssignment (
-          n, is_rec, pat_lst, fix_infix_op_order ass_expr
+          n, is_rec, pat_lst, fix_expr_tree ass_expr
         ),
-        fix_infix_op_order in_expr
+        fix_expr_tree in_expr
       )
   | FunctionCall (fun_expr, arg_expr) ->
-      FunctionCall (fix_infix_op_order fun_expr, fix_infix_op_order arg_expr)
-  | ParenExpr (expr) -> ParenExpr (fix_infix_op_order expr)
+      FunctionCall (fix_expr_tree fun_expr, fix_expr_tree arg_expr)
+  | ParenExpr (expr) -> ParenExpr (fix_expr_tree expr)
   | Constant t -> Constant t
   | VarName t -> VarName t
 
@@ -357,4 +357,4 @@ let parse tok_arr =
     in
     let expr_var_tree = generate_var_tree 0 (n - 1) 25 in
     let tr = parse_expr tok_arr expr_var_tree in
-    fix_infix_op_order tr
+    fix_expr_tree tr
