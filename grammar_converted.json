@@ -202,11 +202,11 @@
       ["Int _"]
     ],
     "ParenExprEnd": [
-      ["ParenExpr", "RParen"]
+      ["ParenExpr", "RParen"],
+      ["Expr", "RParen"]
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"],
       ["LowercaseIdent _"],
       ["Int _"]
     ]
