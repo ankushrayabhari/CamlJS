@@ -1,0 +1,192 @@
+{
+  "tokens": [
+    "Int",
+    "LowercaseIdent",
+    "Plus",
+    "Minus",
+    "Times",
+    "Divide",
+    "GreaterThan",
+    "LessThan",
+    "GreaterThanOrEqual",
+    "LessThanOrEqual",
+    "NotEqual",
+    "Equal",
+    "Negation",
+    "FunctionArrow",
+    "LParen",
+    "RParen",
+    "If",
+    "Then",
+    "Else",
+    "Fun",
+    "SemiColon",
+    "Let",
+    "Rec",
+    "In"
+  ],
+  "productions": {
+    "Expr": [
+      ["LowercaseIdent"],
+      ["Int"],
+      ["Let", "LetDecl"],
+      ["Let", "LetRecDecl"],
+      ["Fun", "FunctionDecl"],
+      ["IfExpr", "SemiColonExprEnd"],
+      ["If", "IfElseExprBody"],
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "LetExpr": [
+      ["Let", "LetDecl"],
+      ["Let", "LetRecDecl"],
+      ["Fun", "FunctionDecl"],
+      ["IfExpr", "SemiColonExprEnd"],
+      ["If", "IfElseExprBody"],
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "LetRecDecl": [
+      ["Rec", "LetDecl"]
+    ],
+    "LetDecl": [
+      ["LowercaseIdent", "LetEqual"]
+    ],
+    "LetEqual": [
+      ["Equal", "LetAssignExpr"]
+    ],
+    "LetAssignExpr": [
+      ["LetExpr", "LetAssignInExpr"]
+    ],
+    "LetAssignInExpr": [
+      ["in", "AnonFuncExpr"]
+    ],
+    "AnonFuncExpr": [
+      ["Fun", "FunctionDecl"],
+      ["IfExpr", "SemiColonExprEnd"],
+      ["If", "IfElseExprBody"],
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "FunctionDecl": [
+      ["OneOrMoreLowercaseIdent", "FunctionBody"]
+    ],
+    "FunctionBody": [
+      ["FunctionArrow", "AnonFuncExpr"]
+    ],
+    "OneOrMoreLowercaseIdent": [
+      ["OneOrMoreLowercaseIdent", "LowercaseIdent"],
+      ["LowercaseIdent"]
+    ],
+    "SemiColonExpr": [
+      ["IfExpr", "SemiColonExprEnd"],
+      ["If", "IfElseExprBody"],
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "SemiColonExprEnd": [
+      ["SemiColon", "SemiColonExpr"],
+    ],
+    "IfExpr": [
+      ["If", "IfElseExprBody"],
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "IfElseExprBody": [
+      ["IfExpr", "IfElseExprThen"]
+    ],
+    "IfElseExprThen": [
+      ["Then", "IfExpr"],
+      ["Then", "IfElseExprThenBody"]
+    ],
+    "IfElseExprThenBody": [
+      ["IfExpr", "IfElseExprThenBody"]
+    ],
+    "ElseExpr": [
+      ["Else", "IfExpr"]
+    ],
+    "ComparisonExpr": [
+      ["ComparisonExpr", "ComparisonExprEnd"],
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "ComparisonExprEnd": [
+      ["Equal", "AddExpr"],
+      ["LessThan", "AddExpr"],
+      ["GreaterThan", "AddExpr"],
+      ["LessThanOrEqual", "AddExpr"],
+      ["GreaterThanOrEqual", "AddExpr"],
+      ["NotEqual", "AddExpr"],
+    ],
+    "AddExpr": [
+      ["AddExpr", "AddExprEnd"],
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "AddExprEnd": [
+      ["Plus", "TimesExpr"],
+      ["Minus", "TimesExpr"],
+    ],
+    "TimesExpr": [
+      ["TimesExpr", "TimesExprEnd"],
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "TimesExprEnd": [
+      ["Times", "FunctionCallExpr"],
+      ["Divide", "FunctionCallExpr"]
+    ],
+    "FunctionCallExpr": [
+      ["FunctionCallExpr", "ParenExpr"],
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "ParenExpr": [
+      ["LParen", "ParenExprEnd"],
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ],
+    "ParenExprEnd": [
+      ["ParenExpr", "RParen"],
+    ],
+    "PrefixExpr": [
+      ["Negation", "PrefixExpr"],
+      ["Negation", "Expr"]
+    ]
+  }
+}
