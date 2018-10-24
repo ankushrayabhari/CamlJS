@@ -221,6 +221,36 @@ and parse_semicolon_expr tok_arr = function
     Sequential (pre_semicolon_expr, post_semicolon_expr)
   | _ -> failwith "not a semicolon expression"
 
+and parse_if_no_else_body tok_arr cond_expr = function
+  | Cons (_,_,_,_,then_body_tree) ->
+    Ternary (cond_expr, (parse_expr tok_arr then_body_tree), None)
+  | Nil -> failwith "if without else has no body (shouldn't be called)"
+
+and parse_if_else_body tok_arr cond_expr = function
+  | Cons (_, _, _, _,
+      Cons (30, _, _,
+        Cons (25, _, _, _, on_if_true_tree),
+        Cons (31, _, _, _, on_if_false_tree)
+      )
+    ) ->
+    Ternary (
+      cond_expr,
+      parse_expr tok_arr on_if_true_tree,
+      Some (parse_expr tok_arr on_if_false_tree)
+    )
+  | Nil -> failwith "if with else somehow failed"
+  | _ -> failwith "should not be called"
+
+and parse_if_expr tok_arr = function
+  | Nil -> failwith "should not be called on nil"
+  | Cons (_,_,_,_,Cons (_,_,_,cond_tree,if_body_tree)) ->
+    let cond_expr = parse_expr tok_arr cond_tree in
+    begin match production_of_root_of_parse_tree cond_tree with
+      | Some (18,25) -> parse_if_no_else_body tok_arr cond_expr if_body_tree
+      | Some (18,30) -> parse_if_else_body tok_arr cond_expr if_body_tree
+      | _-> failwith "invalid if statement production"
+    end
+  | _ -> failwith "invalid if statement parse tree"
 
 and parse_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
@@ -230,7 +260,7 @@ and parse_expr tok_arr = function
         | Some (15, 26) -> parse_paren_expr tok_arr t
         | Some (12, 25) -> parse_prefix_expr tok_arr t
         | Some (25, 27) -> parse_infix_expr tok_arr t
-        | Some (17, 28) -> failwith "if expr not implemented"
+        | Some (17, 28) -> parse_if_expr tok_arr t
         | Some (20, 32) -> parse_fun_expr tok_arr t
         | Some (25, 35) -> parse_semicolon_expr tok_arr t
         | Some (22, 36) -> parse_rec_expr tok_arr t
