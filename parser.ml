@@ -268,6 +268,14 @@ and parse_expr tok_arr = function
         | Some (25, 25) -> parse_function_call_expr tok_arr t
         | _ -> failwith "invalid production rule"
 
+let iterate_over_productions f =
+  List.iteri (fun a el ->
+    let a = a + 25 in
+    List.iter (fun (b, c) ->
+        f (a,b,c)
+    ) el
+  ) rules
+
 let parse tok_arr =
   let n = Array.length tok_arr in
   let dp = Array.init n
@@ -283,20 +291,17 @@ let parse tok_arr =
 
   for l = 1 to n - 1 do
     for s = 0 to n - 1 - l do
-      for m = s to s + l - 1 do
-        List.iteri (fun a el ->
-            let a = a + 25 in
-            List.iter (fun (b, c) ->
-                if not dp.(s).(s + l).(a) &&
+        for m = s to s + l - 1 do
+          iterate_over_productions (fun (a, b, c) ->
+            if not dp.(s).(s + l).(a) &&
                    dp.(s).(m).(b) &&
-                   dp.(m + 1).(s + l).(c)
-                then begin
-                  dp.(s).(s + l).(a) <- true;
-                  prev.(s).(s+l).(a) <- (b, m, c)
-                end
-              ) el
-          ) rules
-      done
+                  dp.(m + 1).(s + l).(c)
+            then begin
+              dp.(s).(s + l).(a) <- true;
+              prev.(s).(s+l).(a) <- (b, m, c);
+            end
+          )
+        done
     done
   done;
 
