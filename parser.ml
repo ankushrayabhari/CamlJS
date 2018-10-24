@@ -229,9 +229,9 @@ and parse_if_no_else_body tok_arr cond_expr = function
 
 and parse_if_else_body tok_arr cond_expr = function
   | Cons (_, _, _, _,
-      Cons (30, _, _,
-        Cons (25, _, _, _, on_if_true_tree),
-        Cons (31, _, _, _, on_if_false_tree)
+      Cons (_, _, _,
+        on_if_true_tree,
+        Cons (_, _, _, _, on_if_false_tree)
       )
     ) ->
     Ternary (
@@ -246,7 +246,7 @@ and parse_if_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_,_,_,_,Cons (_,_,_,cond_tree,if_body_tree)) ->
     let cond_expr = parse_expr tok_arr cond_tree in
-    begin match production_of_root_of_parse_tree cond_tree with
+    begin match production_of_root_of_parse_tree if_body_tree with
       | Some (18,25) -> parse_if_no_else_body tok_arr cond_expr if_body_tree
       | Some (18,30) -> parse_if_else_body tok_arr cond_expr if_body_tree
       | _-> failwith "invalid if statement production"

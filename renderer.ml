@@ -81,6 +81,11 @@ and render_paren_expr expr =
   let rendered_expr = render_expr expr in
   "(" ^ rendered_expr ^ ")"
 
+and render_function_call f_expr arg_expr =
+  let rendered_function = render_expr f_expr in
+  let rendered_argument = render_expr arg_expr in
+  "((" ^ rendered_function ^ ")(" ^ rendered_argument ^ ")" ^ ")"
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
@@ -90,7 +95,7 @@ and render_expr = function
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName (val_name) -> render_value_name val_name
-  | FunctionCall (expr_1, expr_2) -> failwith "function call not implemented"
+  | FunctionCall (expr_1, expr_2) -> render_function_call expr_1 expr_2
   | ParenExpr (expr) -> render_paren_expr expr
 
 let render exp =

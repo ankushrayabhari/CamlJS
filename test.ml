@@ -14,7 +14,22 @@ let tokenizer_tests = Tokenizer.[
       Int 100;
     ] in
     assert_equal expected_tokens tokenized_program
-  )
+  );
+
+  "if statement test" >:: (fun _ ->
+    let tokenized_program = tokenize "if 0 = 0 then 0 else 1" in
+    let expected_tokens = [
+      If;
+      Int 0;
+      Equal;
+      Int 0;
+      Then;
+      Int 0;
+      Else;
+      Int 1;
+    ] in
+    assert_equal expected_tokens tokenized_program
+  );
 ]
 
 let parser_tests = Parser.[
