@@ -81,7 +81,7 @@
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
-      ["Expr"]
+      ["Negation", "Expr"]
     ]
   }
 }
