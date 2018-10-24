@@ -155,6 +155,14 @@ and parse_fun_expr tok_arr = function
     Function (get_params tok_arr s e [], (parse_expr tok_arr ex))
   | _ -> failwith "not a function expr"
 
+and parse_function_call_expr tok_arr = function
+  | Nil   -> failwith "should not be called on nil"
+  | Cons (_, _, _, l, r) -> begin
+      let f_name = parse_expr tok_arr l in
+      let f_args = parse_expr tok_arr r in
+      FunctionCall(f_name, f_args)
+    end
+
 and parse_let_binding_expr tok_arr = function
   | Nil -> failwith "should not be called on nil"
   | Cons (_, _, _, _,
@@ -227,7 +235,7 @@ and parse_expr tok_arr = function
         | Some (25, 35) -> parse_semicolon_expr tok_arr t
         | Some (22, 36) -> parse_rec_expr tok_arr t
         | Some (22, 37) -> parse_let_binding_expr tok_arr t
-        | Some (25, 25) -> failwith "function call not implemented"
+        | Some (25, 25) -> parse_function_call_expr tok_arr t
         | _ -> failwith "invalid production rule"
 
 let parse tok_arr =
