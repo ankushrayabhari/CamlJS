@@ -19,7 +19,8 @@ let tokenizer_tests = Tokenizer.[
 
 let parser_tests = Parser.[
   "basic_test" >:: (fun _ ->
-    let tokenized_program = Tokenizer.tokenize "let x = 1 in x + 100" |> Array.of_list in
+    let tokenized_program =
+      Tokenizer.tokenize "let x = 1 in x + 100" |> Array.of_list in
     let parse_tree = parse tokenized_program in
     let expected_tree =
       LetBinding (
@@ -37,8 +38,8 @@ let parser_tests = Parser.[
   );
 
   "order of ops in infix expression" >:: (fun _ ->
-    let tokenized_program = Tokenizer.tokenize "let x = 1 in x - 100 - 200"
-                            |> Array.of_list in
+    let tokenized_program =
+      Tokenizer.tokenize "let x = 1 in x - 100 - 200" |> Array.of_list in
     let parse_tree = parse tokenized_program in
     let expected_tree =
       LetBinding (
@@ -60,8 +61,10 @@ let parser_tests = Parser.[
   );
 
   "order of ops in infix expression parentheiszed" >:: (fun _ ->
-    let tokenized_program = Tokenizer.tokenize "let x = 1 in (x - 100) - (200 - x)"
-                            |> Array.of_list in
+    let tokenized_program =
+      Tokenizer.tokenize "let x = 1 in (x - 100) - (200 - x)"
+      |> Array.of_list
+    in
     let parse_tree = parse tokenized_program in
     let expected_tree =
       LetBinding (
@@ -75,6 +78,41 @@ let parser_tests = Parser.[
             Minus,
             Constant (Int 100)
           )),
+          Minus,
+          ParenExpr (InfixOp (
+            Constant (Int 200),
+            Minus,
+            VarName (LowercaseIdent "x")
+          ))
+        )
+      ) in
+    assert_equal expected_tree parse_tree
+  );
+
+  "order of ops in infix expression parentheiszed " >:: (fun _ ->
+    let tokenized_program =
+      Tokenizer.tokenize "let x = 1 in (x - 100 - 300) - (200 - x)"
+      |> Array.of_list
+    in
+    let parse_tree = parse tokenized_program in
+    let expected_tree =
+      LetBinding (
+        VarAssignment (
+          ValueName (LowercaseIdent "x"),
+          Constant (Int 1)
+        ),
+        InfixOp (
+          ParenExpr (
+            InfixOp (
+              InfixOp (
+                VarName (LowercaseIdent "x"),
+                Minus,
+                Constant (Int 100)
+              ),
+              Minus,
+              Constant (Int 300)
+            )
+          ),
           Minus,
           ParenExpr (InfixOp (
             Constant (Int 200),

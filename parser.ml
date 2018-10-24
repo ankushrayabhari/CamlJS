@@ -272,12 +272,20 @@ and parse_expr tok_arr = function
 let rec fix_infix_op_order = function
   | InfixOp (exp1, op1, InfixOp (exp2, op2, exp3)) ->
       fix_infix_op_order (InfixOp (InfixOp (exp1, op1, exp2), op2, exp3))
+  | InfixOp (exp1, op, exp2) ->
+      InfixOp (fix_infix_op_order exp1, op, fix_infix_op_order exp2)
   | PrefixOp (prefix, expr) -> PrefixOp (prefix, fix_infix_op_order expr)
   | Ternary (cond_expr, true_expr, Some false_expr) ->
       Ternary (
         fix_infix_op_order cond_expr,
         fix_infix_op_order true_expr,
         Some (fix_infix_op_order false_expr)
+      )
+  | Ternary (cond_expr, true_expr, None) ->
+      Ternary (
+        fix_infix_op_order cond_expr,
+        fix_infix_op_order true_expr,
+        None
       )
   | Function (pattern_lst, body_expr) ->
       Function (pattern_lst, fix_infix_op_order body_expr)
@@ -297,7 +305,9 @@ let rec fix_infix_op_order = function
       )
   | FunctionCall (fun_expr, arg_expr) ->
       FunctionCall (fix_infix_op_order fun_expr, fix_infix_op_order arg_expr)
-  | t -> t
+  | ParenExpr (expr) -> ParenExpr (fix_infix_op_order expr)
+  | Constant t -> Constant t
+  | VarName t -> VarName t
 
 let iterate_over_productions f =
   List.iteri (fun a el ->
