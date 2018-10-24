@@ -110,3 +110,8 @@ let rules = [
   [(49,15);];  (* 50 *)
   [(12,51);(12,24);];  (* 51 *)
 ]
+
+let start_variable = 24
+
+let num_variables = 52
+

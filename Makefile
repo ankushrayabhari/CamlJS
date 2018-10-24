@@ -1,4 +1,4 @@
-MODULES=tokenizer parser renderer main
+MODULES=tokenizer parser renderer main grammar
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

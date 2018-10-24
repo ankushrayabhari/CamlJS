@@ -54,3 +54,10 @@ for (let x = 0; x < variables.length; x++) {
   console.log(val);
 }
 console.log("]");
+
+console.log("")
+console.log("let start_variable = " + (grammar["tokens"].length));
+console.log("")
+console.log("let num_variables = " +
+  (grammar["tokens"].length + Object.keys(grammar["productions"]).length));
+console.log("")
