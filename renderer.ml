@@ -1,7 +1,7 @@
 open Parser
 
 let render_constant = function
-  | Int v -> "(() => " ^ (string_of_int v) ^ ")()"
+  | Int v -> string_of_int v
 
 let render_value_name = function
   | LowercaseIdent s -> s
@@ -47,25 +47,22 @@ and render_ternary condition_expr true_expr false_expr =
   let rendered_condition_expr = render_expr condition_expr in
   let rendered_true_expr = render_expr true_expr in
   let rendered_false_expr = match false_expr with
-    | None -> "(() => {})()"
+    | None -> "undefined"
     | Some expr -> render_expr expr
   in
-  "(() => " ^
-    rendered_condition_expr ^ "? " ^
-    rendered_true_expr ^ " : " ^
-    rendered_false_expr ^
-  ")()"
+  "((() => " ^ rendered_condition_expr ^ ")() ? " ^
+  rendered_true_expr ^ " : " ^ rendered_false_expr ^ ")"
 
 and render_prefix_expr prefix expr =
   let rendered_op = render_prefix_op prefix in
   let rendered_expr = render_expr expr in
-  "(() => " ^ rendered_op ^ "(" ^ rendered_expr ^ "))()"
+  "(" ^ rendered_op ^ "(" ^ rendered_expr ^ "))"
 
 and render_infix_expr l_expr op r_expr =
   let rendered_l = render_expr l_expr in
   let rendered_r = render_expr r_expr in
   let rendered_op = render_infix_op op in
-  "(() => (" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ "))()"
+  "(" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ ")"
 
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
@@ -75,7 +72,7 @@ and render_sequential_expr expr_1 expr_2 =
 and render_let_binding_expr assign expr =
   let rendered_assign = render_let_binding assign in
   let rendered_in_expr = render_expr expr in
-  "(() => {" ^ rendered_assign ^ "return " ^ rendered_in_expr ^ "})()"
+  rendered_assign ^ "{" ^ rendered_in_expr ^ "}"
 
 and render_paren_expr expr =
   let rendered_expr = render_expr expr in
@@ -84,7 +81,7 @@ and render_paren_expr expr =
 and render_function_call f_expr arg_expr =
   let rendered_function = render_expr f_expr in
   let rendered_argument = render_expr arg_expr in
-  "((" ^ rendered_function ^ ")(" ^ rendered_argument ^ ")" ^ ")"
+  rendered_function ^ "(" ^ rendered_argument ^ ")"
 
 and render_expr = function
   | Constant c -> render_constant c
