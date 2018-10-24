@@ -1,7 +1,7 @@
 {
   "tokens": [
-    "Int",
-    "LowercaseIdent",
+    "Int _",
+    "LowercaseIdent _",
     "Plus",
     "Minus",
     "Times",
@@ -27,8 +27,8 @@
   ],
   "productions": {
     "Expr": [
-      ["LowercaseIdent"],
-      ["Int"],
+      ["LowercaseIdent _"],
+      ["Int _"],
       ["Let", "LetDecl"],
       ["Let", "LetRecDecl"],
       ["Fun", "FunctionDecl"],
@@ -60,7 +60,7 @@
       ["Rec", "LetDecl"]
     ],
     "LetDecl": [
-      ["LowercaseIdent", "LetEqual"]
+      ["LowercaseIdent _", "LetEqual"]
     ],
     "LetEqual": [
       ["Equal", "LetAssignExpr"]
@@ -69,7 +69,7 @@
       ["LetExpr", "LetAssignInExpr"]
     ],
     "LetAssignInExpr": [
-      ["in", "AnonFuncExpr"]
+      ["In", "AnonFuncExpr"]
     ],
     "AnonFuncExpr": [
       ["Fun", "FunctionDecl"],
@@ -84,14 +84,14 @@
       ["Negation", "Expr"]
     ],
     "FunctionDecl": [
-      ["OneOrMoreLowercaseIdent", "FunctionBody"]
+      ["OneOrMoreLowercaseIdent _", "FunctionBody"]
     ],
     "FunctionBody": [
       ["FunctionArrow", "AnonFuncExpr"]
     ],
-    "OneOrMoreLowercaseIdent": [
-      ["OneOrMoreLowercaseIdent", "LowercaseIdent"],
-      ["LowercaseIdent"]
+    "OneOrMoreLowercaseIdent _": [
+      ["OneOrMoreLowercaseIdent _", "LowercaseIdent _"],
+      ["LowercaseIdent _"]
     ],
     "SemiColonExpr": [
       ["IfExpr", "SemiColonExprEnd"],
@@ -105,7 +105,7 @@
       ["Negation", "Expr"]
     ],
     "SemiColonExprEnd": [
-      ["SemiColon", "SemiColonExpr"],
+      ["SemiColon", "SemiColonExpr"]
     ],
     "IfExpr": [
       ["If", "IfElseExprBody"],
@@ -145,7 +145,7 @@
       ["GreaterThan", "AddExpr"],
       ["LessThanOrEqual", "AddExpr"],
       ["GreaterThanOrEqual", "AddExpr"],
-      ["NotEqual", "AddExpr"],
+      ["NotEqual", "AddExpr"]
     ],
     "AddExpr": [
       ["AddExpr", "AddExprEnd"],
@@ -157,7 +157,7 @@
     ],
     "AddExprEnd": [
       ["Plus", "TimesExpr"],
-      ["Minus", "TimesExpr"],
+      ["Minus", "TimesExpr"]
     ],
     "TimesExpr": [
       ["TimesExpr", "TimesExprEnd"],
@@ -182,7 +182,7 @@
       ["Negation", "Expr"]
     ],
     "ParenExprEnd": [
-      ["ParenExpr", "RParen"],
+      ["ParenExpr", "RParen"]
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],

@@ -25,6 +25,9 @@ test-debug:
 
 docs: docs-public docs-private
 
+update-grammar:
+	node converter.js > grammar.ml
+
 docs-public: build
 	mkdir -p doc.public
 	ocamlfind ocamldoc -I _build -package $(PKGS) \

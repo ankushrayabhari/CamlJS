@@ -1,195 +1,5 @@
-let grammar = {
-  "tokens": [
-    "Int",
-    "LowercaseIdent",
-    "Plus",
-    "Minus",
-    "Times",
-    "Divide",
-    "GreaterThan",
-    "LessThan",
-    "GreaterThanOrEqual",
-    "LessThanOrEqual",
-    "NotEqual",
-    "Equal",
-    "Negation",
-    "FunctionArrow",
-    "LParen",
-    "RParen",
-    "If",
-    "Then",
-    "Else",
-    "Fun",
-    "SemiColon",
-    "Let",
-    "Rec",
-    "In"
-  ],
-  "productions": {
-    "Expr": [
-      ["LowercaseIdent"],
-      ["Int"],
-      ["Let", "LetDecl"],
-      ["Let", "LetRecDecl"],
-      ["Fun", "FunctionDecl"],
-      ["IfExpr", "SemiColonExprEnd"],
-      ["If", "IfElseExprBody"],
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "LetExpr": [
-      ["Let", "LetDecl"],
-      ["Let", "LetRecDecl"],
-      ["Fun", "FunctionDecl"],
-      ["IfExpr", "SemiColonExprEnd"],
-      ["If", "IfElseExprBody"],
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "LetRecDecl": [
-      ["Rec", "LetDecl"]
-    ],
-    "LetDecl": [
-      ["LowercaseIdent", "LetEqual"]
-    ],
-    "LetEqual": [
-      ["Equal", "LetAssignExpr"]
-    ],
-    "LetAssignExpr": [
-      ["LetExpr", "LetAssignInExpr"]
-    ],
-    "LetAssignInExpr": [
-      ["in", "AnonFuncExpr"]
-    ],
-    "AnonFuncExpr": [
-      ["Fun", "FunctionDecl"],
-      ["IfExpr", "SemiColonExprEnd"],
-      ["If", "IfElseExprBody"],
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "FunctionDecl": [
-      ["OneOrMoreLowercaseIdent", "FunctionBody"]
-    ],
-    "FunctionBody": [
-      ["FunctionArrow", "AnonFuncExpr"]
-    ],
-    "OneOrMoreLowercaseIdent": [
-      ["OneOrMoreLowercaseIdent", "LowercaseIdent"],
-      ["LowercaseIdent"]
-    ],
-    "SemiColonExpr": [
-      ["IfExpr", "SemiColonExprEnd"],
-      ["If", "IfElseExprBody"],
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "SemiColonExprEnd": [
-      ["SemiColon", "SemiColonExpr"],
-    ],
-    "IfExpr": [
-      ["If", "IfElseExprBody"],
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "IfElseExprBody": [
-      ["IfExpr", "IfElseExprThen"]
-    ],
-    "IfElseExprThen": [
-      ["Then", "IfExpr"],
-      ["Then", "IfElseExprThenBody"]
-    ],
-    "IfElseExprThenBody": [
-      ["IfExpr", "IfElseExprThenBody"]
-    ],
-    "ElseExpr": [
-      ["Else", "IfExpr"]
-    ],
-    "ComparisonExpr": [
-      ["ComparisonExpr", "ComparisonExprEnd"],
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "ComparisonExprEnd": [
-      ["Equal", "AddExpr"],
-      ["LessThan", "AddExpr"],
-      ["GreaterThan", "AddExpr"],
-      ["LessThanOrEqual", "AddExpr"],
-      ["GreaterThanOrEqual", "AddExpr"],
-      ["NotEqual", "AddExpr"],
-    ],
-    "AddExpr": [
-      ["AddExpr", "AddExprEnd"],
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "AddExprEnd": [
-      ["Plus", "TimesExpr"],
-      ["Minus", "TimesExpr"],
-    ],
-    "TimesExpr": [
-      ["TimesExpr", "TimesExprEnd"],
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "TimesExprEnd": [
-      ["Times", "FunctionCallExpr"],
-      ["Divide", "FunctionCallExpr"]
-    ],
-    "FunctionCallExpr": [
-      ["FunctionCallExpr", "ParenExpr"],
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "ParenExpr": [
-      ["LParen", "ParenExprEnd"],
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ],
-    "ParenExprEnd": [
-      ["ParenExpr", "RParen"],
-    ],
-    "PrefixExpr": [
-      ["Negation", "PrefixExpr"],
-      ["Negation", "Expr"]
-    ]
-  }
-}
+var fs = require('fs');
+var grammar = JSON.parse(fs.readFileSync('grammar_converted.json', 'utf8'));
 
 let int_map = {};
 for (let i = 0; i < grammar["tokens"].length; i++) {
@@ -201,10 +11,12 @@ for (let x = 0; x < variables.length; x++) {
   int_map[variables[x]] = x + grammar["tokens"].length;
 }
 
+console.log("(*")
 for (let key in int_map) {
   console.log(key + ": " + int_map[key]);
 }
-console.log("");
+console.log("*)");
+console.log("")
 
 let token_to_varid_map = {};
 for (let i = 0; i < grammar["tokens"].length; i++) {
@@ -223,7 +35,7 @@ console.log("let token_to_varid = Tokenizer.(function");
 for (let i = 0; i < grammar["tokens"].length; i++) {
   console.log("    | " +
     grammar["tokens"][i] + " -> [" +
-    token_to_varid_map[grammar["tokens"][i]].toString() + "]");
+    token_to_varid_map[grammar["tokens"][i]].join(";") + "]");
 }
 console.log(")")
 
@@ -238,7 +50,7 @@ for (let x = 0; x < variables.length; x++) {
         int_map[grammar["productions"][variables[x]][i][1]] + ");"
     }
   }
-  val += "  (* " + (x + grammar["tokens"].length) + " *)";
+  val += "];  (* " + (x + grammar["tokens"].length) + " *)";
   console.log(val);
 }
 console.log("]");
