@@ -1,0 +1,87 @@
+{
+  "tokens": [
+    "Int",
+    "LowercaseIdent",
+    "Plus",
+    "Minus",
+    "Times",
+    "Divide",
+    "GreaterThan",
+    "LessThan",
+    "GreaterThanOrEqual",
+    "LessThanOrEqual",
+    "NotEqual",
+    "Equal",
+    "Negation",
+    "FunctionArrow",
+    "LParen",
+    "RParen",
+    "If",
+    "Then",
+    "Else",
+    "Fun",
+    "SemiColon",
+    "Let",
+    "Rec",
+    "In"
+  ],
+  "productions": {
+    "Expr": [
+      ["LowercaseIdent"],
+      ["Int"],
+      ["LetExpr"]
+    ],
+    "LetExpr": [
+      ["Let", "LowercaseIdent", "Equal", "LetExpr", "in", "AnonFuncExpr"],
+      ["AnonFuncExpr"]
+    ],
+    "AnonFuncExpr": [
+      ["Fun", "OneOrMoreLowercaseIdent", "FunctionArrow", "AnonFuncExpr"],
+      ["SemiColonExpr"]
+    ],
+    "OneOrMoreLowercaseIdent": [
+      ["OneOrMoreLowercaseIdent", "LowercaseIdent"],
+      ["LowercaseIdent"]
+    ],
+    "SemiColonExpr": [
+      ["IfExpr", "SemiColon", "SemiColonExpr"],
+      ["IfExpr"]
+    ],
+    "IfExpr": [
+      ["If", "IfExpr", "Then", "IfExpr", "Else", "IfExpr"],
+      ["If", "IfExpr", "Then", "IfExpr"],
+      ["ComparisonExpr"]
+    ],
+    "ComparisonExpr": [
+      ["ComparisonExpr", "Equal", "AddExpr"],
+      ["ComparisonExpr", "LessThan", "AddExpr"],
+      ["ComparisonExpr", "GreaterThan", "AddExpr"],
+      ["ComparisonExpr", "LessThanOrEqual", "AddExpr"],
+      ["ComparisonExpr", "GreaterThanOrEqual", "AddExpr"],
+      ["ComparisonExpr", "NotEqual", "AddExpr"],
+      ["AddExpr"],
+    ],
+    "AddExpr": [
+      ["AddExpr", "Plus", "TimesExpr"],
+      ["AddExpr", "Minus", "TimesExpr"],
+      ["TimesExpr"]
+    ],
+    "TimesExpr": [
+      ["TimesExpr", "Times", "FunctionCallExpr"],
+      ["TimesExpr", "Divide", "FunctionCallExpr"],
+      ["FunctionCallExpr"]
+    ],
+    "FunctionCallExpr": [
+      ["FunctionCallExpr", "ParenExpr"],
+      ["ParenExpr"]
+    ],
+    "ParenExpr": [
+      ["LParen", "ParenExpr", "RParen"],
+      ["PrefixExpr"]
+    ],
+    "PrefixExpr": [
+      ["Negation", "PrefixExpr"],
+      ["Expr"]
+    ]
+  }
+}
