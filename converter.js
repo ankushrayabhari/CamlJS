@@ -158,6 +158,8 @@ let auto_generated_variable = () => {
   return `let auto_generated_variable var = var > ${last_variable}\n`;
 }
 
+console.log("(* DO NOT UPDATE THIS FILE! *)")
+console.log("(* Update grammar.json and then run make grammar! *)")
 console.log(token_to_varid_fn());
 console.log(rules_lst());
 console.log(start_variable_int());
