@@ -102,7 +102,7 @@ let remove_unit_productions = (var_id) => {
 remove_large_productions();
 remove_unit_productions(start_variable);
 
-// Step 3 - Write the token_to_varid function
+// Step 3 - the token_to_varid function
 let token_to_varid_fn = () => {
   let tokenToVarId = new Map();
   for (let var_id = 0; var_id < num_tokens; var_id++) {
@@ -125,10 +125,10 @@ let token_to_varid_fn = () => {
                    `[${tokenToVarId.get(token.name).join(";")}]\n`;
   }
 
-  return `let token_to_varid = Tokenizer.(function\n${match_cases})`
+  return `let token_to_varid = Tokenizer.(function\n${match_cases})\n`
 }
 
-// Step 4 - Write out the rules
+// Step 4 - the rules list
 let rules_lst = () => {
   let rules_lst = "";
   for (let var_id = start_variable; var_id < num_variables; var_id++) {
@@ -139,7 +139,28 @@ let rules_lst = () => {
       .join(";");
     rules_lst += `\n  [${string_productions}];`;
   }
-  return `let rules = [${rules_lst}\n]`;
+  return `let rules = [${rules_lst}\n]\n`;
 }
 
+let start_variable_int = () => {
+  return `let start_variable = ${start_variable}\n`;
+}
+
+let num_tokens_int = () => {
+  return `let num_tokens = ${num_tokens}\n`;
+}
+
+let num_variables_int = () => {
+  return `let num_variables = ${num_variables}\n`;
+}
+
+let auto_generated_variable = () => {
+  return `let auto_generated_variable var = var > ${last_variable}\n`;
+}
+
+console.log(token_to_varid_fn());
 console.log(rules_lst());
+console.log(start_variable_int());
+console.log(num_tokens_int());
+console.log(num_variables_int());
+console.log(auto_generated_variable());
