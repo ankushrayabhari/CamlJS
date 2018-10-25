@@ -133,7 +133,7 @@
       ["ComparisonExpr", "LessThanOrEqual", "AddExpr"],
       ["ComparisonExpr", "GreaterThanOrEqual", "AddExpr"],
       ["ComparisonExpr", "NotEqual", "AddExpr"],
-      ["AddExpr"],
+      ["AddExpr"]
     ],
     "AddExpr": [
       ["AddExpr", "Plus", "TimesExpr"],
@@ -157,7 +157,6 @@
       ["LParen", "Expr", "RParen"],
       ["LowercaseIdent"],
       ["Int"]
-    ],
-
+    ]
   }
 }
