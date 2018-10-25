@@ -72,16 +72,18 @@
       ["FunctionCallExpr"]
     ],
     "FunctionCallExpr": [
-      ["FunctionCallExpr", "ParenExpr"],
-      ["ParenExpr"]
-    ],
-    "ParenExpr": [
-      ["LParen", "ParenExpr", "RParen"],
+      ["FunctionCallExpr", "PrefixExpr"],
       ["PrefixExpr"]
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
-      ["Expr"]
-    ]
+      ["ParenExpr"]
+    ],
+    "ParenExpr": [
+      ["LParen", "Expr", "RParen"],
+      ["LowercaseIdent"],
+      ["Int"]
+    ],
+
   }
 }
