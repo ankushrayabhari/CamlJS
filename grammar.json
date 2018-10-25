@@ -106,7 +106,7 @@
       ["LetExpr"]
     ],
     "LetExpr": [
-      ["Let", "LowercaseIdent", "Equal", "LetExpr", "in", "AnonFuncExpr"],
+      ["Let", "LowercaseIdent", "Equal", "LetExpr", "In", "AnonFuncExpr"],
       ["AnonFuncExpr"]
     ],
     "AnonFuncExpr": [

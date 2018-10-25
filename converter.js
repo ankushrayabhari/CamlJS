@@ -68,7 +68,7 @@ let remove_large_productions = () => {
       while (is_large_production(production)) {
         let last_el = production.pop();
         let second_last_el = production.pop();
-        let new_variable = add_variable(last_el, second_last_el);
+        let new_variable = add_variable(second_last_el, last_el);
         production.push(new_variable);
       }
     }
@@ -137,7 +137,7 @@ let rules_lst = () => {
       .filter(production => !is_token_production(production))
       .map((production) => `(${production.map(get_variable_id).join(",")})`)
       .join(";");
-    rules_lst += `\n  [${string_productions}];`;
+    rules_lst += `\n  [${string_productions}] (* ${var_id} *);`;
   }
   return `let rules = [${rules_lst}\n]\n`;
 }
