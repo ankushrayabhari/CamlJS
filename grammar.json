@@ -1,29 +1,103 @@
 {
   "tokens": [
-    "Int",
-    "LowercaseIdent",
-    "Plus",
-    "Minus",
-    "Times",
-    "Divide",
-    "GreaterThan",
-    "LessThan",
-    "GreaterThanOrEqual",
-    "LessThanOrEqual",
-    "NotEqual",
-    "Equal",
-    "Negation",
-    "FunctionArrow",
-    "LParen",
-    "RParen",
-    "If",
-    "Then",
-    "Else",
-    "Fun",
-    "SemiColon",
-    "Let",
-    "Rec",
-    "In"
+    {
+      "name": "Int",
+      "parameter": "int",
+      "regex": "[0-9]+"
+    },
+    {
+      "name": "LowercaseIdent",
+      "parameter": "string",
+      "regex": "\\([a-z]\\|_\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
+    },
+    {
+      "name": "Plus",
+      "regex": "\\+"
+    },
+    {
+      "name": "Minus",
+      "regex": "-"
+    },
+    {
+      "name": "Times",
+      "regex": "\\*"
+    },
+    {
+      "name": "Divide",
+      "regex": "/"
+    },
+    {
+      "name": "GreaterThan",
+      "regex": ">"
+    },
+    {
+      "name": "LessThan",
+      "regex": "<"
+    },
+    {
+      "name": "GreaterThanOrEqual",
+      "regex": ">="
+    },
+    {
+      "name": "LessThanOrEqual",
+      "regex": "<="
+    },
+    {
+      "name": "NotEqual",
+      "regex": "<>"
+    },
+    {
+      "name": "Equal",
+      "regex": "="
+    },
+    {
+      "name": "Negation",
+      "regex": "~-"
+    },
+    {
+      "name": "FunctionArrow",
+      "regex": "->"
+    },
+    {
+      "name": "LParen",
+      "regex": "("
+    },
+    {
+      "name": "RParen",
+      "regex": ")"
+    },
+    {
+      "name": "If",
+      "regex": "if"
+    },
+    {
+      "name": "Then",
+      "regex": "then"
+    },
+    {
+      "name": "Else",
+      "regex": "else"
+    },
+    {
+      "name": "Fun",
+      "regex": "fun"
+    },
+    {
+      "name": "SemiColon",
+      "regex": ";"
+    },
+    {
+      "name": "Let",
+      "regex": "let"
+    },
+    {
+      "name": "Rec",
+      "regex": "rec"
+    },
+    {
+      "name": "In",
+      "regex": "in"
+    }
   ],
   "productions": {
     "Expr": [
