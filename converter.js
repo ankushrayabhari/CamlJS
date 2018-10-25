@@ -135,9 +135,12 @@ let rules_lst = () => {
     let string_productions =
       get_productions(var_id)
       .filter(production => !is_token_production(production))
-      .map((production) => `(${production.map(get_variable_id).join(",")})`)
-      .join(";");
-    rules_lst += `\n  [${string_productions}] (* ${var_id} *);`;
+      .map((production, index) => {
+        let endline = (index > 0 && index % 7 == 0) ? '\n   ' : '';
+        return `(${production.map(get_variable_id).join(",")})${endline}`;
+      })
+      .join("; ");
+    rules_lst += `\n  [${string_productions}]; (* ${var_id} *)`;
   }
   return `let rules = [${rules_lst}\n]\n`;
 }
