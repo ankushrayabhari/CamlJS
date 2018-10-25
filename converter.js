@@ -137,9 +137,9 @@ let rules_lst = () => {
       .filter(production => !is_token_production(production))
       .map((production, index) => {
         let endline = (index > 0 && index % 7 == 0) ? '\n   ' : '';
-        return `(${production.map(get_variable_id).join(",")})${endline}`;
+        return `(${production.map(get_variable_id).join(",")}); ${endline}`;
       })
-      .join("; ");
+      .join("");
     rules_lst += `\n  [${string_productions}]; (* ${var_id} *)`;
   }
   return `let rules = [${rules_lst}\n]\n`;
