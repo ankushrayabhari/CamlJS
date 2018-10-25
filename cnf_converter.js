@@ -5,8 +5,9 @@ let tokens = grammar["tokens"];
 let num_tokens = tokens.length;
 let productions = grammar["productions"];
 let variables = Object.keys(productions);
-let num_variables = variables.length;
+let last_variable = variables.length - 1 + num_tokens;
 let start_variable = num_tokens;
+let num_variables = variables.length + num_tokens;
 
 // Set values in variable_to_id_map
 let variable_to_id_map = new Map();
@@ -40,6 +41,38 @@ let set_productions = (var_id, new_prod) => {
   productions[variables[var_id - num_tokens]] = no_duplicates_productions;
 }
 
+let add_variable = (var_1, var_2) => {
+  let name = var_1 + "_" + var_2 + "_" + num_variables;
+  productions[name] = [
+    [var_1, var_2]
+  ];
+  variables = Object.keys(productions);
+  variable_to_id_map.set(name, num_variables);
+  num_variables++;
+  return name;
+}
+
+let is_large_production = (production) => {
+  return production.length > 2;
+}
+
+// Step 1 - Get rid of all productions larger than 3
+let remove_large_productions = () => {
+  console.log(start_variable);
+  console.log(last_variable);
+  for (let var_id = start_variable; var_id <= last_variable; var_id++) {
+
+    for (let production of get_productions(var_id)) {
+      while (is_large_production(production)) {
+        let last_el = production.pop();
+        let second_last_el = production.pop();
+        let new_variable = add_variable(last_el, second_last_el);
+        production.push(new_variable);
+      }
+    }
+  }
+}
+
 // Step 2 - Get rid of all unit productions
 let remove_unit_productions = (var_id) => {
   let to_add_productions = [];
@@ -64,5 +97,7 @@ let remove_unit_productions = (var_id) => {
   );
 }
 
-console.log(productions);
+
+remove_large_productions();
 remove_unit_productions(start_variable);
+console.log(productions);
