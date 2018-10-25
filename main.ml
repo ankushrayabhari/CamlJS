@@ -23,6 +23,7 @@ let compile code =
   Tokenizer.tokenize code
   |> Array.of_list
   |> Parser.parse
+  |> Ast.convert
   |> Renderer.render
 
 let write_file file code =

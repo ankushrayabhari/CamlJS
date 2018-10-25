@@ -1,2 +1,2 @@
 
-val render : Parser.ast -> string
+val render : Ast.ast -> string
