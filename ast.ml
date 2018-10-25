@@ -1,3 +1,5 @@
+open Parser
+
 type constant =
   | Int of int
 
@@ -54,42 +56,42 @@ let convert_infix = function
     )
 
 let rec convert_expr = function
-  | Parser.Token (Tokenizer.Int v) -> Constant (Int v)
+  | Token (Tokenizer.Int v) -> Constant (Int v)
 
-  | Parser.Node [
-      Parser.Token(Tokenizer.LParen);
+  | Node [
+      Token(Tokenizer.LParen);
       expr;
-      Parser.Token(Tokenizer.RParen);
+      Token(Tokenizer.RParen);
     ] ->
       ParenExpr (convert_expr expr)
 
-  | Parser.Node [
-      Parser.Token(pre);
+  | Node [
+      Token(pre);
       expr;
     ] when Tokenizer.has_tag pre "prefix" ->
       PrefixOp (convert_prefix pre, convert_expr expr)
 
-  | Parser.Node [
+  | Node [
       expr1;
-      Parser.Token(infix);
+      Token(infix);
       expr2;
     ] when Tokenizer.has_tag infix "infix" ->
       InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
 
-  | Parser.Node [
-      Parser.Token(Tokenizer.If);
+  | Node [
+      Token(Tokenizer.If);
       cond_expr;
-      Parser.Token(Tokenizer.Then);
+      Token(Tokenizer.Then);
       then_expr;
     ] ->
       Ternary (convert_expr cond_expr, convert_expr then_expr, None)
 
-  | Parser.Node [
-      Parser.Token(Tokenizer.If);
+  | Node [
+      Token(Tokenizer.If);
       cond_expr;
-      Parser.Token(Tokenizer.Then);
+      Token(Tokenizer.Then);
       then_expr;
-      Parser.Token(Tokenizer.Else);
+      Token(Tokenizer.Else);
       else_expr;
     ] ->
       Ternary (
@@ -98,22 +100,22 @@ let rec convert_expr = function
         Some (convert_expr else_expr)
       )
 
-  | Parser.Node (Parser.Token(Tokenizer.Fun)::t) ->
+  | Node (Token(Tokenizer.Fun)::t) ->
       failwith "anonymous functions not implemented"
 
-  | Parser.Node [
+  | Node [
       expr1;
-      Parser.Token(Tokenizer.SemiColon);
+      Token(Tokenizer.SemiColon);
       expr2;
     ] -> Sequential (convert_expr expr1, convert_expr expr2)
 
-  | Parser.Node (Parser.Token(Tokenizer.Let)::t) ->
+  | Node (Token(Tokenizer.Let)::t) ->
       failwith "let binding not implemented"
 
-  | Parser.Token (Tokenizer.LowercaseIdent n) ->
+  | Token (Tokenizer.LowercaseIdent n) ->
       VarName (LowercaseIdent n)
 
-  | Parser.Node [
+  | Node [
       fun_expr;
       arg_expr;
     ] ->
