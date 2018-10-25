@@ -41,17 +41,6 @@ let parse tok_arr =
     done
   done;
 
-  for i = 0 to n - 1 do
-    print_endline (string_of_int i ^ ": ");
-    for j = 0 to n - 1 do
-      print_string ("\t" ^ string_of_int j ^ ": ");
-      for k = 1 to 41 do
-        if dp.(i).(j).(k) then print_string (string_of_int k ^ "; ")
-      done;
-      print_endline ""
-    done
-  done;
-
   if not dp.(0).(n - 1).(Grammar.start_variable)
   then failwith "Invalid program."
   else
