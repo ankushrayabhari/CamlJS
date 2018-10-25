@@ -161,11 +161,163 @@ let auto_generated_variable = () => {
   return `let auto_generated_variable var = var > ${last_variable}\n`;
 }
 
-console.log("(* DO NOT UPDATE THIS FILE! *)")
-console.log("(* Update grammar.json and then run make grammar! *)")
-console.log(token_to_varid_fn());
-console.log(rules_lst());
-console.log(start_variable_int());
-console.log(num_tokens_int());
-console.log(num_variables_int());
-console.log(auto_generated_variable());
+// Tokenizer files
+let token_decl = () => {
+  let token_types = tokens.map(el => {
+    if (el.parameter != undefined) {
+      return `  | ${el.name} of ${el.parameter}\n`
+    } else {
+      return `  | ${el.name}\n`
+    }
+  }).join("");
+  return `type token =\n${token_types}`
+}
+
+let tokenize_sig = () => {
+  return `
+val tokenize : string -> token list
+
+val has_tag : token -> string -> bool
+
+val token_to_string : token -> string
+`;
+}
+
+let regexp_of_token_fn = () => {
+  let match = tokens.map(el => {
+    let filtered_regex = el.regex.replace(/\\/g, "\\$&");
+    if (el.parameter != undefined) {
+      return `  | ${el.name} _ -> "${filtered_regex}"\n`
+    } else {
+      return `  | ${el.name} -> "${filtered_regex}"\n`
+    }
+  }).join("");
+  return `let regexp_of_token tok = Str.regexp (match tok with\n${match})\n`;
+}
+
+let precedence_arr = () => {
+  let precendence = tokens.map(el => {
+    if (el.parameter == "int") {
+      return `  ${el.name} 0;\n`;
+    } else if (el.parameter == "string") {
+      return `  ${el.name} "";\n`;
+    } else {
+      return `  ${el.name};\n`;
+    }
+  }).join("");
+  return `let precedence = [\n${precendence}]\n`;
+}
+
+let parametrize_tok_fn = () => {
+  let match = tokens
+    .filter(el => el.parameter != undefined)
+    .map(el => {
+      if (el.parameter == "int") {
+        return `  | ${el.name} _ -> ${el.name} (int_of_string str)\n`;
+      } else if (el.parameter == "string") {
+        return `  | ${el.name} _ -> ${el.name} str\n`;
+      } else {
+        throw new Error("unknown parameter type");
+      }
+    })
+    .join("");
+  return `let parametrize_tok str = function\n${match}  | t -> t\n`;
+}
+
+let tokenize_impl = `let rec tokenize_rec str start tok_lst =
+  let whitespace_regex = Str.regexp "[ \\n\\r\\t]*" in
+  let _ = Str.string_match whitespace_regex str start in
+  let start_index = start + (String.length (Str.matched_string str)) in
+  if start_index >= (String.length str) then tok_lst |> List.rev
+  else
+    let token = List.fold_left (fun acc curr_tok -> match acc with
+        | (Some _, _) -> acc
+        | (None, _) ->
+          let regex = regexp_of_token curr_tok in
+          if Str.string_match regex str start_index
+          then
+            let matched_str = Str.matched_string str in
+            let len = String.length matched_str in
+            (Some (parametrize_tok matched_str curr_tok), len)
+          else (None, -1)
+      ) (None, -1) precedence
+    in
+    match token with
+    | (Some tok, len) -> tokenize_rec str (start_index + len) (tok::tok_lst)
+    | (None, _) ->
+        failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
+
+let tokenize str =
+  tokenize_rec str 0 []
+`;
+
+let has_tag_fn = () => {
+  let match = tokens
+  .filter(el => {
+    return el.tag != undefined;
+  })
+  .map(el => {
+    let pattern = el.parameter != undefined ? ' _, ' : ', ';
+    return `  | (${el.name}${pattern}"${el.tag}")`
+  })
+  .join("\n");
+  return `let has_tag tok tag = match (tok, tag) with\n${match} -> true
+  | _ -> false\n`;
+};
+
+let token_to_string_fn = () => {
+  let match = tokens.map(el => {
+    if (el.parameter != undefined) {
+      return `  | ${el.name} _ -> "${el.name}"\n`
+    } else {
+      return `  | ${el.name} -> "${el.name}"\n`
+    }
+  }).join("");
+  return `let token_to_string = function\n${match}`;
+}
+
+// Write to grammar files
+let header =
+  "(* DO NOT UPDATE THIS FILE! *)\n" +
+  "(* Update grammar.json and then run make grammar! *)\n";
+
+let grammar_text =
+  header + "\n" +
+  token_to_varid_fn() + "\n" +
+  rules_lst() + "\n" +
+  start_variable_int() + "\n" +
+  num_tokens_int() + "\n" +
+  num_variables_int() + "\n" +
+  auto_generated_variable() + "\n";
+
+fs.writeFile('grammar.ml', grammar_text, (err) => {
+    if (err) throw err;
+    console.log('Updated grammar.ml');
+});
+
+// Write to tokenizer interface file
+let token_mli_text =
+  header + "\n" +
+  token_decl() + "\n" +
+  tokenize_sig();
+
+fs.writeFile('tokenizer.mli', token_mli_text, (err) => {
+    if (err) throw err;
+    console.log('Updated tokenizer.mli');
+});
+
+// Write to tokenizer file
+let token_text =
+  header + "\n" +
+  token_decl() + "\n" +
+  regexp_of_token_fn() + "\n" +
+  precedence_arr() + "\n" +
+  parametrize_tok_fn() + "\n" +
+  tokenize_impl + "\n" +
+  has_tag_fn() + "\n" +
+  token_to_string_fn();
+
+fs.writeFile('tokenizer.ml', token_text, (err) => {
+    if (err) throw err;
+    console.log('Updated tokenizer.ml');
+});

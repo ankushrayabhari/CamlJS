@@ -10,13 +10,13 @@ EXEC=camljs
 
 default: bin
 
-build:
+build: grammar
 	$(OCAMLBUILD) $(OBJECTS)
 
 bin: build
 	$(OCAMLBUILD) $(MAIN) && mv $(MAIN) $(EXEC)
 
-test:
+test: grammar
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
 test-debug:
@@ -26,7 +26,7 @@ test-debug:
 docs: docs-public docs-private
 
 grammar:
-	node converter.js > grammar.ml
+	node converter.js
 
 docs-public: build
 	mkdir -p doc.public
@@ -42,3 +42,4 @@ docs-private: build
 clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private
+	rm -rf grammar.ml tokenizer.ml tokenizer.mli

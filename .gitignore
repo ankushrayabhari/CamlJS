@@ -13,6 +13,9 @@ doc.private
 _build
 camljs
 temp.ml
+grammar.ml
+tokenizer.ml
+tokenizer.mli
 
 # temporary files
 *.swp

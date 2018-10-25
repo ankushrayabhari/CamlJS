@@ -2,15 +2,18 @@
   "tokens": [
     {
       "name": "NotEqual",
-      "regex": "<>"
+      "regex": "<>",
+      "tag": "infix"
     },
     {
       "name": "GreaterThanOrEqual",
-      "regex": ">="
+      "regex": ">=",
+      "tag": "infix"
     },
     {
       "name": "LessThanOrEqual",
-      "regex": "<="
+      "regex": "<=",
+      "tag": "infix"
     },
     {
       "name": "FunctionArrow",
@@ -18,35 +21,43 @@
     },
     {
       "name": "Negation",
-      "regex": "~-"
+      "regex": "~-",
+      "tag": "prefix"
     },
     {
       "name": "Plus",
-      "regex": "\\+"
+      "regex": "\\+",
+      "tag": "infix"
     },
     {
       "name": "Minus",
-      "regex": "-"
+      "regex": "-",
+      "tag": "infix"
     },
     {
       "name": "Times",
-      "regex": "\\*"
+      "regex": "\\*",
+      "tag": "infix"
     },
     {
       "name": "Divide",
-      "regex": "/"
+      "regex": "/",
+      "tag": "infix"
     },
     {
       "name": "GreaterThan",
-      "regex": ">"
+      "regex": ">",
+      "tag": "infix"
     },
     {
       "name": "LessThan",
-      "regex": "<"
+      "regex": "<",
+      "tag": "infix"
     },
     {
       "name": "Equal",
-      "regex": "="
+      "regex": "=",
+      "tag": "infix"
     },
     {
       "name": "LParen",
