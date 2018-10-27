@@ -521,6 +521,45 @@ let ast_converter_tests = Ast.[
         ModuleAccessor ("List", "empty_size")
       )
     ));
+
+  make_ast_converter_test
+      "let-rec-in fn (factorial) featuring if-else-then"
+      "let rec fact x = if x=1 then 1 else x * fact(x-1) in fact 3"
+      (LetBinding (
+          FunctionAssignment (
+            "fact",
+            true,
+            [ValueName "x";],
+            Ternary (
+              InfixOp(
+                VarName "x",
+                Equal,
+                Constant (Int 1)
+              ),
+              Constant (Int 1),
+              Some (
+                InfixOp(
+                  VarName "x",
+                  Times,
+                  FunctionCall(
+                    VarName "fact",
+                    ParenExpr (
+                      InfixOp(
+                        VarName "x",
+                        Minus,
+                        Constant (Int 1)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+           ),
+          FunctionCall(
+            VarName "fact",
+            Constant (Int 3)
+          )
+        ));
 ]
 
 let suite = "test suite"  >::: List.flatten [

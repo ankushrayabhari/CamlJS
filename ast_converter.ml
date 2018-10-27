@@ -26,28 +26,41 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
-let rec get_params one_or_more_params acc =
-  match one_or_more_params with
-  | Token (Token.LowercaseIdent p) ->
-      (ValueName p)::acc
-  | Node [params_ptree; Token (Token.LowercaseIdent p)] ->
-      get_params params_ptree ((ValueName p)::acc)
-  | _ -> failwith "not a valid oneOrMorePatterns"
-
 let convert_pattern = function
   | Token (Token.LowercaseIdent ident_name) ->
     ValueName (ident_name)
   | _ -> failwith "not a valid pattern"
 
-let rec convert_let_binding = function
+let rec get_patterns one_or_more_patterns acc =
+  match one_or_more_patterns with
+  | Node [params_ptree; pat] ->
+    get_patterns params_ptree ((convert_pattern pat)::acc)
+  | Token _ as single -> convert_pattern single::acc
+  | _ -> failwith "not a valid oneOrMorePatterns"
+
+let rec convert_let_binding is_rec = function
+  | Node [
+      Token(Token.LowercaseIdent f_name);
+      one_or_more_pattern;
+      Token(Token.Equal);
+      let_expr;
+    ] ->
+      FunctionAssignment (
+        f_name,
+        is_rec,
+        get_patterns one_or_more_pattern [],
+        convert_expr let_expr
+      )
+
   | Node [
       bound_to_pattern;
       Token (Token.Equal);
       let_expr;
-    ] -> VarAssignment (
-      convert_pattern bound_to_pattern,
-      convert_expr let_expr
-    )
+    ] ->
+      VarAssignment (
+        convert_pattern bound_to_pattern,
+        convert_expr let_expr
+      )
   | _ -> failwith "not a valid convert let binding"
 
 and convert_one_or_more_if_expr acc = function
@@ -115,27 +128,41 @@ and convert_expr = function
       )
 
   | Node [
-      Token (Token.Fun);
-      one_or_more_params;
-      Token (Token.FunctionArrow);
-      anon_func_expr
+      Token(Token.Fun);
+      one_or_more_patterns;
+      Token(Token.FunctionArrow);
+      anon_func_expr;
     ] ->
-    Function (get_params one_or_more_params [], convert_expr anon_func_expr)
+      Function (
+        get_patterns one_or_more_patterns [],
+        convert_expr anon_func_expr
+      )
 
   | Node [
       expr1;
       Token (Token.SemiColon);
       expr2;
-    ] -> Sequential (convert_expr expr1, convert_expr expr2)
+    ] ->
+      Sequential (convert_expr expr1, convert_expr expr2)
 
   | Node [
-      Token (Token.Let);
+      Token(Token.Let);
+      Token(Token.Rec);
+      let_binding;
+      Token(Token.In);
+      let_expr;
+    ] -> LetBinding (
+      convert_let_binding true let_binding,
+      convert_expr let_expr
+    )
+
+  | Node [
+      Token(Token.Let);
       let_binding;
       Token (Token.In);
       let_expr;
-    ] -> LetBinding (
-      convert_let_binding let_binding,
-      convert_expr let_expr)
+    ] ->
+      LetBinding (convert_let_binding false let_binding, convert_expr let_expr)
 
   | Node [
       fun_expr;
