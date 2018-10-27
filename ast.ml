@@ -60,7 +60,8 @@ let unbox_param acc param =
   | Token (Tokenizer.LowercaseIdent p) -> (ValueName (LowercaseIdent p))::acc
   | _ -> failwith "not a valid parameter"
 
-let rec convert_expr t = match t with
+
+let rec convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
 
   | Node [
