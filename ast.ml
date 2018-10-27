@@ -63,13 +63,13 @@ let rec get_params one_or_more_params acc =
 
 let rec convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
-  
+
   | Node [
       Token(Tokenizer.LParen);
       expr;
       Token(Tokenizer.RParen);
     ] ->
-    ParenExpr (convert_expr expr)
+      ParenExpr (convert_expr expr)
 
   | Node [
       Token(pre);
