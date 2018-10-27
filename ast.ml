@@ -61,12 +61,14 @@ let convert_pattern = function
   | _ -> failwith "not a valid pattern"
 
 let rec convert_let_binding = function
-  | Node [bound_to_pattern;
-          Token(Tokenizer.Equal);
-          let_expr;
-         ] -> VarAssignment (convert_pattern bound_to_pattern,
-                             convert_expr let_expr)
-
+  | Node [
+      bound_to_pattern;
+      Token(Tokenizer.Equal);
+      let_expr;
+    ] -> VarAssignment (
+      convert_pattern bound_to_pattern,
+      convert_expr let_expr
+    )
   | _ -> failwith "not a valid convert let binding"
 
 
@@ -129,9 +131,9 @@ and convert_expr = function
       let_binding;
       Token(Tokenizer.In);
       let_expr;
-    ] -> LetBinding
-           (convert_let_binding let_binding,
-            convert_expr let_expr)
+    ] -> LetBinding (
+      convert_let_binding let_binding,
+      convert_expr let_expr)
 
   | Token (Tokenizer.LowercaseIdent n) ->
       VarName (LowercaseIdent n)
