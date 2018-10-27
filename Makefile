@@ -20,8 +20,8 @@ bin: build
 test: grammar
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
-test-debug:
-	$(OCAMLBUILD) -tag 'debug' $(TEST) && ocamldebug ./$(TEST)
+temp-debug:
+	$(OCAMLBUILD) -tag 'debug' temp.byte && ocamldebug ./temp.byte
 
 docs: docs-public docs-private
 
