@@ -63,20 +63,20 @@ let rec convert_expr = function
       expr;
       Token(Tokenizer.RParen);
     ] ->
-      ParenExpr (convert_expr expr)
+    ParenExpr (convert_expr expr)
 
   | Node [
       Token(pre);
       expr;
     ] when Tokenizer.has_tag pre "prefix" ->
-      PrefixOp (convert_prefix pre, convert_expr expr)
+    PrefixOp (convert_prefix pre, convert_expr expr)
 
   | Node [
       expr1;
       Token(infix);
       expr2;
     ] when Tokenizer.has_tag infix "infix" ->
-      InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
+    InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
 
   | Node [
       Token(Tokenizer.If);
@@ -84,7 +84,7 @@ let rec convert_expr = function
       Token(Tokenizer.Then);
       then_expr;
     ] ->
-      Ternary (convert_expr cond_expr, convert_expr then_expr, None)
+    Ternary (convert_expr cond_expr, convert_expr then_expr, None)
 
   | Node [
       Token(Tokenizer.If);
@@ -94,14 +94,19 @@ let rec convert_expr = function
       Token(Tokenizer.Else);
       else_expr;
     ] ->
-      Ternary (
-        convert_expr cond_expr,
-        convert_expr then_expr,
-        Some (convert_expr else_expr)
-      )
+    Ternary (
+      convert_expr cond_expr,
+      convert_expr then_expr,
+      Some (convert_expr else_expr)
+    )
 
   | Node (Token(Tokenizer.Fun)::t) ->
-      failwith "anonymous functions not implemented"
+    let rec fun_w_params acc tail = begin
+      match tail with
+      | Token (Tokenizer.FunctionArrow)::fun_body::empty when empty=[] -> Function (acc, convert_expr fun_body)
+      | Token (Tokenizer.LowercaseIdent p)::rest -> fun_w_params ((ValueName (LowercaseIdent p))::acc) rest
+      | _ -> failwith "not valid anonymous fun"    
+    end in fun_w_params [] t
 
   | Node [
       expr1;
@@ -110,16 +115,16 @@ let rec convert_expr = function
     ] -> Sequential (convert_expr expr1, convert_expr expr2)
 
   | Node (Token(Tokenizer.Let)::t) ->
-      failwith "let binding not implemented"
+    failwith "let binding not implemented"
 
   | Token (Tokenizer.LowercaseIdent n) ->
-      VarName (LowercaseIdent n)
+    VarName (LowercaseIdent n)
 
   | Node [
       fun_expr;
       arg_expr;
     ] ->
-      FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
+    FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
 
   | _ -> failwith "not a valid expression"
 
