@@ -229,15 +229,13 @@ let auto_generated_variable () =
   sprintf "let auto_generated_variable var = var > %d\n" last_variable;;
 
 let token_decl () =
-  let token_types =
-    List.map (fun el ->
-      match el.parameter with
-      | Some p -> sprintf "  | %s of %s\n" el.name p
-      | None -> sprintf "  | %s\n" el.name
-    ) tokens_in_order
-    |> String.concat ""
-  in
-  sprintf "type token =\n%s" token_types;;
+  List.map (fun el ->
+    match el.parameter with
+    | Some p -> sprintf "  | %s of %s\n" el.name p
+    | None -> sprintf "  | %s\n" el.name
+  ) tokens_in_order
+  |> String.concat ""
+  |> sprintf "type token =\n%s";;
 
 let tokenize_sig () = {|
 val tokenize : string -> token list
@@ -248,45 +246,37 @@ val token_to_string : token -> string
 |};;
 
 let regexp_of_token_fn () =
-  let match_cases =
-    List.map (fun el ->
-      let output_regex = Str.global_replace (Str.regexp "\\") {|\\\\|} el.regex in
-      match el.parameter with
-      | Some p -> sprintf "  | %s _ -> \"%s\"\n" el.name output_regex
-      | None -> sprintf "  | %s -> \"%s\"\n" el.name output_regex
-    ) tokens_in_order
-    |> String.concat ""
-  in
-  sprintf
-    "let regexp_of_token tok = Str.regexp (match tok with\n%s)\n"
-    match_cases;;
+  List.map (fun el ->
+    let output_regex = Str.global_replace (Str.regexp "\\") {|\\\\|} el.regex in
+    match el.parameter with
+    | Some p -> sprintf "  | %s _ -> \"%s\"\n" el.name output_regex
+    | None -> sprintf "  | %s -> \"%s\"\n" el.name output_regex
+  ) tokens_in_order
+  |> String.concat ""
+  |> sprintf "let regexp_of_token tok = Str.regexp (match tok with\n%s)\n";;
 
 let precedence_arr () =
-  let precedence =
-    List.map (fun el ->
-      match el.parameter with
-      | Some "int" -> sprintf "  %s 0;\n" el.name
-      | Some "string" -> sprintf "  %s \"\";\n" el.name
-      | _ -> sprintf "  %s;\n" el.name
-    ) tokens_in_order
-    |> String.concat ""
-  in
-  sprintf "let precedence = [\n%s]\n" precedence;;
+  List.map (fun el ->
+    match el.parameter with
+    | Some "int" -> sprintf "  %s 0;\n" el.name
+    | Some "string" -> sprintf "  %s \"\";\n" el.name
+    | _ -> sprintf "  %s;\n" el.name
+  ) tokens_in_order
+  |> String.concat ""
+  |> sprintf "let precedence = [\n%s]\n";;
 
 let parametrize_tok_fn () =
-  let cases =
-    List.filter (fun el -> el.parameter != None) tokens_in_order
-    |> List.map (fun el ->
-        match el.parameter with
-        | Some "int" ->
-          sprintf "  | %s _ -> %s (int_of_string str)\n" el.name el.name
-        | Some "string" ->
-          sprintf "  | %s _ -> %s str\n" el.name el.name
-        | _ -> failwith "should not be called on None"
-      )
-    |> String.concat ""
-  in
-  sprintf "let parametrize_tok str = function\n%s  | t -> t\n" cases;;
+  List.filter (fun el -> el.parameter != None) tokens_in_order
+  |> List.map (fun el ->
+      match el.parameter with
+      | Some "int" ->
+        sprintf "  | %s _ -> %s (int_of_string str)\n" el.name el.name
+      | Some "string" ->
+        sprintf "  | %s _ -> %s str\n" el.name el.name
+      | _ -> failwith "should not be called on None"
+    )
+  |> String.concat ""
+  |> sprintf "let parametrize_tok str = function\n%s  | t -> t\n";;
 
 let tokenize_impl = {|
 let rec tokenize_rec str start tok_lst =
@@ -317,33 +307,29 @@ let tokenize str =
 |};;
 
 let has_tag_fn () =
-  let cases =
-    List.filter (fun el -> el.tag != None) tokens_in_order
-    |> List.map (fun el ->
-        let pattern = match el.parameter with
-          | Some _ -> " _, "
-          | None -> ", "
-        in
-        match el.tag with
-        | Some tag -> sprintf "  | (%s%s\"%s\")" el.name pattern tag
-        | None -> failwith "should not be called with None"
-      )
-    |> String.concat "\n"
-  in
-  sprintf
+  List.filter (fun el -> el.tag != None) tokens_in_order
+  |> List.map (fun el ->
+      let pattern = match el.parameter with
+        | Some _ -> " _, "
+        | None -> ", "
+      in
+      match el.tag with
+      | Some tag -> sprintf "  | (%s%s\"%s\")" el.name pattern tag
+      | None -> failwith "should not be called with None"
+    )
+  |> String.concat "\n"
+  |> sprintf
     "let has_tag tok tag = match (tok, tag) with\n%s -> true\n  | _ -> false\n"
-    cases;;
+  ;;
 
 let token_to_string_fn () =
-  let cases =
-    List.map (fun el ->
-      match el.parameter with
-      | Some _ -> sprintf "  | %s _ -> \"%s\"\n" el.name el.name
-      | None -> sprintf "  | %s -> \"%s\"\n" el.name el.name
-    ) tokens_in_order
-    |> String.concat ""
-  in
-  sprintf "let token_to_string = function\n%s" cases;;
+  List.map (fun el ->
+    match el.parameter with
+    | Some _ -> sprintf "  | %s _ -> \"%s\"\n" el.name el.name
+    | None -> sprintf "  | %s -> \"%s\"\n" el.name el.name
+  ) tokens_in_order
+  |> String.concat ""
+  |> sprintf "let token_to_string = function\n%s";;
 
 let header = {|(* DO NOT UPDATE THIS FILE! *)
 (* Update grammar.json and then run make grammar! *)
