@@ -50,9 +50,20 @@ let parse_grammar json =
   let variables = get_variables json in
   (tokens, variables)
 
+let parse_args () =
+  try
+    Sys.argv.(1)
+  with _ ->
+    print_endline "Invalid arguments: missing input file";
+    exit 0
+
 (* Parse grammar into tokens and variables. *)
 let (tokens_in_order, variables_in_order) =
-  Yojson.Basic.from_file "grammar.json" |> parse_grammar
+  try
+    Yojson.Basic.from_file (parse_args ()) |> parse_grammar
+  with Sys_error _ ->
+    print_endline "Invalid arguments: invalid input file";
+    exit 1
 
 let tokens = tokens_in_order |> to_hash |> fst
 let variables = variables_in_order |> to_hash |> fst

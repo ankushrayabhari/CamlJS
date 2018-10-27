@@ -26,7 +26,7 @@ test-debug:
 docs: docs-public docs-private
 
 grammar:
-	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER)
+	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER) grammar.json
 
 docs-public: build
 	mkdir -p doc.public
