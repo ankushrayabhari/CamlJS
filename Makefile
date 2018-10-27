@@ -7,6 +7,7 @@ MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 PKGS=oUnit,str
 EXEC=camljs
+CONVERTER=converter.byte
 
 default: bin
 
@@ -26,7 +27,7 @@ test-debug:
 docs: docs-public docs-private
 
 grammar:
-	node converter.js
+	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER)
 
 docs-public: build
 	mkdir -p doc.public
