@@ -27,11 +27,7 @@ let parse_variable (n, p) = {
   productions =
     p
     |> to_list
-    |> List.map (fun el ->
-        el
-        |> to_list
-        |> List.map to_string
-      )
+    |> List.map (fun el -> el |> to_list |> List.map to_string)
 }
 
 let get_tokens grammar_json =
@@ -102,7 +98,6 @@ let add_variable var_1_name var_2_name =
       var_1_name ^ "_" ^
       var_2_name ^ "_" ^
       (string_of_int !num_variables);
-
     productions = [[var_1_name; var_2_name]];
   } in
   Hashtbl.add variables (Hashtbl.length variables) new_var;
@@ -194,7 +189,7 @@ let token_to_varid_fn () =
 let rules_lst () =
   let rules = ref "" in
   for var_id = start_variable to !num_variables - 1 do
-    let rule = get_productions var_id
+    get_productions var_id
     |> List.filter (fun el -> not (is_token_production el))
     |> List.map (fun prod ->
         List.map get_variable_id prod
@@ -211,8 +206,8 @@ let rules_lst () =
           endline
       )
     |> String.concat ""
-    |> (fun rule -> sprintf "\n  [%s]; (* %d *)" rule var_id) in
-    rules := !rules ^ rule
+    |> (fun rule -> sprintf "\n  [%s]; (* %d *)" rule var_id)
+    |> (fun rule -> rules := !rules ^ rule)
   done;
   sprintf "let rules = [%s\n]\n" !rules;;
 
