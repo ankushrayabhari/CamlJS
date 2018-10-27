@@ -22,7 +22,6 @@ test: grammar
 
 test-debug:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ocamldebug ./$(TEST)
-.PHONY: test, test-debug, bin
 
 docs: docs-public docs-private
 
@@ -44,3 +43,5 @@ clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private
 	rm -rf grammar.ml tokenizer.ml tokenizer.mli
+
+.PHONY: test, test-debug, bin, grammar
