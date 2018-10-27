@@ -55,6 +55,14 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
+let rec get_params one_or_more_params acc =
+  match one_or_more_params with
+  | Token (Tokenizer.LowercaseIdent p) ->
+      (ValueName (LowercaseIdent p))::acc
+  | Node [params_ptree; Token (Tokenizer.LowercaseIdent p)] ->
+      get_params params_ptree (((ValueName (LowercaseIdent p)))::acc)
+  | _ -> failwith "not a valid oneOrMorePatterns"
+
 let convert_pattern = function
   | Token(Tokenizer.LowercaseIdent ident_name) ->
     ValueName (LowercaseIdent (ident_name))
@@ -117,8 +125,13 @@ and convert_expr = function
         Some (convert_expr else_expr)
       )
 
-  | Node (Token(Tokenizer.Fun)::t) ->
-      failwith "anonymous functions not implemented"
+  | Node [
+      Token(Tokenizer.Fun);
+      one_or_more_params;
+      Token(Tokenizer.FunctionArrow);
+      anon_func_expr
+    ] ->
+    Function (get_params one_or_more_params [], convert_expr anon_func_expr)
 
   | Node [
       expr1;
