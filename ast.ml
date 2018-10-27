@@ -103,8 +103,10 @@ let rec convert_expr = function
   | Node (Token(Tokenizer.Fun)::t) ->
     let rec fun_w_params acc tail = begin
       match tail with
-      | Token (Tokenizer.FunctionArrow)::fun_body::empty when empty=[] -> Function (acc, convert_expr fun_body)
-      | Token (Tokenizer.LowercaseIdent p)::rest -> fun_w_params ((ValueName (LowercaseIdent p))::acc) rest
+      | Token (Tokenizer.FunctionArrow)::fun_body::empty when empty=[] -> 
+        Function (acc, convert_expr fun_body)
+      | Token (Tokenizer.LowercaseIdent p)::rest -> 
+        fun_w_params ((ValueName (LowercaseIdent p))::acc) rest
       | _ -> failwith "not valid anonymous fun"    
     end in fun_w_params [] t
 
