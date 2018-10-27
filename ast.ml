@@ -70,20 +70,20 @@ let rec convert_expr = function
       Token(Tokenizer.RParen);
     ] ->
     ParenExpr (convert_expr expr)
-  
+
   | Node [
       Token(pre);
       expr;
     ] when Tokenizer.has_tag pre "prefix" ->
       PrefixOp (convert_prefix pre, convert_expr expr)
-  
+
   | Node [
       expr1;
       Token(infix);
       expr2;
     ] when Tokenizer.has_tag infix "infix" ->
       InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
-  
+
   | Node [
       Token(Tokenizer.If);
       cond_expr;
@@ -91,7 +91,7 @@ let rec convert_expr = function
       then_expr;
     ] ->
       Ternary (convert_expr cond_expr, convert_expr then_expr, None)
-  
+
   | Node [
       Token(Tokenizer.If);
       cond_expr;
@@ -105,7 +105,7 @@ let rec convert_expr = function
         convert_expr then_expr,
         Some (convert_expr else_expr)
       )
-  
+
   | Node [
       Token(Tokenizer.Fun);
       one_or_more_params;
@@ -113,7 +113,7 @@ let rec convert_expr = function
       anon_func_expr
     ] ->
     Function (get_params one_or_more_params [], convert_expr anon_func_expr)
-  
+
   | Node [
       expr1;
       Token(Tokenizer.SemiColon);
