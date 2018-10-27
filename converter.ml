@@ -167,7 +167,10 @@ let rec remove_unit_productions var_id =
   set_productions var_id new_productions;;
 
 remove_large_productions ();;
-remove_unit_productions start_variable;;
+
+for var_id = start_variable to last_variable do
+  remove_unit_productions var_id
+done;;
 
 let token_to_varid_fn () =
   let tokenToVarId = Hashtbl.create (Hashtbl.length tokens) in

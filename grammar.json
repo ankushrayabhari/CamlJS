@@ -116,17 +116,25 @@
       ["Int"],
       ["LetExpr"]
     ],
+    "Pattern": [
+      ["LowercaseIdent"]
+    ],
+    "LetBinding": [
+      ["Pattern", "Equal", "LetExpr"],
+      ["LowercaseIdent", "OneOrMorePattern", "Equal", "LetExpr"]
+    ],
     "LetExpr": [
-      ["Let", "LowercaseIdent", "Equal", "LetExpr", "In", "AnonFuncExpr"],
+      ["Let", "LetBinding", "In", "LetExpr"],
+      ["Let", "Rec", "LetBinding", "In", "LetExpr"],
       ["AnonFuncExpr"]
     ],
     "AnonFuncExpr": [
-      ["Fun", "OneOrMoreLowercaseIdent", "FunctionArrow", "AnonFuncExpr"],
+      ["Fun", "OneOrMorePattern", "FunctionArrow", "AnonFuncExpr"],
       ["SemiColonExpr"]
     ],
-    "OneOrMoreLowercaseIdent": [
-      ["OneOrMoreLowercaseIdent", "LowercaseIdent"],
-      ["LowercaseIdent"]
+    "OneOrMorePattern": [
+      ["OneOrMorePattern", "Pattern"],
+      ["Pattern"]
     ],
     "SemiColonExpr": [
       ["IfExpr", "SemiColon", "SemiColonExpr"],
