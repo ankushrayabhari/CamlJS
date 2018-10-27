@@ -55,7 +55,22 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
-let rec convert_expr = function
+let convert_pattern = function
+  | Token(Tokenizer.LowercaseIdent ident_name) ->
+    ValueName (LowercaseIdent (ident_name))
+  | _ -> failwith "not a valid pattern"
+
+let rec convert_let_binding = function
+  | Node [bound_to_pattern;
+          Token(Tokenizer.Equal);
+          let_expr;
+         ] -> VarAssignment (convert_pattern bound_to_pattern,
+                             convert_expr let_expr)
+
+  | _ -> failwith "not a valid convert let binding"
+
+
+and convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
 
   | Node [
@@ -109,8 +124,14 @@ let rec convert_expr = function
       expr2;
     ] -> Sequential (convert_expr expr1, convert_expr expr2)
 
-  | Node (Token(Tokenizer.Let)::t) ->
-      failwith "let binding not implemented"
+  | Node [
+      Token(Tokenizer.Let);
+      let_binding;
+      Token(Tokenizer.In);
+      let_expr;
+    ] -> LetBinding
+           (convert_let_binding let_binding,
+            convert_expr let_expr)
 
   | Token (Tokenizer.LowercaseIdent n) ->
       VarName (LowercaseIdent n)
