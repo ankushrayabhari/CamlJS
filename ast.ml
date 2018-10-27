@@ -60,6 +60,11 @@ let unbox_param acc param =
   | Token (Tokenizer.LowercaseIdent p) -> (ValueName (LowercaseIdent p))::acc
   | _ -> failwith "not a valid parameter"
 
+let get_params one_or_more_params =
+  match one_or_more_params with
+  | Token (Tokenizer.LowercaseIdent p) -> [ValueName (LowercaseIdent p)]
+  | Node params_ptree -> List.rev (List.fold_left unbox_param [] params_ptree)
+  | _ -> failwith "not a valid oneOrMoreParams"
 
 let rec convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
@@ -112,12 +117,7 @@ let rec convert_expr = function
       Token(Tokenizer.FunctionArrow);
       anon_func_expr
     ] ->
-    let params =
-      match one_or_more_params with
-      | Token (Tokenizer.LowercaseIdent p) -> [ValueName (LowercaseIdent p)]
-      | Node params_ptree -> List.rev (List.fold_left unbox_param [] params_ptree)
-      | _ -> failwith "not a valid oneOrMoreParams"
-    in Function (params, convert_expr anon_func_expr)
+    Function (get_params one_or_more_params, convert_expr anon_func_expr)
 
   | Node [
       expr1;
