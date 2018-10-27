@@ -55,6 +55,11 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
+let unbox_param acc param =
+  match param with
+  | Token (Tokenizer.LowercaseIdent p) -> (ValueName (LowercaseIdent p))::acc
+  | _ -> failwith "not a valid parameter"
+
 let rec convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
 
@@ -101,14 +106,12 @@ let rec convert_expr = function
     )
 
   | Node (Token(Tokenizer.Fun)::t) ->
-    let rec fun_w_params acc tail = begin
-      match tail with
-      | Token (Tokenizer.FunctionArrow)::fun_body::empty when empty=[] -> 
-        Function (acc, convert_expr fun_body)
-      | Token (Tokenizer.LowercaseIdent p)::rest -> 
-        fun_w_params ((ValueName (LowercaseIdent p))::acc) rest
-      | _ -> failwith "not valid anonymous fun"    
-    end in fun_w_params [] t
+    begin match t with
+      | (Node params_ptree)::_::anon_func_expr::empty when empty=[] -> 
+        let params = List.fold_left unbox_param [] params_ptree in
+        Function (List.rev params, convert_expr anon_func_expr)
+      | _ -> failwith "invalid anonymous function"
+    end
 
   | Node [
       expr1;
