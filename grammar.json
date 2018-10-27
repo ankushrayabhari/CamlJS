@@ -165,11 +165,6 @@
       "regex": "[0-9]+"
     },
     {
-      "name": "Float",
-      "parameter": "float",
-      "regex": "[0-9]+.[0-9]*"
-    },
-    {
       "name": "LowercaseIdent",
       "parameter": "string",
       "regex": "\\([a-z]\\|_\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
