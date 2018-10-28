@@ -1,5 +1,5 @@
 type parse_tree =
-  | Token of Tokenizer.token
+  | Token of Token.t
   | Node of parse_tree list
 
-val parse : Tokenizer.token array -> parse_tree
+val parse : Token.t array -> parse_tree

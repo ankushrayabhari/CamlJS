@@ -1,5 +1,5 @@
 type parse_tree =
-  | Token of Tokenizer.token
+  | Token of Token.t
   | Node of parse_tree list
 
 let iterate_over_productions f =

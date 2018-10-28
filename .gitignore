@@ -16,6 +16,7 @@ temp.ml
 grammar.ml
 tokenizer.ml
 tokenizer.mli
+token.mli
 
 # temporary files
 *.swp

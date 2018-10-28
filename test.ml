@@ -6,7 +6,7 @@ let make_tokenizer_test name program expected_value =
     assert_equal expected_value tokenized_program
   )
 
-let tokenizer_tests = Tokenizer.[
+let tokenizer_tests = Token.[
   make_tokenizer_test
     "let assign test"
     "let x = 1 in x + 100"

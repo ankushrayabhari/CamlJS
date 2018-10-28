@@ -1,4 +1,4 @@
-val token_to_varid : Tokenizer.token -> int list
+val token_to_varid : Token.t -> int list
 
 val rules : (int * int) list list
 

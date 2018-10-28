@@ -198,7 +198,7 @@ let token_to_varid_fn () =
       )
   ) tokens_in_order
   |> String.concat ""
-  |> sprintf "let token_to_varid = Tokenizer.(function\n%s)\n";;
+  |> sprintf "let token_to_varid = Token.(function\n%s)\n";;
 
 let rules_lst () =
   let rules = ref "" in
@@ -244,14 +244,14 @@ let token_decl () =
     | None -> sprintf "  | %s\n" el.name
   ) tokens_in_order
   |> String.concat ""
-  |> sprintf "type token =\n%s";;
+  |> sprintf "type t =\n%s";;
 
 let tokenize_sig () = {|
-val tokenize : string -> token list
+val tokenize : string -> Token.t list
 
-val has_tag : token -> string -> bool
+val has_tag : Token.t -> string -> bool
 
-val token_to_string : token -> string
+val token_to_string : Token.t -> string
 |};;
 
 let regexp_of_token_fn () =
@@ -362,15 +362,19 @@ let grammar_text =
     (auto_generated_variable ());;
 
 let token_mli_text =
-  sprintf "%s\n%s%s"
+  sprintf "%s\n%s"
     header
-    (token_decl ())
+    (token_decl ());;
+
+let tokenizer_mli_text =
+  sprintf "%s%s"
+    header
     (tokenize_sig ());;
 
-let token_text =
-  sprintf "%s\n%s\n%s\n%s\n%s%s\n%s\n%s"
+let tokenizer_text =
+  sprintf "%s%s\n%s\n%s\n%s%s\n%s\n%s"
     header
-    (token_decl ())
+    "open Token\n"
     (regexp_of_token_fn ())
     (precedence_arr ())
     (parametrize_tok_fn ())
@@ -385,5 +389,6 @@ let write_to_file f txt =
   print_endline (f ^ " updated!");;
 
 write_to_file "grammar.ml" grammar_text;;
-write_to_file "tokenizer.mli" token_mli_text;;
-write_to_file "tokenizer.ml" token_text;;
+write_to_file "token.mli" token_mli_text;;
+write_to_file "tokenizer.mli" tokenizer_mli_text;;
+write_to_file "tokenizer.ml" tokenizer_text;;

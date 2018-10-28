@@ -2,25 +2,25 @@ open Parser
 open Ast
 
 let convert_prefix = function
-  | Tokenizer.Negation -> Negation
+  | Token.Negation -> Negation
   | t -> failwith (
       "prefix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)
     )
 
 let convert_infix = function
-  | Tokenizer.Plus -> Plus
-  | Tokenizer.Minus -> Minus
-  | Tokenizer.Times -> Times
-  | Tokenizer.Divide -> Divide
-  | Tokenizer.GreaterThan -> GreaterThan
-  | Tokenizer.LessThan -> LessThan
-  | Tokenizer.GreaterThanOrEqual -> GreaterThanOrEqual
-  | Tokenizer.LessThanOrEqual -> LessThanOrEqual
-  | Tokenizer.NotEqual -> NotEqual
-  | Tokenizer.Equal -> Equal
-  | Tokenizer.Append -> Append
-  | Tokenizer.Cons -> Cons
+  | Token.Plus -> Plus
+  | Token.Minus -> Minus
+  | Token.Times -> Times
+  | Token.Divide -> Divide
+  | Token.GreaterThan -> GreaterThan
+  | Token.LessThan -> LessThan
+  | Token.GreaterThanOrEqual -> GreaterThanOrEqual
+  | Token.LessThanOrEqual -> LessThanOrEqual
+  | Token.NotEqual -> NotEqual
+  | Token.Equal -> Equal
+  | Token.Append -> Append
+  | Token.Cons -> Cons
   | t -> failwith (
       "infix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)
@@ -28,21 +28,21 @@ let convert_infix = function
 
 let rec get_params one_or_more_params acc =
   match one_or_more_params with
-  | Token (Tokenizer.LowercaseIdent p) ->
+  | Token (Token.LowercaseIdent p) ->
       (ValueName (LowercaseIdent p))::acc
-  | Node [params_ptree; Token (Tokenizer.LowercaseIdent p)] ->
+  | Node [params_ptree; Token (Token.LowercaseIdent p)] ->
       get_params params_ptree (((ValueName (LowercaseIdent p)))::acc)
   | _ -> failwith "not a valid oneOrMorePatterns"
 
 let convert_pattern = function
-  | Token(Tokenizer.LowercaseIdent ident_name) ->
+  | Token(Token.LowercaseIdent ident_name) ->
     ValueName (LowercaseIdent (ident_name))
   | _ -> failwith "not a valid pattern"
 
 let rec convert_let_binding = function
   | Node [
       bound_to_pattern;
-      Token(Tokenizer.Equal);
+      Token(Token.Equal);
       let_expr;
     ] -> VarAssignment (
       convert_pattern bound_to_pattern,
@@ -53,19 +53,19 @@ let rec convert_let_binding = function
 and convert_one_or_more_if_expr acc = function
   | Node [
       one_or_more_expr;
-      Token(Tokenizer.SemiColon);
+      Token(Token.SemiColon);
       expr;
     ] -> convert_one_or_more_if_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
 and convert_expr = function
-  | Token (Tokenizer.Int v) -> Constant (Int v)
-  | Token (Tokenizer.EmptyList) -> Constant (EmptyList)
+  | Token (Token.Int v) -> Constant (Int v)
+  | Token (Token.EmptyList) -> Constant (EmptyList)
 
   | Node [
-      Token(Tokenizer.LParen);
+      Token(Token.LParen);
       expr;
-      Token(Tokenizer.RParen);
+      Token(Token.RParen);
     ] ->
       ParenExpr (convert_expr expr)
 
@@ -83,19 +83,19 @@ and convert_expr = function
       InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
 
   | Node [
-      Token(Tokenizer.If);
+      Token(Token.If);
       cond_expr;
-      Token(Tokenizer.Then);
+      Token(Token.Then);
       then_expr;
     ] ->
       Ternary (convert_expr cond_expr, convert_expr then_expr, None)
 
   | Node [
-      Token(Tokenizer.If);
+      Token(Token.If);
       cond_expr;
-      Token(Tokenizer.Then);
+      Token(Token.Then);
       then_expr;
-      Token(Tokenizer.Else);
+      Token(Token.Else);
       else_expr;
     ] ->
       Ternary (
@@ -105,29 +105,29 @@ and convert_expr = function
       )
 
   | Node [
-      Token(Tokenizer.Fun);
+      Token(Token.Fun);
       one_or_more_params;
-      Token(Tokenizer.FunctionArrow);
+      Token(Token.FunctionArrow);
       anon_func_expr
     ] ->
     Function (get_params one_or_more_params [], convert_expr anon_func_expr)
 
   | Node [
       expr1;
-      Token(Tokenizer.SemiColon);
+      Token(Token.SemiColon);
       expr2;
     ] -> Sequential (convert_expr expr1, convert_expr expr2)
 
   | Node [
-      Token(Tokenizer.Let);
+      Token(Token.Let);
       let_binding;
-      Token(Tokenizer.In);
+      Token(Token.In);
       let_expr;
     ] -> LetBinding (
       convert_let_binding let_binding,
       convert_expr let_expr)
 
-  | Token (Tokenizer.LowercaseIdent n) ->
+  | Token (Token.LowercaseIdent n) ->
       VarName (LowercaseIdent n)
 
   | Node [
@@ -137,15 +137,15 @@ and convert_expr = function
       FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
 
   | Node [
-      Token(Tokenizer.StartList);
+      Token(Token.StartList);
       one_or_more_expr;
-      Token(Tokenizer.EndList);
+      Token(Token.EndList);
     ]
   | Node [
-      Token(Tokenizer.StartList);
+      Token(Token.StartList);
       one_or_more_expr;
-      Token(Tokenizer.SemiColon);
-      Token(Tokenizer.EndList);
+      Token(Token.SemiColon);
+      Token(Token.EndList);
     ] ->
       ListExpr (convert_one_or_more_if_expr [] one_or_more_expr)
 

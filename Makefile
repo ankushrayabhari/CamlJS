@@ -1,7 +1,7 @@
 MODULES=tokenizer grammar parser ast_converter renderer main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
-MLIS=$(MODULES:=.mli) ast.mli
+MLIS=$(MODULES:=.mli) ast.mli token.mli
 TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
