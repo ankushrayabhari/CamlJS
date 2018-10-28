@@ -25,6 +25,28 @@
       "tag": "prefix"
     },
     {
+      "name": "EmptyList",
+      "regex": "\\[\\]"
+    },
+    {
+      "name": "Cons",
+      "regex": "::",
+      "tag": "infix"
+    },
+    {
+      "name": "Append",
+      "regex": "@",
+      "tag": "infix"
+    },
+    {
+      "name": "StartList",
+      "regex": "\\["
+    },
+    {
+      "name": "EndList",
+      "regex": "\\]"
+    },
+    {
       "name": "Plus",
       "regex": "\\+",
       "tag": "infix"
@@ -112,8 +134,6 @@
   ],
   "productions": {
     "Expr": [
-      ["LowercaseIdent"],
-      ["Int"],
       ["LetExpr"]
     ],
     "Pattern": [
@@ -146,12 +166,20 @@
       ["ComparisonExpr"]
     ],
     "ComparisonExpr": [
-      ["ComparisonExpr", "Equal", "AddExpr"],
-      ["ComparisonExpr", "LessThan", "AddExpr"],
-      ["ComparisonExpr", "GreaterThan", "AddExpr"],
-      ["ComparisonExpr", "LessThanOrEqual", "AddExpr"],
-      ["ComparisonExpr", "GreaterThanOrEqual", "AddExpr"],
-      ["ComparisonExpr", "NotEqual", "AddExpr"],
+      ["ComparisonExpr", "Equal", "AppendExpr"],
+      ["ComparisonExpr", "LessThan", "AppendExpr"],
+      ["ComparisonExpr", "GreaterThan", "AppendExpr"],
+      ["ComparisonExpr", "LessThanOrEqual", "AppendExpr"],
+      ["ComparisonExpr", "GreaterThanOrEqual", "AppendExpr"],
+      ["ComparisonExpr", "NotEqual", "AppendExpr"],
+      ["AppendExpr"]
+    ],
+    "AppendExpr": [
+      ["ConsExpr", "Append", "AppendExpr"],
+      ["ConsExpr"]
+    ],
+    "ConsExpr": [
+      ["AddExpr", "Cons", "ConsExpr"],
       ["AddExpr"]
     ],
     "AddExpr": [
@@ -174,8 +202,12 @@
     ],
     "ParenExpr": [
       ["LParen", "Expr", "RParen"],
+      ["Constant"]
+    ],
+    "Constant": [
+      ["Int"],
       ["LowercaseIdent"],
-      ["Int"]
+      ["EmptyList"]
     ]
   }
 }

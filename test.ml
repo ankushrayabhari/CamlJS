@@ -90,7 +90,90 @@ let tokenizer_tests = Tokenizer.[
     "negation expression"
     "~-1"
     [Negation; Int 1;];
+
+  make_tokenizer_test
+    "empty list constant"
+    "[]"
+    [EmptyList];
+
+  make_tokenizer_test
+    "cons operator"
+    "1::[]"
+    [Int 1; Cons; EmptyList];
+
+  make_tokenizer_test
+    "list append operator"
+    "[]@[]"
+    [EmptyList; Append; EmptyList];
+
+  make_tokenizer_test
+    "list literal"
+    "[1;2;4]"
+    [StartList; Int 1; SemiColon; Int 2; SemiColon; Int 4; EndList];
 ]
+
+let make_parser_test name program expected_tree =
+  name >:: (fun _ ->
+    let parse_tr =
+      Tokenizer.tokenize program
+      |> Array.of_list
+      |> Parser.parse
+    in
+    assert_equal expected_tree parse_tr
+  )
+
+let parser_tests = Parser.(Tokenizer.[
+  make_parser_test
+    "append three lists, right associativity"
+    "[]@[]@[]"
+    (Node [
+      Token(EmptyList);
+      Token(Append);
+      Node [
+        Token(EmptyList);
+        Token(Append);
+        Token(EmptyList);
+      ]
+    ]);
+
+  make_parser_test
+    "cons three elemenets, right associativity"
+    "1::2::[]"
+    (Node [
+      Token(Int 1);
+      Token(Cons);
+      Node [
+        Token(Int 2);
+        Token(Cons);
+        Token(EmptyList);
+      ];
+    ]);
+
+  make_parser_test
+    "append, cons precedence over comp expr, under add expr"
+    "1::2+3@3::4 = []"
+    (Node [
+      Node [
+        Node [
+          Token(Int 1);
+          Token(Cons);
+          Node [
+            Token (Int 2);
+            Token (Plus);
+            Token (Int 3);
+          ];
+        ];
+        Token(Append);
+        Node [
+          Token(Int 3);
+          Token(Cons);
+          Token(Int 4);
+        ];
+      ];
+      Token(Equal);
+      Token(EmptyList);
+    ]);
+])
 
 let make_ast_converter_test name program expected_tree =
   name >:: (fun _ ->
@@ -302,6 +385,7 @@ let ast_converter_tests = Ast.[
 
 let suite = "test suite"  >::: List.flatten [
   tokenizer_tests;
+  parser_tests;
   ast_converter_tests;
 ]
 
