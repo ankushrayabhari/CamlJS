@@ -39,7 +39,7 @@ and render_ternary condition_expr true_expr false_expr =
     | None -> "undefined"
     | Some expr -> render_expr expr
   in
-  "((() => " ^ rendered_condition_expr ^ ")() ? " ^
+  "(( " ^ rendered_condition_expr ^ ") ? " ^
   rendered_true_expr ^ " : " ^ rendered_false_expr ^ ")"
 
 and render_prefix_expr prefix expr =
@@ -72,7 +72,7 @@ and render_sequential_expr expr_1 expr_2 =
 and render_let_binding_expr assign expr =
   let rendered_assign = render_let_binding assign in
   let rendered_in_expr = render_expr expr in
-  rendered_assign ^ "{" ^ rendered_in_expr ^ "}"
+  "(() => {" ^ rendered_assign ^ "{ return " ^ rendered_in_expr ^ "}})()"
 
 and render_paren_expr expr =
   let rendered_expr = render_expr expr in
