@@ -67,7 +67,7 @@ and render_infix_expr l_expr op r_expr =
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
   let rendered_2 = render_expr expr_2 in
-  "(() => {" ^ rendered_1 ^ "; return " ^ rendered_2 ^ "})()"
+  "(" ^ rendered_1 ^ ", " ^ rendered_2 ^ ")"
 
 and render_let_binding_expr assign expr =
   let rendered_assign = render_let_binding assign in
