@@ -94,6 +94,10 @@
       "regex": ";"
     },
     {
+      "name": "Period",
+      "regex": "\\."
+    },
+    {
       "name": "If",
       "regex": "if"
     },
@@ -130,6 +134,11 @@
       "name": "LowercaseIdent",
       "parameter": "string",
       "regex": "\\([a-z]\\|_\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
+    },
+    {
+      "name": "CapitalizedIdent",
+      "parameter": "string",
+      "regex": "\\([A-Z]\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
     }
   ],
   "productions": {
@@ -213,6 +222,7 @@
     "Constant": [
       ["Int"],
       ["LowercaseIdent"],
+      ["CapitalizedIdent", "Period", "LowercaseIdent"],
       ["EmptyList"]
     ]
   }

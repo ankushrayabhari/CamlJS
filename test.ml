@@ -110,6 +110,11 @@ let tokenizer_tests = Token.[
     "list literal"
     "[1;2;4]"
     [StartList; Int 1; SemiColon; Int 2; SemiColon; Int 4; EndList];
+
+  make_tokenizer_test
+    "module accessor"
+    "List.length"
+    [CapitalizedIdent "List"; Period; LowercaseIdent "length"];
 ]
 
 let make_parser_test name program expected_tree =
@@ -226,6 +231,18 @@ let parser_tests = Parser.(Tokenizer.[
         ];
         Token (EndList);
       ];
+    ]);
+
+  make_parser_test
+    "module accessor, parse tree"
+    "List.length []"
+    (Node [
+      Node [
+        Token (CapitalizedIdent "List");
+        Token (Period);
+        Token (LowercaseIdent "length");
+      ];
+      Token (EmptyList);
     ]);
 ])
 
