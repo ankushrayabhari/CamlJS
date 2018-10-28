@@ -173,6 +173,60 @@ let parser_tests = Parser.(Tokenizer.[
       Token(Equal);
       Token(EmptyList);
     ]);
+
+  make_parser_test
+    "list literal, no trailing semicolon"
+    "[1;2;3]"
+    (Node [
+      Token(StartList);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (SemiColon);
+          Token (Int 2);
+        ];
+        Token (SemiColon);
+        Token (Int 3);
+      ];
+      Token(EndList);
+    ]);
+
+  make_parser_test
+    "list literal, trailing semicolon"
+    "[1;2;3;]"
+    (Node [
+      Token(StartList);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (SemiColon);
+          Token (Int 2);
+        ];
+        Token (SemiColon);
+        Token (Int 3);
+      ];
+      Token(SemiColon);
+      Token(EndList);
+    ]);
+
+  make_parser_test
+    "list literal, precedence over function calls"
+    "f [~-1; 0]"
+    (Node [
+      Token(LowercaseIdent "f");
+      Node [
+        Token (StartList);
+        Node [
+          Node [
+            Token (Negation);
+            Token (Int 1);
+          ];
+          Token (SemiColon);
+          Token (Int 0);
+        ];
+        Token(EndList);
+      ];
+    ]);
 ])
 
 let make_ast_converter_test name program expected_tree =

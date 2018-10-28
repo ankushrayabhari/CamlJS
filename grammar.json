@@ -202,7 +202,13 @@
     ],
     "ParenExpr": [
       ["LParen", "Expr", "RParen"],
+      ["StartList", "OneOrMoreIfExprWithSemicolon", "EndList"],
+      ["StartList", "OneOrMoreIfExprWithSemicolon", "SemiColon", "EndList"],
       ["Constant"]
+    ],
+    "OneOrMoreIfExprWithSemicolon": [
+      ["IfExpr"],
+      ["OneOrMoreIfExprWithSemicolon", "SemiColon", "IfExpr"]
     ],
     "Constant": [
       ["Int"],
