@@ -29,14 +29,14 @@ let convert_infix = function
 let rec get_params one_or_more_params acc =
   match one_or_more_params with
   | Token (Token.LowercaseIdent p) ->
-      (ValueName (LowercaseIdent p))::acc
+      (ValueName p)::acc
   | Node [params_ptree; Token (Token.LowercaseIdent p)] ->
-      get_params params_ptree (((ValueName (LowercaseIdent p)))::acc)
+      get_params params_ptree ((ValueName p)::acc)
   | _ -> failwith "not a valid oneOrMorePatterns"
 
 let convert_pattern = function
   | Token (Token.LowercaseIdent ident_name) ->
-    ValueName (LowercaseIdent (ident_name))
+    ValueName (ident_name)
   | _ -> failwith "not a valid pattern"
 
 let rec convert_let_binding = function
@@ -60,7 +60,17 @@ and convert_one_or_more_if_expr acc = function
 
 and convert_expr = function
   | Token (Token.Int v) -> Constant (Int v)
+
   | Token (Token.EmptyList) -> Constant (EmptyList)
+
+  | Token (Token.LowercaseIdent n) -> VarName n
+
+  | Node [
+      Token (CapitalizedIdent module_name);
+      Token (Period);
+      Token (LowercaseIdent value_name);
+    ] ->
+      ModuleAccessor (module_name, value_name)
 
   | Node [
       Token (Token.LParen);
@@ -126,9 +136,6 @@ and convert_expr = function
     ] -> LetBinding (
       convert_let_binding let_binding,
       convert_expr let_expr)
-
-  | Token (Token.LowercaseIdent n) ->
-      VarName (LowercaseIdent n)
 
   | Node [
       fun_expr;

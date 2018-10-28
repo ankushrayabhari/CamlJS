@@ -263,11 +263,11 @@ let ast_converter_tests = Ast.[
     "let x = 1 in x + 100"
     (LetBinding (
       VarAssignment (
-        ValueName (LowercaseIdent "x"),
+        ValueName "x",
         Constant (Int 1)
       ),
       InfixOp (
-        VarName (LowercaseIdent "x"),
+        VarName "x",
         Plus,
         Constant (Int 100)
       )
@@ -278,12 +278,12 @@ let ast_converter_tests = Ast.[
     "let x = 1 in x - 100 - 200"
     (LetBinding (
         VarAssignment (
-          ValueName (LowercaseIdent "x"),
+          ValueName "x",
           Constant (Int 1)
         ),
         InfixOp (
           InfixOp (
-            VarName (LowercaseIdent "x"),
+            VarName "x",
             Minus,
             Constant (Int 100)
           ),
@@ -297,12 +297,12 @@ let ast_converter_tests = Ast.[
     "let x = 1 in (x - 100) - (200 - x)"
     (LetBinding (
         VarAssignment (
-          ValueName (LowercaseIdent "x"),
+          ValueName "x",
           Constant (Int 1)
         ),
         InfixOp (
           ParenExpr (InfixOp (
-            VarName (LowercaseIdent "x"),
+            VarName "x",
             Minus,
             Constant (Int 100)
           )),
@@ -310,7 +310,7 @@ let ast_converter_tests = Ast.[
           ParenExpr (InfixOp (
             Constant (Int 200),
             Minus,
-            VarName (LowercaseIdent "x")
+            VarName "x"
           ))
         )));
 
@@ -319,14 +319,14 @@ let ast_converter_tests = Ast.[
     "let x = 1 in (x - 100 - 300) - (200 - x)"
     (LetBinding (
           VarAssignment (
-            ValueName (LowercaseIdent "x"),
+            ValueName "x",
             Constant (Int 1)
           ),
           InfixOp (
             ParenExpr (
               InfixOp (
                 InfixOp (
-                  VarName (LowercaseIdent "x"),
+                  VarName "x",
                   Minus,
                   Constant (Int 100)
                 ),
@@ -338,7 +338,7 @@ let ast_converter_tests = Ast.[
             ParenExpr (InfixOp (
               Constant (Int 200),
               Minus,
-              VarName (LowercaseIdent "x")
+              VarName "x"
             ))
           )
         ));
@@ -348,27 +348,27 @@ let ast_converter_tests = Ast.[
     "let rec x a b c = a * b * c in x 1 2 3"
     (LetBinding (
       FunctionAssignment (
-        LowercaseIdent "x",
+        "x",
         true,
         [
-          ValueName (LowercaseIdent "a");
-          ValueName (LowercaseIdent "b");
-          ValueName (LowercaseIdent "c");
+          ValueName "a";
+          ValueName "b";
+          ValueName "c";
         ],
         InfixOp (
           InfixOp (
-            VarName (LowercaseIdent "a"),
+            VarName "a",
             Times,
-            VarName (LowercaseIdent "b")
+            VarName "b"
           ),
           Times,
-          VarName (LowercaseIdent "c")
+          VarName "c"
         )
       ),
       FunctionCall (
         FunctionCall (
           FunctionCall (
-            VarName (LowercaseIdent "x"),
+            VarName "x",
             Constant (Int 1)
           ),
           Constant (Int 2)
@@ -427,9 +427,9 @@ let ast_converter_tests = Ast.[
     "anonymous function expression"
     "fun a b -> a + b"
     (Function (
-      [ValueName (LowercaseIdent "a"); ValueName (LowercaseIdent "b")],
+      [ValueName "a"; ValueName "b"],
       InfixOp (
-        VarName (LowercaseIdent "a"), Plus, VarName (LowercaseIdent "b")
+        VarName "a", Plus, VarName "b"
       ))
     );
 
@@ -501,6 +501,25 @@ let ast_converter_tests = Ast.[
       ListExpr [
         Constant (Int 3);
       ]
+    ));
+
+  make_ast_converter_test
+    "module accessor, list length of empty list"
+    "List.length []"
+    (FunctionCall (
+      ModuleAccessor ("List", "length"),
+      Constant (EmptyList)
+    ));
+
+  make_ast_converter_test
+    "module accessor, higher precedence than function call, higher than prefix"
+    "List.create ~-List.empty_size"
+    (FunctionCall (
+      ModuleAccessor ("List", "create"),
+      PrefixOp (
+        Negation,
+        ModuleAccessor ("List", "empty_size")
+      )
     ));
 ]
 

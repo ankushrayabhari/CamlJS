@@ -4,19 +4,15 @@ let render_constant = function
   | Int v -> string_of_int v
   | EmptyList -> "[]"
 
-let render_value_name = function
-  | LowercaseIdent s -> s
-
 let render_pattern = function
-  | ValueName value -> render_value_name value
+  | ValueName name -> name
 
 let rec render_let_binding = function
   | VarAssignment (pat, expr) ->
       let var_name = render_pattern pat in
       let assignment_expr = render_expr expr in
       "let " ^ var_name ^ " = " ^ assignment_expr ^  ";"
-  | FunctionAssignment (name_value, _, arg_list, body_expr) ->
-      let function_name = render_value_name name_value in
+  | FunctionAssignment (function_name, _, arg_list, body_expr) ->
       "let " ^ function_name ^ " = " ^ render_fun arg_list body_expr ^  ";"
 
 and render_fun arg_list body_expr =
@@ -90,6 +86,9 @@ and render_list_expr lst =
   |> String.concat ","
   |> (fun lst_body -> "[" ^ lst_body ^ "]")
 
+and render_module_accessor module_name value_name =
+  module_name ^ "." ^ value_name
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
@@ -98,10 +97,11 @@ and render_expr = function
   | Function (arg_list, body_expr) -> render_fun arg_list body_expr
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
-  | VarName (val_name) -> render_value_name val_name
+  | VarName name -> name
   | FunctionCall (expr_1, expr_2) -> render_function_call expr_1 expr_2
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
+  | ModuleAccessor (m, v) -> render_module_accessor m v
 
 let render exp =
   render_expr exp
