@@ -272,7 +272,7 @@ let precedence_arr () =
     | Some "float" -> sprintf "  %s 0.0;\n" el.name
     | Some "bool" -> sprintf "  %s false;\n" el.name
     | None -> sprintf "  %s;\n" el.name
-    | _ -> failwith "should not be called on None"
+    | _ -> failwith "unknown parameter type"
   ) tokens_in_order
   |> String.concat ""
   |> sprintf "let precedence = [\n%s]\n";;
