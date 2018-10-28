@@ -2,10 +2,11 @@ open Parser
 
 type constant =
   | Int of int
+  | EmptyList
 
 type infix_op =
   | Plus | Minus | Divide | Times | GreaterThan | LessThan | GreaterThanOrEqual
-  | LessThanOrEqual | Equal | NotEqual
+  | LessThanOrEqual | Equal | NotEqual | Cons | Append
 
 type prefix_symbol =
   | Negation
@@ -30,6 +31,7 @@ and expr =
   | VarName of value_name
   | FunctionCall of expr * expr
   | ParenExpr of expr
+  | ListExpr of expr list
 type ast = expr
 
 let convert_prefix = function
@@ -50,6 +52,8 @@ let convert_infix = function
   | Tokenizer.LessThanOrEqual -> LessThanOrEqual
   | Tokenizer.NotEqual -> NotEqual
   | Tokenizer.Equal -> Equal
+  | Tokenizer.Append -> Append
+  | Tokenizer.Cons -> Cons
   | t -> failwith (
       "infix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)
@@ -79,9 +83,17 @@ let rec convert_let_binding = function
     )
   | _ -> failwith "not a valid convert let binding"
 
+and convert_one_or_more_if_expr acc = function
+  | Node [
+      one_or_more_expr;
+      Token(Tokenizer.SemiColon);
+      expr;
+    ] -> convert_one_or_more_if_expr ((convert_expr expr)::acc) one_or_more_expr
+  | expr -> (convert_expr expr)::acc
 
 and convert_expr = function
   | Token (Tokenizer.Int v) -> Constant (Int v)
+  | Token (Tokenizer.EmptyList) -> Constant (EmptyList)
 
   | Node [
       Token(Tokenizer.LParen);
@@ -156,6 +168,19 @@ and convert_expr = function
       arg_expr;
     ] ->
       FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
+
+  | Node [
+      Token(Tokenizer.StartList);
+      one_or_more_expr;
+      Token(Tokenizer.EndList);
+    ]
+  | Node [
+      Token(Tokenizer.StartList);
+      one_or_more_expr;
+      Token(Tokenizer.SemiColon);
+      Token(Tokenizer.EndList);
+    ] ->
+      ListExpr (convert_one_or_more_if_expr [] one_or_more_expr)
 
   | _ -> failwith "not a valid expression"
 

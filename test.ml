@@ -435,6 +435,56 @@ let ast_converter_tests = Ast.[
     "negation expression"
     "~-1"
     (PrefixOp (Negation, Constant (Int 1)));
+
+  make_ast_converter_test
+    "empty list"
+    "[]"
+    (Constant (EmptyList));
+
+  make_ast_converter_test
+    "list literal, no trailing semicolon"
+    "[1;2;3]"
+    (ListExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+    ]);
+
+  make_ast_converter_test
+    "list literal, trailing semicolon"
+    "[1;2;3;]"
+    (ListExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+    ]);
+
+  make_ast_converter_test
+    "cons operator"
+    "1::2::[]"
+    (InfixOp (
+      Constant (Int 1),
+      Cons,
+      InfixOp (
+        Constant (Int 2),
+        Cons,
+        Constant (EmptyList)
+      )
+    ));
+
+  make_ast_converter_test
+    "append operator"
+    "[1;2;]@[3]"
+    (InfixOp (
+      ListExpr [
+        Constant (Int 1);
+        Constant (Int 2);
+      ],
+      Append,
+      ListExpr [
+        Constant (Int 3);
+      ]
+    ));
 ]
 
 let suite = "test suite"  >::: List.flatten [

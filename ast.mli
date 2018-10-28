@@ -1,9 +1,10 @@
 type constant =
   | Int of int
+  | EmptyList
 
 type infix_op =
   | Plus | Minus | Divide | Times | GreaterThan | LessThan | GreaterThanOrEqual
-  | LessThanOrEqual | Equal | NotEqual
+  | LessThanOrEqual | Equal | NotEqual | Cons | Append
 
 type prefix_symbol =
   | Negation
@@ -28,6 +29,7 @@ and expr =
   | VarName of value_name
   | FunctionCall of expr * expr
   | ParenExpr of expr
+  | ListExpr of expr list
 type ast = expr
 
 val convert : Parser.parse_tree -> ast
