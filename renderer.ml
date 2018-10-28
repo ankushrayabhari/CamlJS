@@ -2,21 +2,10 @@ open Ast
 
 let render_constant = function
   | Int v -> string_of_int v
+  | EmptyList -> "[]"
 
 let render_value_name = function
   | LowercaseIdent s -> s
-
-let render_infix_op = function
-  | Plus -> "+"
-  | Minus -> "-"
-  | Divide -> "/"
-  | Times -> "*"
-  | GreaterThan -> ">"
-  | LessThan -> "<"
-  | GreaterThanOrEqual -> ">="
-  | LessThanOrEqual -> "<="
-  | Equal -> "==="
-  | NotEqual -> "!=="
 
 let render_pattern = function
   | ValueName value -> render_value_name value
@@ -61,8 +50,19 @@ and render_prefix_expr prefix expr =
 and render_infix_expr l_expr op r_expr =
   let rendered_l = render_expr l_expr in
   let rendered_r = render_expr r_expr in
-  let rendered_op = render_infix_op op in
-  "(" ^ rendered_l ^ ")" ^ rendered_op ^ "(" ^ rendered_r ^ ")"
+  match op with
+  | Plus -> rendered_l ^ "+" ^ rendered_r
+  | Minus -> rendered_l ^ "-" ^ rendered_r
+  | Divide -> rendered_l ^ "/" ^ rendered_r
+  | Times -> rendered_l ^ "*" ^ rendered_r
+  | GreaterThan -> rendered_l ^ ">" ^ rendered_r
+  | LessThan -> rendered_l ^ "<" ^ rendered_r
+  | GreaterThanOrEqual -> rendered_l ^ ">=" ^ rendered_r
+  | LessThanOrEqual -> rendered_l ^ "<=" ^ rendered_r
+  | Equal -> rendered_l ^ "===" ^ rendered_r
+  | NotEqual -> rendered_l ^ "!==" ^ rendered_r
+  | Cons -> rendered_r ^ ".push(" ^ rendered_l ^ ")"
+  | Append -> rendered_l ^ ".concat(" ^ rendered_r ^ ")"
 
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
@@ -83,6 +83,13 @@ and render_function_call f_expr arg_expr =
   let rendered_argument = render_expr arg_expr in
   rendered_function ^ "(" ^ rendered_argument ^ ")"
 
+and render_list_expr lst =
+  lst
+  |> List.rev
+  |> List.map render_expr
+  |> String.concat ","
+  |> (fun lst_body -> "[" ^ lst_body ^ "]")
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
@@ -94,6 +101,7 @@ and render_expr = function
   | VarName (val_name) -> render_value_name val_name
   | FunctionCall (expr_1, expr_2) -> render_function_call expr_1 expr_2
   | ParenExpr (expr) -> render_paren_expr expr
+  | ListExpr expr_lst -> render_list_expr expr_lst
 
 let render exp =
   render_expr exp
