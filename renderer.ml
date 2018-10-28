@@ -62,7 +62,7 @@ and render_infix_expr l_expr op r_expr =
   | Equal -> rendered_l ^ "===" ^ rendered_r
   | NotEqual -> rendered_l ^ "!==" ^ rendered_r
   | Cons -> rendered_r ^ ".push(" ^ rendered_l ^ ")"
-  | Append -> rendered_l ^ ".concat(" ^ rendered_r ^ ")"
+  | Append -> rendered_r ^ ".concat(" ^ rendered_l ^ ")"
 
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
