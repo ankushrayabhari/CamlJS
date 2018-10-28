@@ -127,12 +127,12 @@ let parser_tests = Parser.(Tokenizer.[
     "append three lists, right associativity"
     "[]@[]@[]"
     (Node [
-      Token(EmptyList);
-      Token(Append);
+      Token (EmptyList);
+      Token (Append);
       Node [
-        Token(EmptyList);
-        Token(Append);
-        Token(EmptyList);
+        Token (EmptyList);
+        Token (Append);
+        Token (EmptyList);
       ]
     ]);
 
@@ -140,12 +140,12 @@ let parser_tests = Parser.(Tokenizer.[
     "cons three elemenets, right associativity"
     "1::2::[]"
     (Node [
-      Token(Int 1);
-      Token(Cons);
+      Token (Int 1);
+      Token (Cons);
       Node [
-        Token(Int 2);
-        Token(Cons);
-        Token(EmptyList);
+        Token (Int 2);
+        Token (Cons);
+        Token (EmptyList);
       ];
     ]);
 
@@ -155,30 +155,30 @@ let parser_tests = Parser.(Tokenizer.[
     (Node [
       Node [
         Node [
-          Token(Int 1);
-          Token(Cons);
+          Token (Int 1);
+          Token (Cons);
           Node [
             Token (Int 2);
             Token (Plus);
             Token (Int 3);
           ];
         ];
-        Token(Append);
+        Token (Append);
         Node [
-          Token(Int 3);
-          Token(Cons);
-          Token(Int 4);
+          Token (Int 3);
+          Token (Cons);
+          Token (Int 4);
         ];
       ];
-      Token(Equal);
-      Token(EmptyList);
+      Token (Equal);
+      Token (EmptyList);
     ]);
 
   make_parser_test
     "list literal, no trailing semicolon"
     "[1;2;3]"
     (Node [
-      Token(StartList);
+      Token (StartList);
       Node [
         Node [
           Token (Int 1);
@@ -188,14 +188,14 @@ let parser_tests = Parser.(Tokenizer.[
         Token (SemiColon);
         Token (Int 3);
       ];
-      Token(EndList);
+      Token (EndList);
     ]);
 
   make_parser_test
     "list literal, trailing semicolon"
     "[1;2;3;]"
     (Node [
-      Token(StartList);
+      Token (StartList);
       Node [
         Node [
           Token (Int 1);
@@ -205,15 +205,15 @@ let parser_tests = Parser.(Tokenizer.[
         Token (SemiColon);
         Token (Int 3);
       ];
-      Token(SemiColon);
-      Token(EndList);
+      Token (SemiColon);
+      Token (EndList);
     ]);
 
   make_parser_test
     "list literal, precedence over function calls"
     "f [~-1; 0]"
     (Node [
-      Token(LowercaseIdent "f");
+      Token (LowercaseIdent "f");
       Node [
         Token (StartList);
         Node [
@@ -224,7 +224,7 @@ let parser_tests = Parser.(Tokenizer.[
           Token (SemiColon);
           Token (Int 0);
         ];
-        Token(EndList);
+        Token (EndList);
       ];
     ]);
 ])
