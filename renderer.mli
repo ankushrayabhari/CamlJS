@@ -1,2 +1,1 @@
-
-val render : Ast.ast -> string
+val render : Ast.t -> string

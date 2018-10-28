@@ -30,6 +30,4 @@ and expr =
   | FunctionCall of expr * expr
   | ParenExpr of expr
   | ListExpr of expr list
-type ast = expr
-
-val convert : Parser.parse_tree -> ast
+type t = expr

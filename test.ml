@@ -235,7 +235,7 @@ let make_ast_converter_test name program expected_tree =
       Tokenizer.tokenize program
       |> Array.of_list
       |> Parser.parse
-      |> Ast.convert
+      |> Ast_converter.convert
     in
     assert_equal expected_tree ast
   )
