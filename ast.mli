@@ -1,13 +1,20 @@
 type constant =
   | Int of int
   | EmptyList
+  | Bool of bool
+  | String of string
+  | Char of char
+  | Float of float
+  | Unit
 
 type infix_op =
   | Plus | Minus | Divide | Times | GreaterThan | LessThan | GreaterThanOrEqual
-  | LessThanOrEqual | Equal | NotEqual | Cons | Append
+  | LessThanOrEqual | Equal | NotEqual | Cons | Append | LogicalAnd
+  | LogicalOr | PlusFloat | MinusFloat | DivideFloat | TimesFloat
+  | Concat
 
 type prefix_symbol =
-  | Negation
+  | Negation | NegationFloat
 
 type pattern =
   | ValueName of string
