@@ -3,6 +3,11 @@ open Ast
 let render_constant = function
   | Int v -> string_of_int v
   | EmptyList -> "[]"
+  | Bool b -> string_of_bool b
+  | Float f -> string_of_float f
+  | String s -> s
+  | Char c -> String.make 1 c
+  | Unit -> "null"
 
 let render_pattern = function
   | ValueName name -> name
@@ -27,6 +32,7 @@ and render_fun arg_list body_expr =
 
 and render_prefix_op = function
   | Negation -> "-"
+  | NegationFloat -> "-"
 
 and render_ternary condition_expr true_expr false_expr =
   let rendered_condition_expr = render_expr condition_expr in
@@ -47,10 +53,10 @@ and render_infix_expr l_expr op r_expr =
   let rendered_l = render_expr l_expr in
   let rendered_r = render_expr r_expr in
   match op with
-  | Plus -> rendered_l ^ "+" ^ rendered_r
-  | Minus -> rendered_l ^ "-" ^ rendered_r
-  | Divide -> rendered_l ^ "/" ^ rendered_r
-  | Times -> rendered_l ^ "*" ^ rendered_r
+  | Plus | PlusFloat -> rendered_l ^ "+" ^ rendered_r
+  | Minus | MinusFloat -> rendered_l ^ "-" ^ rendered_r
+  | Divide | DivideFloat -> rendered_l ^ "/" ^ rendered_r
+  | Times | TimesFloat -> rendered_l ^ "*" ^ rendered_r
   | GreaterThan -> rendered_l ^ ">" ^ rendered_r
   | LessThan -> rendered_l ^ "<" ^ rendered_r
   | GreaterThanOrEqual -> rendered_l ^ ">=" ^ rendered_r
@@ -59,6 +65,9 @@ and render_infix_expr l_expr op r_expr =
   | NotEqual -> rendered_l ^ "!==" ^ rendered_r
   | Cons -> "List.cons(" ^ rendered_l ^ ")(" ^ rendered_r ^ ")"
   | Append -> "List.append(" ^ rendered_l ^ ")(" ^ rendered_r ^ ")"
+  | LogicalAnd -> rendered_l ^ "&&" ^ rendered_r
+  | LogicalOr -> rendered_l ^ "||" ^ rendered_r
+  | Concat -> rendered_l ^ "+" ^ rendered_r
 
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
