@@ -1,21 +1,6 @@
 {
   "tokens": [
     {
-      "name": "NotEqualFloat",
-      "regex": "<>\\.",
-      "tag": "infix"
-    },
-    {
-      "name": "GreaterThanOrEqualFloat",
-      "regex": ">=\\.",
-      "tag": "infix"
-    },
-    {
-      "name": "LessThanOrEqualFloat",
-      "regex": "<=\\.",
-      "tag": "infix"
-    },
-    {
       "name": "FunctionArrow",
       "regex": "->"
     },
@@ -42,21 +27,6 @@
     {
       "name": "DivideFloat",
       "regex": "/\\.",
-      "tag": "infix"
-    },
-    {
-      "name": "GreaterThanFloat",
-      "regex": ">\\.",
-      "tag": "infix"
-    },
-    {
-      "name": "LessThanFloat",
-      "regex": "<\\.",
-      "tag": "infix"
-    },
-    {
-      "name": "EqualFloat",
-      "regex": "=\\.",
       "tag": "infix"
     },
     {
