@@ -42,6 +42,6 @@ docs-private: build
 clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private
-	rm -rf grammar.ml tokenizer.ml tokenizer.mli
+	rm -rf grammar.ml tokenizer.ml tokenizer.mli token.mli
 
 .PHONY: test, test-debug, bin, grammar
