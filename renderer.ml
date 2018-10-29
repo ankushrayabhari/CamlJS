@@ -57,8 +57,8 @@ and render_infix_expr l_expr op r_expr =
   | LessThanOrEqual -> rendered_l ^ "<=" ^ rendered_r
   | Equal -> rendered_l ^ "===" ^ rendered_r
   | NotEqual -> rendered_l ^ "!==" ^ rendered_r
-  | Cons -> rendered_r ^ ".push(" ^ rendered_l ^ ")"
-  | Append -> rendered_r ^ ".concat(" ^ rendered_l ^ ")"
+  | Cons -> "List.cons(" ^ rendered_l ^ ")(" ^ rendered_r ^ ")"
+  | Append -> "List.append(" ^ rendered_l ^ ")(" ^ rendered_r ^ ")"
 
 and render_sequential_expr expr_1 expr_2 =
   let rendered_1 = render_expr expr_1 in
@@ -103,5 +103,8 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
 
-let render exp =
-  render_expr exp
+let render expr =
+  Pervasives_js.impl ^
+  Pervasives_js.destructure ^
+  List_js.impl ^
+  render_expr expr

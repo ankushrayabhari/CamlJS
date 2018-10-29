@@ -1,4 +1,4 @@
-MODULES=tokenizer grammar parser ast_converter renderer main
+MODULES=tokenizer grammar parser ast_converter pervasives_js list_js renderer main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli) ast.mli token.mli

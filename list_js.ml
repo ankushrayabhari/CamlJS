@@ -1,3 +1,4 @@
+let impl = {|
 const List = {
   length: a => a.length,
   cons: a => b => b.concat([a]),
@@ -8,12 +9,12 @@ const List = {
   rev: a => a.slice().reverse(),
   append: a => b => b.concat(a),
   flatten: a => [].concat(...a),
-  iter: f => a => a.forEach(f),
-  iteri: f => a => a.forEach((v, i) => f(i)(v)),
+  iter: f => a => a.reduceRight((acc, curr) => f(curr), undefined),
+  iteri: f => a => a.reduceRight((acc, curr, idx) => f(a.length - 1 - idx)(curr), undefined),
   map: f => a => a.map(f),
   mapi: f => a => a.map((v, i) => f(i)(v)),
-  fold_left: f => a => lst => lst.reduce((acc, curr) => f(acc)(curr), a),
-  fold_right: f => lst => a => lst.reduceRight((acc, curr) => f(curr)(acc), a),
+  fold_left: f => a => lst => lst.reduceRight((acc, curr) => f(acc)(curr), a),
+  fold_right: f => lst => a => lst.reduce((acc, curr) => f(curr)(acc), a),
   mem: el => lst => {for (let i = 0; i < lst.length; i++) { if (compare(el)(lst[i]) == 0) {return true;}} return false;},
   memq: el => lst => lst.indexOf(el) >= 0,
   find: f => lst => {for (let i = 0; i < lst.length; i++) { if (f(el)) {return lst[i];}} throw new Error("Not found");},
@@ -21,4 +22,33 @@ const List = {
   filter: f => lst => lst.filter(f),
   sort: f => lst => lst.slice().sort((el1, el2) => f(el1)(el2)),
   sort_uniq: f => lst => lst.slice().sort((el1, el2) => f(el1)(el2)).filter((el, idx, lst) => idx == 0 || f(el)(lst[idx - 1]) != 0)
-}
+};
+|}
+
+
+let destructure = {|
+const {
+  length,
+  cons,
+  hd,
+  tl,
+  nth,
+  nth_opt,
+  rev,
+  append,
+  flatten,
+  iter,
+  iteri,
+  map,
+  mapi,
+  fold_left,
+  fold_right,
+  mem,
+  memq,
+  find,
+  find_opt,
+  filter,
+  sort,
+  sort_uniq
+} = List;
+|}
