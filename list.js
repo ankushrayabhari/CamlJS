@@ -1,9 +1,9 @@
 const List = {
   length: a => a.length,
   cons: a => b => b.concat([a]),
-  hd: a => a.length == 0 ? (throw new Error("hd")) : a[a.length - 1],
-  tl: a => a.length == 0 ? (throw new Error("tl")) : a.slice(0, a.length - 1),
-  nth: a => n => a.length <= n ? (throw new Error("nth")) : n < 0 ? (throw new Error("List.nth")) : a[n],
+  hd: a => {if (a.length == 0) {throw new Error("hd")} else return a[a.length - 1]},
+  tl: a => {if (a.length == 0) {throw new Error("tl")} else return a.slice(0, a.length - 1)},
+  nth: a => n => {if (a.length <= n) {throw new Error("nth")} else if (n < 0) {throw new Error("List.nth")} else return a[n];},
   nth_opt: a => n => a.length <= n || n < 0 ? null : a[n],
   rev: a => a.slice().reverse(),
   append: a => b => b.concat(a),
