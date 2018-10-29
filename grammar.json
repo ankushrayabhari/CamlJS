@@ -16,6 +16,10 @@
       "tag": "infix"
     },
     {
+      "name": "FunctionArrow",
+      "regex": "->"
+    },
+    {
       "name": "NegationFloat",
       "regex": "~-.",
       "tag": "prefix"
@@ -69,10 +73,6 @@
       "name": "LessThanOrEqual",
       "regex": "<=",
       "tag": "infix"
-    },
-    {
-      "name": "FunctionArrow",
-      "regex": "->"
     },
     {
       "name": "Negation",
