@@ -256,7 +256,7 @@ val token_to_string : Token.t -> string
 
 let regexp_of_token_fn () =
   List.map (fun el ->
-    let output_regex = Str.global_replace (Str.regexp "\\") {|\\\\|} el.regex in
+    let output_regex = String.escaped el.regex in
     match el.parameter with
     | Some p -> sprintf "  | %s _ -> \"%s\"\n" el.name output_regex
     | None -> sprintf "  | %s -> \"%s\"\n" el.name output_regex
