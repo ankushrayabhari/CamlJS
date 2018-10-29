@@ -271,6 +271,7 @@ let precedence_arr () =
     | Some "string" -> sprintf "  %s \"\";\n" el.name
     | Some "float" -> sprintf "  %s 0.0;\n" el.name
     | Some "bool" -> sprintf "  %s false;\n" el.name
+    | Some "char" -> sprintf "  %s 'a';\n" el.name
     | None -> sprintf "  %s;\n" el.name
     | _ -> failwith "unknown parameter type"
   ) tokens_in_order
@@ -289,6 +290,8 @@ let parametrize_tok_fn () =
         sprintf "  | %s _ -> %s (float_of_string str)\n" el.name el.name
       | Some "bool" ->
         sprintf "  | %s _ -> %s (bool_of_string str)\n" el.name el.name
+      | Some "char" ->
+        sprintf "  | %s _ -> %s (String.get str 0)\n" el.name el.name
       | _ -> failwith "should not be called on None"
     )
   |> String.concat ""
