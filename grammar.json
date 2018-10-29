@@ -2,17 +2,17 @@
   "tokens": [
     {
       "name": "NotEqualFloat",
-      "regex": "<>.",
+      "regex": "<>\\.",
       "tag": "infix"
     },
     {
       "name": "GreaterThanOrEqualFloat",
-      "regex": ">=.",
+      "regex": ">=\\.",
       "tag": "infix"
     },
     {
       "name": "LessThanOrEqualFloat",
-      "regex": "<=.",
+      "regex": "<=\\.",
       "tag": "infix"
     },
     {
@@ -21,42 +21,42 @@
     },
     {
       "name": "NegationFloat",
-      "regex": "~-.",
+      "regex": "~-\\.",
       "tag": "prefix"
     },
     {
       "name": "PlusFloat",
-      "regex": "\\+.",
+      "regex": "\\+\\.",
       "tag": "infix"
     },
     {
       "name": "MinusFloat",
-      "regex": "-.",
+      "regex": "-\\.",
       "tag": "infix"
     },
     {
       "name": "TimesFloat",
-      "regex": "\\*.",
+      "regex": "\\*\\.",
       "tag": "infix"
     },
     {
       "name": "DivideFloat",
-      "regex": "/.",
+      "regex": "/\\.",
       "tag": "infix"
     },
     {
       "name": "GreaterThanFloat",
-      "regex": ">.",
+      "regex": ">\\.",
       "tag": "infix"
     },
     {
       "name": "LessThanFloat",
-      "regex": "<.",
+      "regex": "<\\.",
       "tag": "infix"
     },
     {
       "name": "EqualFloat",
-      "regex": "=.",
+      "regex": "=\\.",
       "tag": "infix"
     },
     {
@@ -157,7 +157,7 @@
     {
       "name": "Float",
       "parameter": "float",
-      "regex": "[0-9]+.[0-9]*"
+      "regex": "[0-9]+\\.[0-9]*"
     },
     {
       "name": "Int",

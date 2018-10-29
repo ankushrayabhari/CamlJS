@@ -26,9 +26,19 @@ let tokenizer_tests = Tokenizer.[
     [Int 1; GreaterThan; Int 2];
 
   make_tokenizer_test
+    "greater than comparison expression"
+    "1. >. 2.0"
+    [Float 1.; GreaterThanFloat; Float 2.];
+
+  make_tokenizer_test
     "less than comparison expression"
     "1 < 2"
     [Int 1; LessThan; Int 2];
+
+  make_tokenizer_test
+    "less than float comparison expression"
+    "1.0 <. 2."
+    [Float 1.; LessThanFloat; Float 2.];
 
   make_tokenizer_test
     "greater than or equal comparison expression"
@@ -36,9 +46,19 @@ let tokenizer_tests = Tokenizer.[
     [Int 1; GreaterThanOrEqual; Int 2];
 
   make_tokenizer_test
+    "greater than or equal float comparison expression"
+    "1. >=. 2."
+    [Float 1.; GreaterThanOrEqualFloat; Float 2.];
+
+  make_tokenizer_test
     "less than or equal comparison expression"
     "1 <= 2"
     [Int 1; LessThanOrEqual; Int 2];
+
+  make_tokenizer_test
+    "less than or equal float comparison expression"
+    "1.00 <=. 2.0000"
+    [Float 1.; LessThanOrEqualFloat; Float 2.];
 
   make_tokenizer_test
     "is equal comparison expression"
@@ -46,14 +66,29 @@ let tokenizer_tests = Tokenizer.[
     [Int 1; Equal; Int 2];
 
   make_tokenizer_test
+    "is equal float comparison expression"
+    "1. =. 02."
+    [Float 1.; EqualFloat; Float 2.];
+
+  make_tokenizer_test
     "not equal comparison expression"
     "1 <> 2"
     [Int 1; NotEqual; Int 2];
 
   make_tokenizer_test
+    "not equal float comparison expression"
+    "1. <>. 2."
+    [Float 1.; NotEqualFloat; Float 2.];
+
+  make_tokenizer_test
     "if then no else expression"
     "if 1 = 2 then 0"
     [If; Int 1; Equal; Int 2; Then; Int 0];
+
+  make_tokenizer_test
+    "if then no else expression with floats"
+    "if 1. =. 2. then 0"
+    [If; Float 1.; EqualFloat; Float 2.; Then; Int 0];
 
   make_tokenizer_test
     "if then with else expression"
@@ -82,6 +117,11 @@ let tokenizer_tests = Tokenizer.[
     [Int 1; Times; Int 2];
 
   make_tokenizer_test
+    "times float infix expression"
+    "1. *. 2."
+    [Float 1.; TimesFloat; Float 2.];
+
+  make_tokenizer_test
     "divide infix expression"
     "1 / 2"
     [Int 1; Divide; Int 2];
@@ -90,6 +130,11 @@ let tokenizer_tests = Tokenizer.[
     "negation expression"
     "~-1"
     [Negation; Int 1;];
+
+  make_tokenizer_test
+    "negation float expression"
+    "~-.1."
+    [NegationFloat; Float 1.];
 ]
 
 let make_ast_converter_test name program expected_tree =
