@@ -255,11 +255,11 @@
       ["OrExpr"]
     ],
     "OrExpr": [
-      ["OrExpr", "Or", "AndExpr"],
+      ["AndExpr", "Or", "OrExpr"],
       ["AndExpr"]
     ],
     "AndExpr": [
-      ["AndExpr", "And", "ComparisonExpr"],
+      ["ComparisonExpr", "And", "AndExpr"],
       ["ComparisonExpr"]
     ],
     "ComparisonExpr": [

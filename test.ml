@@ -593,6 +593,32 @@ let parser_tests = Parser.(Tokenizer.[
             Token (Bool false)
           ];
         ]);
+
+    make_parser_test
+      "and operator associativity, parse tree"
+      "true && true && false"
+      (Node [
+          Token (Bool true);
+          Token (And);
+          Node [
+            Token (Bool true);
+            Token (And);
+            Token (Bool false)
+          ];
+        ]);
+
+    make_parser_test
+      "or operator associativity, parse tree"
+      "true || true || false"
+      (Node [
+          Token (Bool true);
+          Token (Or);
+          Node [
+            Token (Bool true);
+            Token (Or);
+            Token (Bool false)
+          ];
+        ]);
 ])
 
 let make_ast_converter_test name program expected_tree =
