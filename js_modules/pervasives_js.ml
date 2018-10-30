@@ -1,4 +1,5 @@
 let impl = {|
+const NativeString = global.String;
 const Pervasives = {
   min: a => b => Math.min(a, b),
   max: a => b => Math.max(a, b),
@@ -39,7 +40,7 @@ const Pervasives = {
   max_float: Number.MAX_VALUE,
   min_float: Number.MIN_VALUE,
   int_of_char: a => a.charCodeAt(0),
-  char_of_int: String.fromCharCode,
+  char_of_int: NativeString.fromCharCode,
   ignore: a => undefined,
   string_of_bool: a => a.toString(),
   bool_of_string: a => {

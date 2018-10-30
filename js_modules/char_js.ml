@@ -1,7 +1,7 @@
 let impl = {|
 const Char = {
   code: a => a.charCodeAt(0),
-  chr: a => String.fromCharCode(a),
+  chr: a => NativeString.fromCharCode(a),
   lowercase_ascii: a => a.toLowerCase(),
   uppercase_ascii: a => a.toUpperCase(),
   compare: a => b => Pervasives.compare(Char.code(a))(Char.code(b)),

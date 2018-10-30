@@ -116,6 +116,7 @@ let render_open_decl = function
   | "Pervasives" -> Pervasives_js.destructure
   | "List" -> List_js.destructure
   | "Char" -> Char_js.destructure
+  | "String" -> String_js.destructure
   | t -> failwith ("Open Decl not supported for " ^ t)
 
 let render_let_decl = function
@@ -138,4 +139,5 @@ let render ast =
   Pervasives_js.impl ^
   List_js.impl ^
   Char_js.impl ^
+  String_js.impl ^
   render_module_items_list ((OpenDecl "Pervasives")::ast)
