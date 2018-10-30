@@ -35,4 +35,10 @@ and expr =
   | FunctionCall of expr * expr
   | ParenExpr of expr
   | ListExpr of expr list
-type t = expr
+
+type module_item =
+  | LetDecl of let_binding
+  | OpenDecl of string
+  | Expr of expr
+
+type t = module_item list

@@ -186,20 +186,20 @@
     ],
     "ExprDefinitionNotStartingWithDoubleSemicolon": [
       ["Expr"],
-      ["Expr", "DoubleSemicolon"],
       ["Definition"],
-      ["Definition", "DoubleSemicolon"],
       ["Expr", "OneOrMoreDefinitionOrExpr"],
       ["Definition", "OneOrMoreDefinitionOrExpr"],
+      ["Expr", "DoubleSemicolon"],
+      ["Definition", "DoubleSemicolon"],
       ["Expr", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"],
       ["Definition", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"]
     ],
     "OneOrMoreDefinitionOrExpr": [
       ["DoubleSemicolon", "Definition", "OneOrMoreDefinitionOrExpr"],
-      ["Definition", "OneOrMoreDefinitionOrExpr"],
       ["DoubleSemicolon", "Expr", "OneOrMoreDefinitionOrExpr"],
       ["DoubleSemicolon", "Definition"],
       ["DoubleSemicolon", "Expr"],
+      ["Definition", "OneOrMoreDefinitionOrExpr"],
       ["Definition"]
     ],
     "Expr": [

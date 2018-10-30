@@ -112,8 +112,10 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
 
-let render expr =
-  Pervasives_js.impl ^
-  Pervasives_js.destructure ^
-  List_js.impl ^
-  render_expr expr
+let render = function
+  | [Expr expr] ->
+    Pervasives_js.impl ^
+    Pervasives_js.destructure ^
+    List_js.impl ^
+    render_expr expr
+  | _ -> failwith "render on other modules not implemented"

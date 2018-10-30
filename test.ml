@@ -553,7 +553,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "basic_test"
     "let x = 1 in x + 100"
-    (LetBinding (
+    [Expr (LetBinding (
       VarAssignment (
         ValueName "x",
         Constant (Int 1)
@@ -563,12 +563,12 @@ let ast_converter_tests = Ast.[
         Plus,
         Constant (Int 100)
       )
-    ));
+    ))];
 
   make_ast_converter_test
     "order of ops in infix expression"
     "let x = 1 in x - 100 - 200"
-    (LetBinding (
+    [Expr (LetBinding (
         VarAssignment (
           ValueName "x",
           Constant (Int 1)
@@ -582,12 +582,12 @@ let ast_converter_tests = Ast.[
           Minus,
           Constant (Int 200)
         )
-      ));
+      ))];
 
   make_ast_converter_test
     "order of ops in infix expression parentheiszed"
     "let x = 1 in (x - 100) - (200 - x)"
-    (LetBinding (
+    [Expr (LetBinding (
         VarAssignment (
           ValueName "x",
           Constant (Int 1)
@@ -604,12 +604,12 @@ let ast_converter_tests = Ast.[
             Minus,
             VarName "x"
           ))
-        )));
+        )))];
 
   make_ast_converter_test
     "order of ops in infix expression parentheiszed nested"
     "let x = 1 in (x - 100 - 300) - (200 - x)"
-    (LetBinding (
+    [Expr (LetBinding (
           VarAssignment (
             ValueName "x",
             Constant (Int 1)
@@ -633,12 +633,12 @@ let ast_converter_tests = Ast.[
               VarName "x"
             ))
           )
-        ));
+        ))];
 
   make_ast_converter_test
     "function call"
     "let rec x a b c = a * b * c in x 1 2 3"
-    (LetBinding (
+    [Expr (LetBinding (
       FunctionAssignment (
         "x",
         true,
@@ -667,111 +667,111 @@ let ast_converter_tests = Ast.[
         ),
         Constant (Int 3)
       )
-    ));
+    ))];
 
   make_ast_converter_test
     "greater than comparison expression"
     "1 > 2"
-    (InfixOp (Constant (Int 1), GreaterThan, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), GreaterThan, (Constant (Int 2))))];
 
   make_ast_converter_test
     "less than comparison expression"
     "1 < 2"
-    (InfixOp (Constant (Int 1), LessThan, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), LessThan, (Constant (Int 2))))];
 
   make_ast_converter_test
     "less than or equal comparison expression"
     "1 <= 2"
-    (InfixOp (Constant (Int 1), LessThanOrEqual, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), LessThanOrEqual, (Constant (Int 2))))];
 
   make_ast_converter_test
     "greater than or equal comparison expression"
     "1 >= 2"
-    (InfixOp (Constant (Int 1), GreaterThanOrEqual, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), GreaterThanOrEqual, (Constant (Int 2))))];
 
   make_ast_converter_test
     "is equal comparison expression"
     "1 = 2"
-    (InfixOp (Constant (Int 1), Equal, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), Equal, (Constant (Int 2))))];
 
   make_ast_converter_test
     "not equal comparison expression"
     "1 <> 2"
-    (InfixOp (Constant (Int 1), NotEqual, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), NotEqual, (Constant (Int 2))))];
 
   make_ast_converter_test
     "if then no else expression"
     "if 1 = 2 then 0"
-    (Ternary (
+    [Expr (Ternary (
       InfixOp (Constant (Int 1), Equal, (Constant (Int 2))),
       Constant (Int 0),
-      None));
+      None))];
 
   make_ast_converter_test
     "if then with else expression"
     "if 1 = 2 then 0 else 5"
-    (Ternary (
+    [Expr (Ternary (
       InfixOp (Constant (Int 1), Equal, (Constant (Int 2))),
       Constant (Int 0),
-      Some (Constant (Int 5))));
+      Some (Constant (Int 5))))];
 
   make_ast_converter_test
     "anonymous function expression"
     "fun a b -> a + b"
-    (Function (
+    [Expr (Function (
       [ValueName "a"; ValueName "b"],
       InfixOp (
         VarName "a", Plus, VarName "b"
       ))
-    );
+    )];
 
   make_ast_converter_test
     "semicolon expression"
     "1;2"
-    (Sequential (Constant (Int 1), Constant (Int 2)));
+    [Expr (Sequential (Constant (Int 1), Constant (Int 2)))];
 
   make_ast_converter_test
     "times infix expression"
     "1 * 2"
-    (InfixOp (Constant (Int 1), Times, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), Times, (Constant (Int 2))))];
 
   make_ast_converter_test
     "divide infix expression"
     "1 / 2"
-    (InfixOp (Constant (Int 1), Divide, (Constant (Int 2))));
+    [Expr (InfixOp (Constant (Int 1), Divide, (Constant (Int 2))))];
 
   make_ast_converter_test
     "negation expression"
     "~-1"
-    (PrefixOp (Negation, Constant (Int 1)));
+    [Expr (PrefixOp (Negation, Constant (Int 1)))];
 
   make_ast_converter_test
     "empty list"
     "[]"
-    (Constant (EmptyList));
+    [Expr (Constant (EmptyList))];
 
   make_ast_converter_test
     "list literal, no trailing semicolon"
     "[1;2;3]"
-    (ListExpr [
+    [Expr (ListExpr [
       Constant (Int 1);
       Constant (Int 2);
       Constant (Int 3);
-    ]);
+    ])];
 
   make_ast_converter_test
     "list literal, trailing semicolon"
     "[1;2;3;]"
-    (ListExpr [
+    [Expr (ListExpr [
       Constant (Int 1);
       Constant (Int 2);
       Constant (Int 3);
-    ]);
+    ])];
 
   make_ast_converter_test
     "cons operator"
     "1::2::[]"
-    (InfixOp (
+    [Expr (InfixOp (
       Constant (Int 1),
       Cons,
       InfixOp (
@@ -779,12 +779,12 @@ let ast_converter_tests = Ast.[
         Cons,
         Constant (EmptyList)
       )
-    ));
+    ))];
 
   make_ast_converter_test
     "append operator"
     "[1;2;]@[3]"
-    (InfixOp (
+    [Expr (InfixOp (
       ListExpr [
         Constant (Int 1);
         Constant (Int 2);
@@ -793,65 +793,129 @@ let ast_converter_tests = Ast.[
       ListExpr [
         Constant (Int 3);
       ]
-    ));
+    ))];
 
   make_ast_converter_test
     "module accessor, list length of empty list"
     "List.length []"
-    (FunctionCall (
+    [Expr (FunctionCall (
       ModuleAccessor ("List", "length"),
       Constant (EmptyList)
-    ));
+    ))];
 
   make_ast_converter_test
     "module accessor, higher precedence than function call, higher than prefix"
     "List.create ~-List.empty_size"
-    (FunctionCall (
+    [Expr (FunctionCall (
       ModuleAccessor ("List", "create"),
       PrefixOp (
         Negation,
         ModuleAccessor ("List", "empty_size")
       )
-    ));
+    ))];
 
   make_ast_converter_test
-      "let-rec-in fn (factorial) featuring if-else-then"
-      "let rec fact x = if x=1 then 1 else x * fact(x-1) in fact 3"
-      (LetBinding (
-          FunctionAssignment (
-            "fact",
-            true,
-            [ValueName "x";],
-            Ternary (
+    "let-rec-in fn (factorial) featuring if-else-then"
+    "let rec fact x = if x=1 then 1 else x * fact(x-1) in fact 3"
+    [Expr (LetBinding (
+        FunctionAssignment (
+          "fact",
+          true,
+          [ValueName "x";],
+          Ternary (
+            InfixOp(
+              VarName "x",
+              Equal,
+              Constant (Int 1)
+            ),
+            Constant (Int 1),
+            Some (
               InfixOp(
                 VarName "x",
-                Equal,
-                Constant (Int 1)
-              ),
-              Constant (Int 1),
-              Some (
-                InfixOp(
-                  VarName "x",
-                  Times,
-                  FunctionCall(
-                    VarName "fact",
-                    ParenExpr (
-                      InfixOp(
-                        VarName "x",
-                        Minus,
-                        Constant (Int 1)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-           ),
-          FunctionCall(
-            VarName "fact",
-            Constant (Int 3)
-          )
-        ));
+                Times,
+                FunctionCall(
+                  VarName "fact",
+                  ParenExpr (
+                    InfixOp(
+                      VarName "x",
+                      Minus,
+                      Constant (Int 1)
+                    ))))))),
+        FunctionCall(
+          VarName "fact",
+          Constant (Int 3)
+        )
+      ))];
+
+  make_ast_converter_test
+    "compilation module ast, single open decl"
+    "open Test"
+    [OpenDecl "Test"];
+
+  make_ast_converter_test
+    "compilation module ast, single let decl"
+    "let x = 1"
+    [LetDecl (VarAssignment (ValueName "x", Constant (Int 1)))];
+
+  make_ast_converter_test
+    "compilation module ast, single let rec decl"
+    "let rec id x = x"
+    [LetDecl (FunctionAssignment ("id", true, [ValueName "x"], VarName "x"))];
+
+  make_ast_converter_test
+    "compilation module ast, single let rec decl"
+    "let rec id x = x"
+    [LetDecl (FunctionAssignment ("id", true, [ValueName "x"], VarName "x"))];
+
+  make_ast_converter_test
+    "compilation module ast, double expr decl, start/end ;;"
+    ";;print_int 1;;print_int 2;;"
+    [
+      Expr (FunctionCall (
+        VarName "print_int",
+        Constant (Int 1)
+      ));
+      Expr (FunctionCall (
+        VarName "print_int",
+        Constant (Int 2)
+      ));
+    ];
+
+  make_ast_converter_test
+    "compilation module ast, open decl, newline sep, let decl, ;; expr, ;; end"
+    "open Pervasives\nlet x = 1;;print_int x;;"
+    [
+      OpenDecl "Pervasives";
+      LetDecl (VarAssignment (
+        ValueName "x",
+        Constant (Int 1)
+      ));
+      Expr (FunctionCall (
+        VarName "print_int",
+        VarName "x"
+      ));
+    ];
+
+  make_ast_converter_test
+    "compilation module ast, multiple open decl, newline seps"
+    "\n\nopen Pervasives\n\nopen List\nopen Pervasives"
+    [
+      OpenDecl "Pervasives";
+      OpenDecl "List";
+      OpenDecl "Pervasives";
+    ];
+
+  make_ast_converter_test
+    "compilation module ast, open/let/open decl, newline seps"
+    "\n\nopen Pervasives\n\nlet x = 1\nopen Pervasives"
+    [
+      OpenDecl "Pervasives";
+      LetDecl (VarAssignment (
+        ValueName "x",
+        Constant (Int 1)
+      ));
+      OpenDecl "Pervasives";
+    ];
 ]
 
 let suite = "test suite"  >::: List.flatten [

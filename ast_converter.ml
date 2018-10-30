@@ -185,5 +185,70 @@ and convert_expr = function
 
   | _ -> failwith "not a valid expression"
 
+let convert_definition = function
+  | Node [
+      Token (Open);
+      Token (CapitalizedIdent module_name);
+    ] ->
+      OpenDecl module_name
+  | Node [
+      Token(Token.Let);
+      Token(Token.Rec);
+      let_binding;
+    ] ->
+      LetDecl (convert_let_binding true let_binding)
+  | Node [
+      Token(Token.Let);
+      let_binding;
+    ] ->
+      LetDecl (convert_let_binding false let_binding)
+  | _ -> failwith "not a valid definition"
+
+let convert_module_item tr =
+  try Expr (convert_expr tr) with _ -> (convert_definition tr)
+
+let rec convert_one_plus_def_expr = function
+  | Node [
+      Token (DoubleSemicolon);
+      tr;
+      def_expr_tr;
+    ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
+  | Node [
+      Token (DoubleSemicolon);
+      tr;
+    ] -> [convert_module_item tr]
+  | tr -> try [convert_definition tr] with _ ->
+      match tr with
+      | Node [
+          tr;
+          def_expr_tr;
+        ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
+      | _ -> failwith "not a valid expr def no start ;;"
+
+let convert_expr_definition_no_start_double_semicolon = function
+  | Node [
+      tr;
+      def_expr_tr;
+      Token (DoubleSemicolon);
+    ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
+  | Node [
+      tr;
+      Token (DoubleSemicolon);
+    ] -> [convert_module_item tr]
+  | tr -> try [convert_module_item tr] with _ ->
+    match tr with
+      | Node [
+          tr;
+          def_expr_tr;
+        ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
+      | _ -> failwith "not a valid expr def no start ;;"
+
+let convert_ast = function
+  | Node [
+      Token (DoubleSemicolon);
+      tr;
+    ]
+  | tr -> convert_expr_definition_no_start_double_semicolon tr
+
 let convert parse_tr =
-  convert_expr parse_tr
+  convert_ast parse_tr
