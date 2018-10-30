@@ -28,7 +28,7 @@ let convert_infix = function
 
 let convert_pattern = function
   | Token (Token.LowercaseIdent ident_name) ->
-    ValueName (ident_name)
+    ValueNamePattern (ident_name)
   | _ -> failwith "not a valid pattern"
 
 let rec get_patterns one_or_more_patterns acc =

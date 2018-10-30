@@ -638,7 +638,7 @@ let ast_converter_tests = Ast.[
     "let x = 1 in x + 100"
     [Expr (LetBinding (
       VarAssignment (
-        ValueName "x",
+        ValueNamePattern "x",
         Constant (Int 1)
       ),
       InfixOp (
@@ -653,7 +653,7 @@ let ast_converter_tests = Ast.[
     "let x = 1 in x - 100 - 200"
     [Expr (LetBinding (
         VarAssignment (
-          ValueName "x",
+          ValueNamePattern "x",
           Constant (Int 1)
         ),
         InfixOp (
@@ -672,7 +672,7 @@ let ast_converter_tests = Ast.[
     "let x = 1 in (x - 100) - (200 - x)"
     [Expr (LetBinding (
         VarAssignment (
-          ValueName "x",
+          ValueNamePattern "x",
           Constant (Int 1)
         ),
         InfixOp (
@@ -694,7 +694,7 @@ let ast_converter_tests = Ast.[
     "let x = 1 in (x - 100 - 300) - (200 - x)"
     [Expr (LetBinding (
           VarAssignment (
-            ValueName "x",
+            ValueNamePattern "x",
             Constant (Int 1)
           ),
           InfixOp (
@@ -726,9 +726,9 @@ let ast_converter_tests = Ast.[
         "x",
         true,
         [
-          ValueName "a";
-          ValueName "b";
-          ValueName "c";
+          ValueNamePattern "a";
+          ValueNamePattern "b";
+          ValueNamePattern "c";
         ],
         InfixOp (
           InfixOp (
@@ -802,7 +802,7 @@ let ast_converter_tests = Ast.[
     "anonymous function expression"
     "fun a b -> a + b"
     [Expr (Function (
-      [ValueName "a"; ValueName "b"],
+      [ValueNamePattern "a"; ValueNamePattern "b"],
       InfixOp (
         VarName "a", Plus, VarName "b"
       ))
@@ -904,7 +904,7 @@ let ast_converter_tests = Ast.[
         FunctionAssignment (
           "fact",
           true,
-          [ValueName "x";],
+          [ValueNamePattern "x";],
           Ternary (
             InfixOp(
               VarName "x",
@@ -938,17 +938,27 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "compilation module ast, single let decl"
     "let x = 1"
-    [LetDecl (VarAssignment (ValueName "x", Constant (Int 1)))];
+    [LetDecl (VarAssignment (ValueNamePattern "x", Constant (Int 1)))];
 
   make_ast_converter_test
     "compilation module ast, single let rec decl"
     "let rec id x = x"
-    [LetDecl (FunctionAssignment ("id", true, [ValueName "x"], VarName "x"))];
+    [LetDecl (FunctionAssignment (
+      "id",
+      true,
+      [ValueNamePattern "x"],
+      VarName "x"
+    ))];
 
   make_ast_converter_test
     "compilation module ast, single let rec decl"
     "let rec id x = x"
-    [LetDecl (FunctionAssignment ("id", true, [ValueName "x"], VarName "x"))];
+    [LetDecl (FunctionAssignment (
+      "id",
+      true,
+      [ValueNamePattern "x"],
+      VarName "x"
+    ))];
 
   make_ast_converter_test
     "compilation module ast, double expr decl, start/end ;;"
@@ -970,7 +980,7 @@ let ast_converter_tests = Ast.[
     [
       OpenDecl "Pervasives";
       LetDecl (VarAssignment (
-        ValueName "x",
+        ValueNamePattern "x",
         Constant (Int 1)
       ));
       Expr (FunctionCall (
@@ -994,7 +1004,7 @@ let ast_converter_tests = Ast.[
     [
       OpenDecl "Pervasives";
       LetDecl (VarAssignment (
-        ValueName "x",
+        ValueNamePattern "x",
         Constant (Int 1)
       ));
       OpenDecl "Pervasives";

@@ -10,7 +10,7 @@ let render_constant = function
   | Unit -> "null"
 
 let render_pattern = function
-  | ValueName name -> name
+  | ValueNamePattern name -> name
 
 let rec render_let_binding = function
   | VarAssignment (pat, expr) ->

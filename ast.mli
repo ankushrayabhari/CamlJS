@@ -17,7 +17,14 @@ type prefix_symbol =
   | Negation | NegationFloat
 
 type pattern =
-  | ValueName of string
+  | ValueNamePattern of string
+  | ConstantPattern of constant
+  | AliasPattern of pattern * string
+  | OrPattern of pattern * pattern
+  | ParenPattern of pattern
+  | ListPattern of pattern list
+  | ConsPattern of pattern * pattern
+  | CharRangePattern
 
 type let_binding =
   | VarAssignment of pattern * expr
