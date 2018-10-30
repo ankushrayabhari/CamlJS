@@ -112,10 +112,28 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
 
-let render = function
-  | [Expr expr] ->
-    Pervasives_js.impl ^
-    Pervasives_js.destructure ^
-    List_js.impl ^
-    render_expr expr
-  | _ -> failwith "render on other modules not implemented"
+let render_open_decl = function
+  | "Pervasives" -> Pervasives_js.destructure
+  | "List" -> List_js.destructure
+  | t -> failwith ("Open Decl not supported for " ^ t)
+
+let render_let_decl = function
+  | LetDecl let_bind -> render_let_binding let_bind
+  | _ -> failwith "Not a Let Decl"
+
+let render_module_items_list lst =
+  let (left, right) = List.fold_left (fun (left_body, right_body) el ->
+    match el with
+      | LetDecl let_bind ->
+        (left_body ^ render_let_binding let_bind ^ "{", right_body ^ "}")
+      | OpenDecl module_name ->
+        (left_body ^ render_open_decl module_name ^ "{", right_body ^ "}")
+      | Expr e ->
+        (left_body ^ render_expr e ^ ";", right_body)
+  ) ("", "") lst in
+  left ^ right
+
+let render ast =
+  Pervasives_js.impl ^
+  List_js.impl ^
+  render_module_items_list ((OpenDecl "Pervasives")::ast)
