@@ -78,6 +78,8 @@ and convert_one_or_more_if_expr acc = function
 and convert_expr = function
   | Token (Token.Int v) -> Constant (Int v)
 
+  | Token (Token.Float v) -> Constant (Float v)
+
   | Token (Token.EmptyList) -> Constant (EmptyList)
 
   | Token (Token.LowercaseIdent n) -> VarName n
