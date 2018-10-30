@@ -1,4 +1,5 @@
 B _build
+B _build/js_modules
 PKG oUnit
 PKG str
 PKG yojson
