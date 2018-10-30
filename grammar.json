@@ -59,6 +59,10 @@
       "tag": "infix"
     },
     {
+      "name": "DoubleSemicolon",
+      "regex": ";;"
+    },
+    {
       "name": "Append",
       "regex": "@",
       "tag": "infix"

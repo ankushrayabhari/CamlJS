@@ -125,6 +125,11 @@ let tokenizer_tests = Token.[
     "negation float expression"
     "~-.1."
     [NegationFloat; Float 1.];
+
+  make_tokenizer_test
+    "double semicolon expression"
+    ";;"
+    [DoubleSemicolon];
 ]
 
 let make_parser_test name program expected_tree =
