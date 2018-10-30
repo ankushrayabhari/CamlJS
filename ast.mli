@@ -24,7 +24,8 @@ type pattern =
   | ParenPattern of pattern
   | ListPattern of pattern list
   | ConsPattern of pattern * pattern
-  | CharRangePattern
+  | CharRangePattern of string * string
+  | IgnorePattern
 
 type let_binding =
   | VarAssignment of pattern * expr
@@ -42,7 +43,7 @@ and expr =
   | FunctionCall of expr * expr
   | ParenExpr of expr
   | ListExpr of expr list
-  | MatchExpr of (pattern * expr * expr option) list
+  | MatchExpr of expr * (pattern * expr * expr option) list
 
 type module_item =
   | LetDecl of let_binding

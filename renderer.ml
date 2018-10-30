@@ -13,8 +13,7 @@ let render_pattern = function
   | ValueNamePattern name -> name
 
 let rec render_let_binding = function
-  | VarAssignment (pat, expr) ->
-      let var_name = render_pattern pat in
+  | VarAssignment (ValueNamePattern var_name, expr) ->
       let assignment_expr = render_expr expr in
       "let " ^ var_name ^ " = " ^ assignment_expr ^  ";"
   | FunctionAssignment (function_name, _, arg_list, body_expr) ->
@@ -98,6 +97,58 @@ and render_list_expr lst =
 and render_module_accessor module_name value_name =
   module_name ^ "." ^ value_name
 
+and get_pattern_bindings target_var pattern =
+  match pattern with
+  | ListPattern lst ->
+    let (_, bindings, constant_assertions) =
+      List.fold_left (fun (idx, bindings, constant_assertions) pat ->
+        let (r, c) =
+          get_pattern_bindings (target_var ^ "[" ^ (string_of_int idx) ^ "]") pat
+        in
+        (idx + 1, bindings@r, constant_assertions@c)
+      ) (0, [], []) lst
+    in
+    (bindings, constant_assertions)
+  | _ -> failwith "asdf"
+
+and render_match_expr target_expr pat_lst =
+  let rendered_target =
+    Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
+  let rendered_match_cases = List.fold_left (fun acc (pat, expr, _) ->
+    let rendered_value = render_expr expr in
+    let (bindings, constants) = get_pattern_bindings "TARGET" pat in
+    let rendered_bindings =
+      List.fold_left (fun acc (target_var, target_value) ->
+        acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
+      ) "" bindings
+    in
+    let rendered_constant_bindings =
+      List.fold_left (fun acc (target_var, target_value, _) ->
+        acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
+      ) "" constants
+    in
+    let rendered_binding_assertions =
+      List.fold_left (fun acc (target_var, _) ->
+        acc ^ (Printf.sprintf "if (%s === undefined) { throw new Error('Match failure')};" target_var)
+      ) "" bindings
+    in
+    let rendered_constant_binding_assertions =
+      List.fold_left (fun acc (target_var, _, expected_value) ->
+        acc ^ (Printf.sprintf "if (Pervasives.compare(%s, %s) !== 0) { throw new Error('Match failure')};" target_var expected_value)
+      ) "" constants
+    in
+    acc ^ Printf.sprintf "try {%s; %s; %s; %s; return %s;} catch (err) {};"
+      rendered_bindings
+      rendered_constant_bindings
+      rendered_binding_assertions
+      rendered_constant_binding_assertions
+      rendered_value
+  ) "" pat_lst
+  in
+  Printf.sprintf "(() => {%s;%s;throw new Error('Match Failure');})()"
+    rendered_target
+    rendered_match_cases
+
 and render_expr = function
   | Constant c -> render_constant c
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
@@ -111,6 +162,8 @@ and render_expr = function
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
+  | MatchExpr (expr, lst) -> render_match_expr expr lst
+
 
 let render_open_decl = function
   | "Pervasives" -> Pervasives_js.destructure
