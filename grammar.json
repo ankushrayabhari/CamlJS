@@ -180,8 +180,35 @@
     }
   ],
   "productions": {
+    "ModuleItems": [
+      ["DoubleSemicolon", "ExprDefinitionNotStartingWithDoubleSemicolon"],
+      ["ExprDefinitionNotStartingWithDoubleSemicolon"]
+    ],
+    "ExprDefinitionNotStartingWithDoubleSemicolon": [
+      ["Expr"],
+      ["Expr", "DoubleSemicolon"],
+      ["Definition"],
+      ["Definition", "DoubleSemicolon"],
+      ["Expr", "OneOrMoreDefinitionOrExpr"],
+      ["Definition", "OneOrMoreDefinitionOrExpr"],
+      ["Expr", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"],
+      ["Definition", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"]
+    ],
+    "OneOrMoreDefinitionOrExpr": [
+      ["DoubleSemicolon", "Definition", "OneOrMoreDefinitionOrExpr"],
+      ["Definition", "OneOrMoreDefinitionOrExpr"],
+      ["DoubleSemicolon", "Expr", "OneOrMoreDefinitionOrExpr"],
+      ["DoubleSemicolon", "Definition"],
+      ["DoubleSemicolon", "Expr"],
+      ["Definition"]
+    ],
     "Expr": [
       ["LetExpr"]
+    ],
+    "Definition": [
+      ["Let", "LetBinding"],
+      ["Let", "Rec", "LetBinding"],
+      ["Open", "ModulePath"]
     ],
     "Pattern": [
       ["LowercaseIdent"]
@@ -257,10 +284,13 @@
       ["IfExpr"],
       ["OneOrMoreIfExprWithSemicolon", "SemiColon", "IfExpr"]
     ],
+    "ModulePath": [
+      ["CapitalizedIdent"]
+    ],
     "Constant": [
       ["Int"],
       ["LowercaseIdent"],
-      ["CapitalizedIdent", "Period", "LowercaseIdent"],
+      ["ModulePath", "Period", "LowercaseIdent"],
       ["EmptyList"]
     ]
   }
