@@ -59,6 +59,16 @@
       "tag": "infix"
     },
     {
+      "name": "And",
+      "regex": "&&",
+      "tag": "infix"
+    },
+    {
+      "name": "Or",
+      "regex": "||",
+      "tag": "infix"
+    },
+    {
       "name": "DoubleSemicolon",
       "regex": ";;"
     },
@@ -127,27 +137,12 @@
       "regex": "\\."
     },
     {
-      "name": "And",
-      "regex": "&&",
-      "tag": "infix"
-    },
-    {
-      "name": "Or",
-      "regex": "||",
-      "tag": "infix"
-    },
-    {
       "name": "Open",
       "regex": "open"
     },
     {
       "name": "If",
       "regex": "if"
-    },
-    {
-      "name": "Bool",
-      "parameter": "bool",
-      "regex": "true\\|false"
     },
     {
       "name": "Then",
@@ -172,6 +167,11 @@
     {
       "name": "In",
       "regex": "in"
+    },
+    {
+      "name": "Bool",
+      "parameter": "bool",
+      "regex": "true\\|false"
     },
     {
       "name": "Float",
