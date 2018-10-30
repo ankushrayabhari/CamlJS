@@ -127,6 +127,10 @@
       "regex": "\\."
     },
     {
+      "name": "Open",
+      "regex": "open"
+    },
+    {
       "name": "If",
       "regex": "if"
     },

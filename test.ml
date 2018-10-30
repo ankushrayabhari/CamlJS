@@ -130,6 +130,11 @@ let tokenizer_tests = Token.[
     "double semicolon expression"
     ";;"
     [DoubleSemicolon];
+
+  make_tokenizer_test
+    "open module"
+    "open List"
+    [Open; CapitalizedIdent "List"];
 ]
 
 let make_parser_test name program expected_tree =
