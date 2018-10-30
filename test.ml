@@ -264,6 +264,278 @@ let parser_tests = Parser.(Tokenizer.[
       ];
       Token (EmptyList);
     ]);
+
+  make_parser_test
+    "compilation unit, start with ;;, single expr"
+    ";;1+1"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Token (Int 1);
+        Token (Plus);
+        Token (Int 1);
+      ];
+    ]);
+
+  make_parser_test
+    "compilation unit, end with ;;, single expr"
+    "1+1;;"
+    (Node [
+      Node [
+        Token (Int 1);
+        Token (Plus);
+        Token (Int 1);
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+  make_parser_test
+    "compilation unit, start/end with ;;, single expr"
+    ";;1+1;;"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (Plus);
+          Token (Int 1);
+        ];
+        Token (DoubleSemicolon);
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, start/end with ;;, double expr"
+    ";;1+1;;1+1;;"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (Plus);
+          Token (Int 1);
+        ];
+        Node [
+          Token (DoubleSemicolon);
+          Node [
+            Token (Int 1);
+            Token (Plus);
+            Token (Int 1);
+          ];
+        ];
+        Token (DoubleSemicolon);
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, start with ;;, double expr"
+    ";;1+1;;1+1"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (Plus);
+          Token (Int 1);
+        ];
+        Node [
+          Token (DoubleSemicolon);
+          Node [
+            Token (Int 1);
+            Token (Plus);
+            Token (Int 1);
+          ];
+        ];
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, end with ;;, double expr"
+    "1+1;;1+1;;"
+    (Node [
+      Node [
+        Token (Int 1);
+        Token (Plus);
+        Token (Int 1);
+      ];
+      Node [
+        Token (DoubleSemicolon);
+        Node [
+          Token (Int 1);
+          Token (Plus);
+          Token (Int 1);
+        ];
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+  make_parser_test
+    "compilation unit, end with ;;, double expr"
+    "1+1;;1+1;;"
+    (Node [
+      Node [
+        Token (Int 1);
+        Token (Plus);
+        Token (Int 1);
+      ];
+      Node [
+        Token (DoubleSemicolon);
+        Node [
+          Token (Int 1);
+          Token (Plus);
+          Token (Int 1);
+        ];
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+  make_parser_test
+    "compilation unit, start with ;;, single Definition"
+    ";;open List"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Token (Open);
+        Token (CapitalizedIdent "List");
+      ];
+    ]);
+
+  make_parser_test
+    "compilation unit, end with ;;, single expr"
+    "let rec x = 1;;"
+    (Node [
+      Node [
+        Token (Let);
+        Token (Rec);
+        Node [
+          Token (LowercaseIdent "x");
+          Token (Equal);
+          Token (Int 1);
+        ];
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+  make_parser_test
+    "compilation unit, start/end with ;;, single expr"
+    ";;let rec x = 1;;"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Let);
+          Token (Rec);
+          Node [
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Int 1);
+          ];
+        ];
+        Token (DoubleSemicolon);
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, start/end with ;;, double definition"
+    ";;let x = 1;;let rec x = 1;;"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Let);
+          Node [
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Int 1);
+          ];
+        ];
+        Node [
+          Token (DoubleSemicolon);
+          Node [
+            Token (Let);
+            Token (Rec);
+            Node [
+              Token (LowercaseIdent "x");
+              Token (Equal);
+              Token (Int 1);
+            ];
+          ];
+        ];
+        Token (DoubleSemicolon);
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, start with ;;, double definition"
+    ";;let x = 1;;let x = 1"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Let);
+          Node [
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Int 1);
+          ];
+        ];
+        Node [
+          Token (DoubleSemicolon);
+          Node [
+            Token (Let);
+            Node [
+              Token (LowercaseIdent "x");
+              Token (Equal);
+              Token (Int 1);
+            ];
+          ];
+        ];
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, end with ;;, double definition"
+    "open List;;let x = 1;;"
+    (Node [
+      Node [
+        Token (Open);
+        Token (CapitalizedIdent "List");
+      ];
+      Node [
+        Token (DoubleSemicolon);
+        Node [
+          Token (Let);
+          Node [
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Int 1);
+          ];
+        ];
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+  make_parser_test
+    "compilation unit, no ;;, double definition"
+    "let x = 1\nlet x = 1"
+    (Node [
+      Node [
+        Token (Let);
+        Node [
+          Token (LowercaseIdent "x");
+          Token (Equal);
+          Token (Int 1);
+        ];
+      ];
+      Node [
+        Token (Let);
+        Node [
+          Token (LowercaseIdent "x");
+          Token (Equal);
+          Token (Int 1);
+        ];
+      ];
+    ]);
 ])
 
 let make_ast_converter_test name program expected_tree =
