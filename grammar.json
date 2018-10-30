@@ -312,6 +312,7 @@
     ],
     "Constant": [
       ["Int"],
+      ["Bool"],
       ["LowercaseIdent"],
       ["ModulePath", "Period", "LowercaseIdent"],
       ["EmptyList"]
