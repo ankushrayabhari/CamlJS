@@ -42,14 +42,38 @@ const Pervasives = {
   char_of_int: String.fromCharCode,
   ignore: a => undefined,
   string_of_bool: a => a.toString(),
-  bool_of_string: a => {if (a === 'true') {return true;} else if (a === 'false') {return false;} else {throw new Error("invalid argument")}},
+  bool_of_string: a => {
+    if (a === 'true') {
+      return true;
+    } else if (a === 'false') {
+      return false;
+    } else {
+      throw new Error("invalid argument")
+    }
+  },
   bool_of_string_opt: a => a === 'true' ? true : a === 'false' ? false : null,
   string_of_int: a => (a).toString(),
-  int_of_string: a => { let v = Number.parseInt(a); if (Number.isNaN(v)) {throw new Error("int_of_string")} else return v;},
-  int_of_string_opt: a => { let v = Number.parseInt(a); return Number.isNaN(v) ? null : v},
+  int_of_string: a => {
+    let v = Number.parseInt(a);
+    if (Number.isNaN(v)) {
+      throw new Error("int_of_string")
+    } else return v;
+  },
+  int_of_string_opt: a => {
+    let v = Number.parseInt(a);
+    return Number.isNaN(v) ? null : v;
+  },
   string_of_float: a => (a).toString(),
-  float_of_string: a => { let v = Number.parseFloat(a); if (Number.isNaN(v)) {throw new Error("float_of_string")} else return v;},
-  float_of_string_opt: a => { let v = Number.parseFloat(a); return Number.isNaN(v) ? null : v},
+  float_of_string: a => {
+    let v = Number.parseFloat(a);
+    if (Number.isNaN(v)) {
+      throw new Error("float_of_string")
+    } else return v;
+  },
+  float_of_string_opt: a => {
+    let v = Number.parseFloat(a);
+    return Number.isNaN(v) ? null : v
+  },
   print_char: a => (process.stdout.write(a), undefined),
   print_string: a => (process.stdout.write(a), undefined),
   print_int: a => (process.stdout.write(string_of_int(a)), undefined),
