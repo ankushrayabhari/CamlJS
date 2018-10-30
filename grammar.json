@@ -127,12 +127,27 @@
       "regex": "\\."
     },
     {
+      "name": "And",
+      "regex": "&&",
+      "tag": "infix"
+    },
+    {
+      "name": "Or",
+      "regex": "||",
+      "tag": "infix"
+    },
+    {
       "name": "Open",
       "regex": "open"
     },
     {
       "name": "If",
       "regex": "if"
+    },
+    {
+      "name": "Bool",
+      "parameter": "bool",
+      "regex": "true\\|false"
     },
     {
       "name": "Then",
@@ -237,6 +252,14 @@
     "IfExpr": [
       ["If", "IfExpr", "Then", "IfExpr", "Else", "IfExpr"],
       ["If", "IfExpr", "Then", "IfExpr"],
+      ["OrExpr"]
+    ],
+    "OrExpr": [
+      ["OrExpr", "Or", "AndExpr"],
+      ["AndExpr"]
+    ],
+    "AndExpr": [
+      ["AndExpr", "And", "ComparisonExpr"],
       ["ComparisonExpr"]
     ],
     "ComparisonExpr": [

@@ -135,6 +135,31 @@ let tokenizer_tests = Token.[
     "open module"
     "open List"
     [Open; CapitalizedIdent "List"];
+
+  make_tokenizer_test
+    "simple bool test, tokenizer"
+    "let x = true in ()"
+    [Let; LowercaseIdent "x"; Equal; Bool true; In; LParen; RParen];
+
+  make_tokenizer_test
+    "and test, tokenizer"
+    "let x = (true && false)"
+    [Let; LowercaseIdent "x"; Equal; LParen; Bool true; And; Bool false; RParen];
+
+  make_tokenizer_test
+    "or test, tokenizer"
+    "let bool_expr = true || false in \nlet x = 1"
+    [Let; LowercaseIdent "bool_expr"; Equal; Bool true; Or; Bool false; In; Let; LowercaseIdent "x"; Equal; Int 1];
+
+  make_tokenizer_test
+    "not test, tokenizer"
+    "let x = not false"
+    [Let; LowercaseIdent "x"; Equal; LowercaseIdent "not"; Bool false];
+
+  make_tokenizer_test
+    "complicated and/or/not test, tokenizer"
+    "let x = not (true && false)"
+    [Let; LowercaseIdent "x"; Equal; LowercaseIdent "not"; LParen; Bool true; And; Bool false; RParen];
 ]
 
 let make_parser_test name program expected_tree =
@@ -536,6 +561,37 @@ let parser_tests = Parser.(Tokenizer.[
         ];
       ];
     ]);
+
+    make_parser_test
+        "and/or operator precedence, parse tree"
+        (*&& should be applied before ||, so &&
+        node needs to be farther down parse tree*)
+        "true || true && false"
+        (Node [
+            Token (Bool true);
+            Token (Or);
+            Node [
+              Token (Bool true);
+              Token (And);
+              Token (Bool false)
+            ];
+          ]);
+
+    make_parser_test
+      "and/or/not operator precedence, parse tree"
+      "not true || true && false"
+      (Node [
+          Node [
+            Token (LowercaseIdent "not");
+            Token (Bool true);
+          ];
+          Token (Or);
+          Node [
+            Token (Bool true);
+            Token (And);
+            Token (Bool false)
+          ];
+        ]);
 ])
 
 let make_ast_converter_test name program expected_tree =
