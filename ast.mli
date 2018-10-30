@@ -2,8 +2,8 @@ type constant =
   | Int of int
   | EmptyList
   | Bool of bool
-  | String of string
-  | Char of char
+  | StringLiteral of string
+  | CharLiteral of char
   | Float of float
   | Unit
 

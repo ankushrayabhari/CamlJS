@@ -5,8 +5,8 @@ let render_constant = function
   | EmptyList -> "[]"
   | Bool b -> string_of_bool b
   | Float f -> string_of_float f
-  | String s -> s
-  | Char c -> String.make 1 c
+  | StringLiteral s -> s
+  | CharLiteral c -> String.make 1 c
   | Unit -> "null"
 
 let render_pattern = function
@@ -115,6 +115,7 @@ and render_expr = function
 let render_open_decl = function
   | "Pervasives" -> Pervasives_js.destructure
   | "List" -> List_js.destructure
+  | "Char" -> Char_js.destructure
   | t -> failwith ("Open Decl not supported for " ^ t)
 
 let render_let_decl = function
@@ -136,4 +137,5 @@ let render_module_items_list lst =
 let render ast =
   Pervasives_js.impl ^
   List_js.impl ^
+  Char_js.impl ^
   render_module_items_list ((OpenDecl "Pervasives")::ast)
