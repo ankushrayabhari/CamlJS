@@ -3,7 +3,7 @@ type constant =
   | EmptyList
   | Bool of bool
   | StringLiteral of string
-  | CharLiteral of char
+  | CharLiteral of string
   | Float of float
   | Unit
 

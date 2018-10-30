@@ -25,6 +25,7 @@ let convert_infix = function
   | Token.Equal -> Equal
   | Token.Append -> Append
   | Token.Cons -> Cons
+  | Token.Concat -> Concat
   | t -> failwith (
       "infix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)
@@ -79,6 +80,8 @@ and convert_expr = function
   | Token (Token.Int v) -> Constant (Int v)
 
   | Token (Token.Float v) -> Constant (Float v)
+
+  | Token (Token.StringLiteral v) -> Constant (StringLiteral v)
 
   | Token (Token.EmptyList) -> Constant (EmptyList)
 

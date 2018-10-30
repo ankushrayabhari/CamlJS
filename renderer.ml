@@ -6,7 +6,7 @@ let render_constant = function
   | Bool b -> string_of_bool b
   | Float f -> string_of_float f
   | StringLiteral s -> s
-  | CharLiteral c -> String.make 1 c
+  | CharLiteral c -> c
   | Unit -> "null"
 
 let rec render_let_binding = function

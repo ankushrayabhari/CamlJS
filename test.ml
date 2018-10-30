@@ -2,11 +2,71 @@ open OUnit2
 
 let make_tokenizer_test name program expected_value =
   name >:: (fun _ ->
-    let tokenized_program = Tokenizer.tokenize program in
+    let tokenized_program = try Tokenizer.tokenize program with _ -> [] in
     assert_equal expected_value tokenized_program
   )
 
 let tokenizer_tests = Token.[
+  make_tokenizer_test
+    "concatenate two strings"
+    "\"a\" ^ \"b\""
+    [StringLiteral "\"a\""; Concat; StringLiteral "\"b\""];
+
+  make_tokenizer_test
+    "empty string"
+    "\"\""
+    [StringLiteral "\"\""];
+
+  make_tokenizer_test
+    "string a"
+    "\"a\""
+    [StringLiteral "\"a\""];
+
+  make_tokenizer_test
+    "two strings"
+    "\"a\"     \"b\""
+    [StringLiteral "\"a\""; StringLiteral "\"b\""];
+
+  make_tokenizer_test
+    "string newline char"
+    "\"a\\n\""
+    [StringLiteral "\"a\\n\""];
+
+  make_tokenizer_test
+    "string abc"
+    "\"abc\""
+    [StringLiteral "\"abc\""];
+
+  make_tokenizer_test
+    "char a"
+    "'a'"
+    [CharLiteral "'a'"];
+
+  make_tokenizer_test
+    "char \\n"
+    "'\\n'"
+    [CharLiteral "'\\n'"];
+
+  make_tokenizer_test
+    "char \\r"
+    "'\r'"
+    [];
+
+  make_tokenizer_test
+    "char \\t"
+    "'\t'"
+    [];
+
+  make_tokenizer_test
+    "char \\n"
+    "'\\n'"
+    [CharLiteral "'\\n'"];
+
+  make_tokenizer_test
+    "char \\r"
+    "'\b'"
+    [];
+
   make_tokenizer_test
     "let assign test"
     "let x = 1 in x + 100"
@@ -175,7 +235,21 @@ let make_parser_test name program expected_tree =
     assert_equal expected_tree parse_tr
   )
 
+
 let parser_tests = Parser.(Tokenizer.[
+  make_parser_test
+    "concat 2 strings"
+    "\"a\" ^ \"b\";;"
+    (Node [
+      Node [
+        Token (StringLiteral "\"a\"");
+        Token (Concat);
+        Token (StringLiteral "\"b\"");
+      ];
+      Token (DoubleSemicolon);
+    ]);
+
+
   make_parser_test
     "append three lists, right associativity"
     "[]@[]@[]"
@@ -711,6 +785,21 @@ let make_ast_converter_test name program expected_tree =
   )
 
 let ast_converter_tests = Ast.[
+  make_ast_converter_test
+    "let concat 2 strings test"
+    "let x = \"a\" in x ^ \"b\""
+    [Expr (LetBinding (
+      VarAssignment (
+        ValueNamePattern "x",
+        Constant (StringLiteral "\"a\"")
+      ),
+      InfixOp (
+        VarName "x",
+        Concat,
+        Constant (StringLiteral "\"b\"")
+      )
+    ))];
+
   make_ast_converter_test
     "basic_test"
     "let x = 1 in x + 100"

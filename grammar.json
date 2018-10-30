@@ -78,6 +78,11 @@
       "tag": "infix"
     },
     {
+      "name": "Concat",
+      "regex": "\\^",
+      "tag": "infix"
+    },
+    {
       "name": "StartList",
       "regex": "\\["
     },
@@ -184,6 +189,16 @@
       "regex": "[0-9]+"
     },
     {
+      "name": "CharLiteral",
+      "parameter": "string",
+      "regex": "'\\(\\\\.\\|[^\"\n\\'\t\r\b]\\)'"
+    },
+    {
+      "name": "StringLiteral",
+      "parameter": "string",
+      "regex": "\"\\(\\\\.\\|[^\"\n]\\)*\""
+    },
+    {
       "name": "LowercaseIdent",
       "parameter": "string",
       "regex": "\\([a-z]\\|_\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
@@ -273,6 +288,7 @@
     ],
     "AppendExpr": [
       ["ConsExpr", "Append", "AppendExpr"],
+      ["ConsExpr", "Concat", "AppendExpr"],
       ["ConsExpr"]
     ],
     "ConsExpr": [
@@ -319,6 +335,8 @@
       ["Int"],
       ["Bool"],
       ["Float"],
+      ["CharLiteral"],
+      ["StringLiteral"],
       ["LowercaseIdent"],
       ["ModulePath", "Period", "LowercaseIdent"],
       ["EmptyList"]
