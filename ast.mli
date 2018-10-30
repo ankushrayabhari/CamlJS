@@ -42,6 +42,7 @@ and expr =
   | FunctionCall of expr * expr
   | ParenExpr of expr
   | ListExpr of expr list
+  | MatchExpr of (pattern * expr * expr option) list
 
 type module_item =
   | LetDecl of let_binding
