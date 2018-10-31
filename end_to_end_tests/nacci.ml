@@ -1,5 +1,7 @@
 let rec nacci n =
-  if n < 2 then 1 else
-  nacci (n - 1) + nacci (n - 2);;
+  match n with
+  | 1 -> 1
+  | 2 -> 1
+  | n -> nacci (n - 1) + nacci (n - 2);;
 
-print_string (string_of_int (nacci 5))
+print_endline (string_of_int (nacci 10))
