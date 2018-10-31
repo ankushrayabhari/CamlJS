@@ -138,8 +138,28 @@
       "regex": ";"
     },
     {
+      "name": "VerticalBar",
+      "regex": "|"
+    },
+    {
       "name": "Period",
       "regex": "\\."
+    },
+    {
+      "name": "Match",
+      "regex": "match"
+    },
+    {
+      "name": "With",
+      "regex": "with"
+    },
+    {
+      "name": "When",
+      "regex": "when"
+    },
+    {
+      "name": "Ignore",
+      "regex": "_"
     },
     {
       "name": "Open",
@@ -201,7 +221,7 @@
     {
       "name": "LowercaseIdent",
       "parameter": "string",
-      "regex": "\\([a-z]\\|_\\)\\([A-Za-z0-9]\\|_\\|'\\)*"
+      "regex": "[a-z]\\([A-Za-z0-9]\\|_\\|'\\)*"
     },
     {
       "name": "CapitalizedIdent",

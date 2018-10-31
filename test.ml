@@ -223,6 +223,18 @@ let tokenizer_tests = Token.[
     "let x = not (true && false)"
     [Let; LowercaseIdent "x"; Equal; LowercaseIdent "not"; LParen; Bool true;
      And; Bool false; RParen];
+
+  make_tokenizer_test
+    "pattern match expression"
+    "match x with | 1 when x = 1 -> true | _ -> false"
+    [Match; LowercaseIdent "x"; With; VerticalBar; Int 1; When;
+     LowercaseIdent "x"; Equal; Int 1; FunctionArrow; Bool true; VerticalBar;
+     Ignore; FunctionArrow; Bool false;];
+
+  make_tokenizer_test
+    "pattern match expression in a let assignment"
+    "let _ = 'c'"
+    [Let; Ignore; Equal; CharLiteral "'c'";];
 ]
 
 let make_parser_test name program expected_tree =
