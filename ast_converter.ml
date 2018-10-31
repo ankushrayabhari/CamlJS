@@ -10,9 +10,13 @@ let convert_prefix = function
 
 let convert_infix = function
   | Token.Plus -> Plus
+  | Token.PlusFloat -> PlusFloat
   | Token.Minus -> Minus
+  | Token.MinusFloat -> MinusFloat
   | Token.Times -> Times
+  | Token.TimesFloat -> TimesFloat
   | Token.Divide -> Divide
+  | Token.DivideFloat -> DivideFloat
   | Token.GreaterThan -> GreaterThan
   | Token.LessThan -> LessThan
   | Token.GreaterThanOrEqual -> GreaterThanOrEqual
@@ -73,6 +77,8 @@ and convert_one_or_more_if_expr acc = function
 
 and convert_expr = function
   | Token (Token.Int v) -> Constant (Int v)
+
+  | Token (Token.Float v) -> Constant (Float v)
 
   | Token (Token.EmptyList) -> Constant (EmptyList)
 
