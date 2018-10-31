@@ -304,21 +304,25 @@ let rec tokenize_rec str start tok_lst =
   let start_index = start + (String.length (Str.matched_string str)) in
   if start_index >= (String.length str) then tok_lst |> List.rev
   else
-    let token = List.fold_left (fun acc curr_tok -> match acc with
-        | (Some _, _) -> acc
-        | (None, _) ->
-          let regex = regexp_of_token curr_tok in
-          if Str.string_match regex str start_index
-          then
-            let matched_str = Str.matched_string str in
-            let len = String.length matched_str in
-            (Some (parametrize_tok matched_str curr_tok), len)
-          else (None, -1)
-      ) (None, -1) precedence
+    let matched_tokens =
+      List.map (fun curr_tok ->
+        let regex = regexp_of_token curr_tok in
+        if Str.string_match regex str start_index
+        then
+          let matched_str = Str.matched_string str in
+          Some (parametrize_tok matched_str curr_tok, String.length matched_str)
+        else None
+      ) precedence
+      |> List.filter (fun el -> el <> None)
+      |> List.stable_sort (fun el1 el2 ->
+          match (el1, el2) with
+          | (Some (_, len1), Some (_, len2)) -> compare len2 len1
+          | _ -> failwith "should not contain none"
+        )
     in
-    match token with
-    | (Some tok, len) -> tokenize_rec str (start_index + len) (tok::tok_lst)
-    | (None, _) ->
+    match matched_tokens with
+    | Some (tok, len)::t -> tokenize_rec str (start_index + len) (tok::tok_lst)
+    | _ ->
         failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
 
 let tokenize str =

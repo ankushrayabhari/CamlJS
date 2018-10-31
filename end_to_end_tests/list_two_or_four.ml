@@ -2,7 +2,7 @@ let lst1 = [1;2;3;4;5]
 let lst2 = 1::2::3::4::5::[]
 let lst3 = [1]@[2;3;4]
 
-let two_or_four_elements = function
+let two_or_four_elements lst = match lst with
   | _::_::[] -> true
   | _::_::_::_::[] -> true
   | _ -> false

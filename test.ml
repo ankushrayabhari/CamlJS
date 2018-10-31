@@ -750,27 +750,11 @@ let parser_tests = Parser.(Tokenizer.[
       ];
     ]);
 
-    make_parser_test
-        "and/or operator precedence, parse tree"
-        "true || true && false"
-        (Node [
-            Token (Bool true);
-            Token (Or);
-            Node [
-              Token (Bool true);
-              Token (And);
-              Token (Bool false)
-            ];
-          ]);
-
-    make_parser_test
-      "and/or/not operator precedence, parse tree"
-      "not true || true && false"
+  make_parser_test
+      "and/or operator precedence, parse tree"
+      "true || true && false"
       (Node [
-          Node [
-            Token (LowercaseIdent "not");
-            Token (Bool true);
-          ];
+          Token (Bool true);
           Token (Or);
           Node [
             Token (Bool true);
@@ -779,183 +763,199 @@ let parser_tests = Parser.(Tokenizer.[
           ];
         ]);
 
-    make_parser_test
-      "and operator associativity, parse tree"
-      "true && true && false"
-      (Node [
+  make_parser_test
+    "and/or/not operator precedence, parse tree"
+    "not true || true && false"
+    (Node [
+        Node [
+          Token (LowercaseIdent "not");
+          Token (Bool true);
+        ];
+        Token (Or);
+        Node [
           Token (Bool true);
           Token (And);
-          Node [
-            Token (Bool true);
-            Token (And);
-            Token (Bool false)
-          ];
-        ]);
+          Token (Bool false)
+        ];
+      ]);
 
-    make_parser_test
-      "or operator associativity, parse tree"
-      "true || true || false"
-      (Node [
+  make_parser_test
+    "and operator associativity, parse tree"
+    "true && true && false"
+    (Node [
+        Token (Bool true);
+        Token (And);
+        Node [
+          Token (Bool true);
+          Token (And);
+          Token (Bool false)
+        ];
+      ]);
+
+  make_parser_test
+    "or operator associativity, parse tree"
+    "true || true || false"
+    (Node [
+        Token (Bool true);
+        Token (Or);
+        Node [
           Token (Bool true);
           Token (Or);
-          Node [
-            Token (Bool true);
-            Token (Or);
-            Token (Bool false)
-          ];
-        ]);
+          Token (Bool false)
+        ];
+      ]);
 
-    make_parser_test
-      "Simple Unit test, parse tree"
-      "let x = ()"
-      (Node [
-          Token (Let);
-          Node[
-            Token (LowercaseIdent "x");
-            Token (Equal);
-            Token (Unit);
-          ];
-        ]);
-
-    make_parser_test
-      "pattern matching precedence"
-      "let (1)::[2;_;] as x = []"
-      (Node [
+  make_parser_test
+    "Simple Unit test, parse tree"
+    "let x = ()"
+    (Node [
         Token (Let);
+        Node[
+          Token (LowercaseIdent "x");
+          Token (Equal);
+          Token (Unit);
+        ];
+      ]);
+
+  make_parser_test
+    "pattern matching precedence"
+    "let (1)::[2;_;] as x = []"
+    (Node [
+      Token (Let);
+      Node [
         Node [
           Node [
             Node [
+              Token (LParen);
+              Token (Int 1);
+              Token (RParen);
+            ];
+            Token (Cons);
+            Node [
+              Token (StartList);
               Node [
-                Token (LParen);
-                Token (Int 1);
-                Token (RParen);
-              ];
-              Token (Cons);
-              Node [
-                Token (StartList);
-                Node [
-                  Token (Int 2);
-                  Token (SemiColon);
-                  Token (Ignore);
-                ];
+                Token (Int 2);
                 Token (SemiColon);
-                Token (EndList);
+                Token (Ignore);
               ];
-            ];
-            Token (As);
-            Token (LowercaseIdent "x");
-          ];
-          Token (Equal);
-          Token (EmptyList);
-        ];
-      ]);
-
-    make_parser_test
-      "pattern matching cons associativity"
-      "let 1::2::3 = []"
-      (Node [
-        Token (Let);
-        Node [
-          Node [
-            Token (Int 1);
-            Token (Cons);
-            Node [
-              Token (Int 2);
-              Token (Cons);
-              Token (Int 3);
+              Token (SemiColon);
+              Token (EndList);
             ];
           ];
-          Token (Equal);
-          Token (EmptyList);
+          Token (As);
+          Token (LowercaseIdent "x");
         ];
-      ]);
-
-    make_parser_test
-      "match expression on lists"
-      "match [] with h::t -> true | [] -> false"
-      (Node [
-        Token (Match);
+        Token (Equal);
         Token (EmptyList);
-        Token (With);
+      ];
+    ]);
+
+  make_parser_test
+    "pattern matching cons associativity"
+    "let 1::2::3 = []"
+    (Node [
+      Token (Let);
+      Node [
         Node [
+          Token (Int 1);
+          Token (Cons);
           Node [
-            Token (LowercaseIdent "h");
+            Token (Int 2);
             Token (Cons);
-            Token (LowercaseIdent "t");
-          ];
-          Token (FunctionArrow);
-          Token (Bool true);
-          Node [
-            Token (VerticalBar);
-            Token (EmptyList);
-            Token (FunctionArrow);
-            Token (Bool false);
+            Token (Int 3);
           ];
         ];
-      ]);
+        Token (Equal);
+        Token (EmptyList);
+      ];
+    ]);
 
-    make_parser_test
-      "match expression on floats, starting cases with vertical bar"
-      "match 1.0 with | 1.5 -> true | _ -> false"
-      (Node [
+  make_parser_test
+    "match expression on lists"
+    "match [] with h::t -> true | [] -> false"
+    (Node [
+      Token (Match);
+      Token (EmptyList);
+      Token (With);
+      Node [
+        Node [
+          Token (LowercaseIdent "h");
+          Token (Cons);
+          Token (LowercaseIdent "t");
+        ];
+        Token (FunctionArrow);
+        Token (Bool true);
+        Node [
+          Token (VerticalBar);
+          Token (EmptyList);
+          Token (FunctionArrow);
+          Token (Bool false);
+        ];
+      ];
+    ]);
+
+  make_parser_test
+    "match expression on floats, starting cases with vertical bar"
+    "match 1.0 with | 1.5 -> true | _ -> false"
+    (Node [
+      Token (Match);
+      Token (Float 1.0);
+      Token (With);
+      Node [
+        Token (VerticalBar);
+        Token (Float 1.5);
+        Token (FunctionArrow);
+        Token (Bool true);
+        Node [
+          Token (VerticalBar);
+          Token (Ignore);
+          Token (FunctionArrow);
+          Token (Bool false);
+        ];
+      ];
+    ]);
+
+  make_parser_test
+    "match expressions nesting, starting cases with vertical bar"
+    {|
+      match match 1 with | 1 -> true | 0 -> false with
+      true -> match 0 with 0 -> false
+    |}
+    (Node [
+      Token (Match);
+      Node [
         Token (Match);
-        Token (Float 1.0);
+        Token (Int 1);
         Token (With);
         Node [
           Token (VerticalBar);
-          Token (Float 1.5);
+          Token (Int 1);
           Token (FunctionArrow);
           Token (Bool true);
           Node [
             Token (VerticalBar);
-            Token (Ignore);
+            Token (Int 0);
             Token (FunctionArrow);
             Token (Bool false);
           ];
         ];
-      ]);
-
-    make_parser_test
-      "match expressions nesting, starting cases with vertical bar"
-      {|
-        match match 1 with | 1 -> true | 0 -> false with
-        true -> match 0 with 0 -> false
-      |}
-      (Node [
-        Token (Match);
+      ];
+      Token (With);
+      Node [
+        Token (Bool true);
+        Token (FunctionArrow);
         Node [
           Token (Match);
-          Token (Int 1);
+          Token (Int 0);
           Token (With);
           Node [
-            Token (VerticalBar);
-            Token (Int 1);
-            Token (FunctionArrow);
-            Token (Bool true);
-            Node [
-              Token (VerticalBar);
-              Token (Int 0);
-              Token (FunctionArrow);
-              Token (Bool false);
-            ];
-          ];
-        ];
-        Token (With);
-        Node [
-          Token (Bool true);
-          Token (FunctionArrow);
-          Node [
-            Token (Match);
             Token (Int 0);
-            Token (With);
-            Node [
-              Token (Int 0);
-              Token (FunctionArrow);
-              Token (Bool false);
-            ];
+            Token (FunctionArrow);
+            Token (Bool false);
           ];
         ];
-      ]);
+      ];
+    ]);
 ])
 
 let ast_converter_tests = Ast.[

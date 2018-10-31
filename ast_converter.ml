@@ -27,6 +27,8 @@ let convert_infix = function
   | Token.Append -> Append
   | Token.Cons -> Cons
   | Token.Concat -> Concat
+  | Token.And -> LogicalAnd
+  | Token.Or -> LogicalOr
   | t -> failwith (
       "infix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)
@@ -157,6 +159,8 @@ and convert_pattern_matching acc = function
 
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
+
+  | Token (Token.Bool b) -> Constant (Bool b)
 
   | Token (Token.Float v) -> Constant (Float v)
 

@@ -4,6 +4,10 @@ let end_to_end_test_dir = "end_to_end_tests";;
 let files = Sys.readdir end_to_end_test_dir;;
 
 Array.iter (fun file ->
+  Sys.command "echo \"\" > e2e-compiled.js" |> ignore;
+  Sys.command "echo \"\" > e2e-js-result.txt" |> ignore;
+  Sys.command "echo \"\" > e2e-ml-result.txt" |> ignore;
+  Sys.command "echo \"\" > e2e-diff.txt" |> ignore;
   let full_file = sprintf "%s/%s" end_to_end_test_dir file in
   let compile = sprintf "./camljs %s e2e-compiled.js" full_file in
   let node = "node e2e-compiled.js &> e2e-js-result.txt" in
