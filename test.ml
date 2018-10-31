@@ -199,7 +199,7 @@ let tokenizer_tests = Token.[
   make_tokenizer_test
     "simple bool test, tokenizer"
     "let x = true in ()"
-    [Let; LowercaseIdent "x"; Equal; Bool true; In; LParen; RParen];
+    [Let; LowercaseIdent "x"; Equal; Bool true; In; Unit];
 
   make_tokenizer_test
     "and test, tokenizer"
@@ -240,6 +240,16 @@ let tokenizer_tests = Token.[
     "pattern match expression in a let assignment"
     "match x with _ as n"
     [Match; LowercaseIdent "x"; With; Ignore; As; LowercaseIdent "n";];
+
+  make_tokenizer_test
+    "simple unit test, tokenizer"
+    "let x = ()"
+    [Let; LowercaseIdent "x"; Equal; Unit];
+
+  make_tokenizer_test
+    "unit test 2, tokenizer"
+    "let () = print_string \"hi\""
+    [Let; Unit; Equal; LowercaseIdent "print_string"; StringLiteral ("\"hi\"")];
 ]
 
 let make_parser_test name program expected_tree =
@@ -788,6 +798,18 @@ let parser_tests = Parser.(Tokenizer.[
             Token (Bool false)
           ];
         ]);
+
+    make_parser_test
+      "Simple Unit test, parse tree"
+      "let x = ()"
+      (Node [
+          Token (Let);
+          Node[
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Unit);
+          ];
+        ]);
 ])
 
 let make_ast_converter_test name program expected_tree =
@@ -1274,6 +1296,16 @@ let ast_converter_tests = Ast.[
           Constant (CharLiteral "'c'")
         )
       )));
+    ];
+
+  make_ast_converter_test
+    "simple Unit test, ast conversion"
+    "let x = ()"
+    [
+      LetDecl (VarAssignment (
+        ValueNamePattern "x",
+        Constant (Unit)
+      ));
     ];
 ]
 
