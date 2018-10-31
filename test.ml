@@ -1761,6 +1761,19 @@ let ast_converter_tests = Ast.[
         )
       ));
     ];
+
+  make_ast_converter_test
+    "function with unit pattern match as constant"
+    "let x () = print_string \"x\""
+    [
+      LetDecl (FunctionAssignment (
+        "x", false, [ConstantPattern (Unit)],
+        FunctionCall (
+          VarName "print_string",
+          Constant (StringLiteral "\"x\"")
+        )
+      ));
+    ];
 ]
 
 let suite = "test suite"  >::: List.flatten [

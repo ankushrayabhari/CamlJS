@@ -43,7 +43,7 @@ let rec convert_pattern = function
   | Token (StringLiteral v) -> ConstantPattern (StringLiteral v)
   | Token (EmptyList) -> ConstantPattern (EmptyList)
   | Token (Bool b) -> ConstantPattern (Bool b)
-  (* | Token (Unit) -> ConstantPattern (Unit) *)
+  | Token (Unit) -> ConstantPattern (Unit)
   | Node [
       pat;
       Token (Token.As);
