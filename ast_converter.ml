@@ -4,6 +4,7 @@ open Ast
 
 let convert_prefix = function
   | Token.Negation -> Negation
+  | Token.NegationFloat -> NegationFloat
   | t -> failwith (
       "prefix operator conversion not supported: " ^
       (Tokenizer.token_to_string t)

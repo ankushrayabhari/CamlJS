@@ -1774,6 +1774,11 @@ let ast_converter_tests = Ast.[
         )
       ));
     ];
+
+  make_ast_converter_test
+    "negation float"
+    "~-.1.0"
+    [Expr (PrefixOp (NegationFloat, Constant (Float 1.0)))];
 ]
 
 let suite = "test suite"  >::: List.flatten [
