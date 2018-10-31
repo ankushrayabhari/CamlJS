@@ -17,15 +17,13 @@ type prefix_symbol =
   | Negation | NegationFloat
 
 type pattern =
+  | IgnorePattern
   | ValueNamePattern of string
   | ConstantPattern of constant
   | AliasPattern of pattern * string
-  | OrPattern of pattern * pattern
   | ParenPattern of pattern
   | ListPattern of pattern list
   | ConsPattern of pattern * pattern
-  | CharRangePattern of string * string
-  | IgnorePattern
 
 type let_binding =
   | VarAssignment of pattern * expr

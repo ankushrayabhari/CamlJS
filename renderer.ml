@@ -9,25 +9,66 @@ let render_constant = function
   | CharLiteral c -> String.make 1 c
   | Unit -> "null"
 
-let render_pattern = function
-  | ValueNamePattern name -> name
-
 let rec render_let_binding = function
-  | VarAssignment (ValueNamePattern var_name, expr) ->
-      let assignment_expr = render_expr expr in
-      "let " ^ var_name ^ " = " ^ assignment_expr ^  ";"
+  | VarAssignment (pat, expr) ->
+      let rendered_target =
+        Printf.sprintf "let TARGET = (%s);" (render_expr expr) in
+      let (bindings, constants) = get_pattern_bindings (ref 0) "TARGET" pat in
+      let rendered_bindings =
+        List.fold_left (fun acc (target_var, target_value) ->
+          acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
+        ) "" bindings
+      in
+      let rendered_constant_bindings =
+        List.fold_left (fun acc (target_var, target_value, _) ->
+          acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
+        ) "" constants
+      in
+      let rendered_binding_assertions =
+        List.fold_left (fun acc (target_var, _) ->
+          acc ^ Printf.sprintf
+            "if (%s === undefined) { throw new Error('Match failure');}"
+            target_var
+        ) "" bindings
+      in
+      let rendered_constant_binding_assertions =
+        List.fold_left (fun acc (target_var, _, expected_value) ->
+          acc ^ Printf.sprintf
+            "if (Pervasives.compare(%s)(%s) !== 0) { throw new Error('Match failure');}"
+            target_var
+            expected_value
+        ) "" constants
+      in
+      Printf.sprintf "%s%s%s%s%s"
+        rendered_target
+        rendered_bindings
+        rendered_constant_bindings
+        rendered_binding_assertions
+        rendered_constant_binding_assertions
   | FunctionAssignment (function_name, _, arg_list, body_expr) ->
       "let " ^ function_name ^ " = " ^ render_fun arg_list body_expr ^  ";"
 
 and render_fun arg_list body_expr =
-  let function_body = render_expr body_expr in
-  let arguments =
-    List.map render_pattern arg_list |>
-    List.fold_left (fun acc el ->
-      acc ^ "(" ^ el ^ ") => "
-    ) ""
+  let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_list in
+  let arguments = List.fold_left (fun acc el ->
+      acc ^ el ^ " => "
+    ) "" arg_names
   in
-  "(" ^ arguments ^ function_body ^ ")"
+  let argument_match_expr =
+    List.fold_right2 (fun arg_pat arg_name prev_expr ->
+      MatchExpr (
+        VarName arg_name,
+        [(arg_pat, prev_expr, None)]
+      )
+    )
+    arg_list
+    arg_names
+    body_expr
+  in
+  match argument_match_expr with
+  | MatchExpr (target, pat_lst) ->
+      "(" ^ arguments ^ (render_match_expr target pat_lst) ^ ")"
+  | _ -> failwith "should be a Match Expression"
 
 and render_prefix_op = function
   | Negation -> "-"
@@ -97,26 +138,63 @@ and render_list_expr lst =
 and render_module_accessor module_name value_name =
   module_name ^ "." ^ value_name
 
-and get_pattern_bindings target_var pattern =
+and get_pattern_bindings curr_bind_idx target_var pattern =
   match pattern with
+  | IgnorePattern -> ([], [])
+  | ConstantPattern c ->
+    let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
+    incr curr_bind_idx;
+    ([], [(curr_bind_name, target_var, render_constant c)])
+  | ValueNamePattern v ->
+    ([(v, target_var)], [])
+  | AliasPattern (pat, alias) ->
+    let (bindings, constant_assertions) =
+      get_pattern_bindings curr_bind_idx target_var pat in
+    ((alias, target_var)::bindings, constant_assertions)
+  | ParenPattern p -> get_pattern_bindings curr_bind_idx target_var p
   | ListPattern lst ->
+    let pat_lst_length = List.length lst in
     let (_, bindings, constant_assertions) =
       List.fold_left (fun (idx, bindings, constant_assertions) pat ->
         let (r, c) =
-          get_pattern_bindings (target_var ^ "[" ^ (string_of_int idx) ^ "]") pat
+          get_pattern_bindings
+            curr_bind_idx
+            (Printf.sprintf "%s[%d]" target_var (pat_lst_length - 1 - idx))
+            pat
         in
         (idx + 1, bindings@r, constant_assertions@c)
       ) (0, [], []) lst
     in
-    (bindings, constant_assertions)
-  | _ -> failwith "asdf"
+    let (_, length_assertion) =
+      get_pattern_bindings
+        curr_bind_idx
+        (target_var^".length")
+        (ConstantPattern (Int pat_lst_length))
+    in
+    (bindings, (List.hd length_assertion)::constant_assertions)
+  | ConsPattern (hd_pat, tl_pat) ->
+    let hd_target_var = Printf.sprintf "%s.slice(-1)[0]" target_var in
+    let tl_target_var = Printf.sprintf "%s.slice(0, -1)" target_var in
+    let (hd_bindings, hd_constant_assertions) =
+      get_pattern_bindings
+        curr_bind_idx
+        hd_target_var
+        hd_pat
+    in
+    let (tl_bindings, tl_constant_assertions) =
+      get_pattern_bindings
+        curr_bind_idx
+        tl_target_var
+        tl_pat
+    in
+    (hd_bindings@tl_bindings, hd_constant_assertions@tl_constant_assertions)
 
 and render_match_expr target_expr pat_lst =
   let rendered_target =
     Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
   let rendered_match_cases = List.fold_left (fun acc (pat, expr, _) ->
     let rendered_value = render_expr expr in
-    let (bindings, constants) = get_pattern_bindings "TARGET" pat in
+    let (bindings, constants) = get_pattern_bindings (ref 0) "TARGET" pat in
     let rendered_bindings =
       List.fold_left (fun acc (target_var, target_value) ->
         acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
@@ -129,15 +207,20 @@ and render_match_expr target_expr pat_lst =
     in
     let rendered_binding_assertions =
       List.fold_left (fun acc (target_var, _) ->
-        acc ^ (Printf.sprintf "if (%s === undefined) { throw new Error('Match failure')};" target_var)
+        acc ^ Printf.sprintf
+          "if (%s === undefined) { throw new Error('Match failure');}"
+          target_var
       ) "" bindings
     in
     let rendered_constant_binding_assertions =
       List.fold_left (fun acc (target_var, _, expected_value) ->
-        acc ^ (Printf.sprintf "if (Pervasives.compare(%s, %s) !== 0) { throw new Error('Match failure')};" target_var expected_value)
+        acc ^ Printf.sprintf
+          "if (Pervasives.compare(%s)(%s) !== 0) { throw new Error('Match failure');}"
+          target_var
+          expected_value
       ) "" constants
     in
-    acc ^ Printf.sprintf "try {%s; %s; %s; %s; return %s;} catch (err) {};"
+    acc ^ Printf.sprintf "try {%s%s%s%sreturn %s;} catch (err) {};"
       rendered_bindings
       rendered_constant_bindings
       rendered_binding_assertions
@@ -145,7 +228,7 @@ and render_match_expr target_expr pat_lst =
       rendered_value
   ) "" pat_lst
   in
-  Printf.sprintf "(() => {%s;%s;throw new Error('Match Failure');})()"
+  Printf.sprintf "(() => {%s%sthrow new Error('Match Failure');})()"
     rendered_target
     rendered_match_cases
 
@@ -163,7 +246,6 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
   | MatchExpr (expr, lst) -> render_match_expr expr lst
-
 
 let render_open_decl = function
   | "Pervasives" -> Pervasives_js.destructure

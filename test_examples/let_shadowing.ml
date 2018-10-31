@@ -1,3 +1,3 @@
-let x = 10 in
-let x = 20 in
-x
+let x = 10;;
+let x = 20;;
+print_int x
