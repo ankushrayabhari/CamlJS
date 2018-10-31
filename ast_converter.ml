@@ -89,6 +89,8 @@ and convert_expr = function
 
   | Token (Token.LowercaseIdent n) -> VarName n
 
+  | Token (Token.Unit) -> Constant (Unit)
+
   | Node [
       Token (CapitalizedIdent module_name);
       Token (Period);
