@@ -247,7 +247,7 @@ let token_decl () =
   |> sprintf "type t =\n%s";;
 
 let tokenize_sig () = {|
-val tokenize : string -> Token.t list
+val tokenize : string -> Token.t array
 
 val has_tag : Token.t -> string -> bool
 
@@ -322,7 +322,7 @@ let rec tokenize_rec str start tok_lst =
         failwith ("Unknown symbol at " ^ string_of_int start_index ^ ".")
 
 let tokenize str =
-  tokenize_rec str 0 []
+  tokenize_rec str 0 [] |> Array.of_list
 |};;
 
 let has_tag_fn () =

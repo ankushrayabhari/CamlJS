@@ -2,8 +2,25 @@ open OUnit2
 
 let make_tokenizer_test name program expected_value =
   name >:: (fun _ ->
-    let tokenized_program = try Tokenizer.tokenize program with _ -> [] in
-    assert_equal expected_value tokenized_program
+    let tokenized_program = try Tokenizer.tokenize program with _ -> [||] in
+    let expected_tokens = expected_value |> Array.of_list in
+    assert_equal expected_tokens tokenized_program
+  )
+
+let make_parser_test name program expected_tree =
+  name >:: (fun _ ->
+    let parse_tr = Tokenizer.tokenize program |> Parser.parse in
+    assert_equal expected_tree parse_tr
+  )
+
+let make_ast_converter_test name program expected_tree =
+  name >:: (fun _ ->
+    let ast =
+      Tokenizer.tokenize program
+      |> Parser.parse
+      |> Ast_converter.convert
+    in
+    assert_equal expected_tree ast
   )
 
 let tokenizer_tests = Token.[
@@ -241,17 +258,6 @@ let tokenizer_tests = Token.[
     "match x with _ as n"
     [Match; LowercaseIdent "x"; With; Ignore; As; LowercaseIdent "n";];
 ]
-
-let make_parser_test name program expected_tree =
-  name >:: (fun _ ->
-    let parse_tr =
-      Tokenizer.tokenize program
-      |> Array.of_list
-      |> Parser.parse
-    in
-    assert_equal expected_tree parse_tr
-  )
-
 
 let parser_tests = Parser.(Tokenizer.[
   make_parser_test
@@ -889,7 +895,10 @@ let parser_tests = Parser.(Tokenizer.[
 
     make_parser_test
       "match expressions nesting, starting cases with vertical bar"
-      "match match 1 with | 1 -> true | 0 -> false with true -> match 0 with 0 -> false"
+      {|
+        match match 1 with | 1 -> true | 0 -> false with
+        true -> match 0 with 0 -> false
+      |}
       (Node [
         Token (Match);
         Node [
@@ -926,17 +935,6 @@ let parser_tests = Parser.(Tokenizer.[
         ];
       ]);
 ])
-
-let make_ast_converter_test name program expected_tree =
-  name >:: (fun _ ->
-    let ast =
-      Tokenizer.tokenize program
-      |> Array.of_list
-      |> Parser.parse
-      |> Ast_converter.convert
-    in
-    assert_equal expected_tree ast
-  )
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test

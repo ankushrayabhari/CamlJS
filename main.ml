@@ -1,6 +1,5 @@
 let compile code =
   Tokenizer.tokenize code
-  |> Array.of_list
   |> Parser.parse
   |> Ast_converter.convert
   |> Renderer.render
