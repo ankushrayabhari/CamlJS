@@ -841,6 +841,90 @@ let parser_tests = Parser.(Tokenizer.[
           Token (EmptyList);
         ];
       ]);
+
+    make_parser_test
+      "match expression on lists"
+      "match [] with h::t -> true | [] -> false"
+      (Node [
+        Token (Match);
+        Token (EmptyList);
+        Token (With);
+        Node [
+          Node [
+            Token (LowercaseIdent "h");
+            Token (Cons);
+            Token (LowercaseIdent "t");
+          ];
+          Token (FunctionArrow);
+          Token (Bool true);
+          Node [
+            Token (VerticalBar);
+            Token (EmptyList);
+            Token (FunctionArrow);
+            Token (Bool false);
+          ];
+        ];
+      ]);
+
+    make_parser_test
+      "match expression on floats, starting cases with vertical bar"
+      "match 1.0 with | 1.5 -> true | _ -> false"
+      (Node [
+        Token (Match);
+        Token (Float 1.0);
+        Token (With);
+        Node [
+          Token (VerticalBar);
+          Token (Float 1.5);
+          Token (FunctionArrow);
+          Token (Bool true);
+          Node [
+            Token (VerticalBar);
+            Token (Ignore);
+            Token (FunctionArrow);
+            Token (Bool false);
+          ];
+        ];
+      ]);
+
+    make_parser_test
+      "match expressions nesting, starting cases with vertical bar"
+      "match match 1 with | 1 -> true | 0 -> false with true -> match 0 with 0 -> false"
+      (Node [
+        Token (Match);
+        Node [
+          Token (Match);
+          Token (Int 1);
+          Token (With);
+          Node [
+            Token (VerticalBar);
+            Token (Int 1);
+            Token (FunctionArrow);
+            Token (Bool true);
+            Node [
+              Token (VerticalBar);
+              Token (Int 0);
+              Token (FunctionArrow);
+              Token (Bool false);
+            ];
+          ];
+        ];
+        Token (With);
+        Node [
+          Token (Bool true);
+          Token (FunctionArrow);
+          Node [
+            Token (Match);
+            Token (Int 0);
+            Token (With);
+            Node [
+              Token (Int 0);
+              Token (FunctionArrow);
+              Token (Bool false);
+            ];
+          ];
+        ];
+      ]);
 ])
 
 let make_ast_converter_test name program expected_tree =

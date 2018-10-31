@@ -295,7 +295,17 @@
       ["Let", "LetBinding", "In", "LetAnonFuncMatchExpr"],
       ["Let", "Rec", "LetBinding", "In", "LetAnonFuncMatchExpr"],
       ["Fun", "OneOrMorePattern", "FunctionArrow", "LetAnonFuncMatchExpr"],
+      ["Match", "LetAnonFuncMatchExpr", "With", "PatternMatching"],
       ["SemiColonExpr"]
+    ],
+    "PatternMatching": [
+      ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr"],
+      ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
+      ["OneOrMorePatternMatchesWithVerticalBar"]
+    ],
+    "OneOrMorePatternMatchesWithVerticalBar": [
+      ["VerticalBar", "Pattern", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
+      ["VerticalBar", "Pattern", "FunctionArrow", "LetAnonFuncMatchExpr"]
     ],
     "OneOrMorePattern": [
       ["OneOrMorePattern", "Pattern"],
