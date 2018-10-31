@@ -281,12 +281,16 @@
     ],
     "AddExpr": [
       ["AddExpr", "Plus", "TimesExpr"],
+      ["AddExpr", "PlusFloat", "TimesExpr"],
       ["AddExpr", "Minus", "TimesExpr"],
+      ["AddExpr", "MinusFloat", "TimesExpr"],
       ["TimesExpr"]
     ],
     "TimesExpr": [
       ["TimesExpr", "Times", "FunctionCallExpr"],
+      ["TimesExpr", "TimesFloat", "FunctionCallExpr"],
       ["TimesExpr", "Divide", "FunctionCallExpr"],
+      ["TimesExpr", "DivideFloat", "FunctionCallExpr"],
       ["FunctionCallExpr"]
     ],
     "FunctionCallExpr": [
@@ -295,6 +299,7 @@
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
+      ["NegationFloat", "PrefixExpr"],
       ["ParenExpr"]
     ],
     "ParenExpr": [
@@ -313,6 +318,7 @@
     "Constant": [
       ["Int"],
       ["Bool"],
+      ["Float"],
       ["LowercaseIdent"],
       ["ModulePath", "Period", "LowercaseIdent"],
       ["EmptyList"]

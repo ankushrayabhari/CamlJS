@@ -282,6 +282,25 @@ let parser_tests = Parser.(Tokenizer.[
     ]);
 
   make_parser_test
+    "list literal, precedence over function calls with float negation"
+    "f [~-.1.; 0.00]"
+    (Node [
+      Token (LowercaseIdent "f");
+      Node [
+        Token (StartList);
+        Node [
+          Node [
+            Token (NegationFloat);
+            Token (Float 1.);
+          ];
+          Token (SemiColon);
+          Token (Float 0.);
+        ];
+        Token (EndList);
+      ];
+    ]);
+
+  make_parser_test
     "module accessor, parse tree"
     "List.length []"
     (Node [
@@ -302,6 +321,18 @@ let parser_tests = Parser.(Tokenizer.[
         Token (Int 1);
         Token (Plus);
         Token (Int 1);
+      ];
+    ]);
+
+  make_parser_test
+    "compilation unit, start with ;;, single expr"
+    ";;1.+.1."
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Token (Float 1.);
+        Token (PlusFloat);
+        Token (Float 1.);
       ];
     ]);
 
@@ -429,6 +460,23 @@ let parser_tests = Parser.(Tokenizer.[
     ]);
 
   make_parser_test
+    "Float operations"
+    "1.6/.2.+.3.*.05.2"
+    (Node [
+      (Node [
+        Token (Float 1.6);
+        Token DivideFloat;
+        Token (Float 2.)
+      ]);
+      Token PlusFloat;
+      (Node [
+        Token (Float 3.);
+        Token TimesFloat;
+        Token (Float 5.2)
+      ])
+    ]);
+
+  make_parser_test
     "compilation unit, end with ;;, single expr"
     "let rec x = 1;;"
     (Node [
@@ -486,6 +534,36 @@ let parser_tests = Parser.(Tokenizer.[
               Token (LowercaseIdent "x");
               Token (Equal);
               Token (Int 1);
+            ];
+          ];
+        ];
+        Token (DoubleSemicolon);
+      ]
+    ]);
+
+  make_parser_test
+    "compilation unit, start/end with ;;, double definition"
+    ";;let x = 1.;;let rec x = 01.0;;"
+    (Node [
+      Token (DoubleSemicolon);
+      Node [
+        Node [
+          Token (Let);
+          Node [
+            Token (LowercaseIdent "x");
+            Token (Equal);
+            Token (Float 1.);
+          ];
+        ];
+        Node [
+          Token (DoubleSemicolon);
+          Node [
+            Token (Let);
+            Token (Rec);
+            Node [
+              Token (LowercaseIdent "x");
+              Token (Equal);
+              Token (Float 1.);
             ];
           ];
         ];
@@ -666,6 +744,25 @@ let ast_converter_tests = Ast.[
           Constant (Int 200)
         )
       ))];
+  
+  make_ast_converter_test
+    "order of ops in infix expression with floats"
+    "let x = 1. in x -. 100. -. 200."
+    [Expr (LetBinding (
+        VarAssignment (
+          ValueName "x",
+          Constant (Float 1.)
+        ),
+        InfixOp (
+          InfixOp (
+            VarName "x",
+            MinusFloat,
+            Constant (Float 100.)
+          ),
+          MinusFloat,
+          Constant (Float 200.)
+        )
+      ))];
 
   make_ast_converter_test
     "order of ops in infix expression parentheiszed"
@@ -753,9 +850,58 @@ let ast_converter_tests = Ast.[
     ))];
 
   make_ast_converter_test
+    "function call floats"
+    "let rec x a b c = a *. b *. c in x 1. 2. 3."
+    [Expr (LetBinding (
+      FunctionAssignment (
+        "x",
+        true,
+        [
+          ValueName "a";
+          ValueName "b";
+          ValueName "c";
+        ],
+        InfixOp (
+          InfixOp (
+            VarName "a",
+            TimesFloat,
+            VarName "b"
+          ),
+          TimesFloat,
+          VarName "c"
+        )
+      ),
+      FunctionCall (
+        FunctionCall (
+          FunctionCall (
+            VarName "x",
+            Constant (Float 1.)
+          ),
+          Constant (Float 2.)
+        ),
+        Constant (Float 3.)
+      )
+    ))];
+
+  make_ast_converter_test
+    "float operations"
+    "1.6/.2.+.3.*.05.2"
+    [Expr
+    (InfixOp
+      (InfixOp (Constant (Float 1.6), DivideFloat, Constant (Float 2.)),
+      PlusFloat,
+      InfixOp (Constant (Float 3.), TimesFloat, Constant (Float 5.2))))
+    ];
+
+  make_ast_converter_test
     "greater than comparison expression"
     "1 > 2"
     [Expr (InfixOp (Constant (Int 1), GreaterThan, (Constant (Int 2))))];
+
+  make_ast_converter_test
+    "greater than comparison expression floats"
+    "1. > 2."
+    [Expr (InfixOp (Constant (Float 1.), GreaterThan, (Constant (Float 2.))))];
 
   make_ast_converter_test
     "less than comparison expression"
