@@ -1,8 +1,9 @@
-MODULES=tokenizer grammar parser ast_converter pervasives_js list_js char_js string_js renderer main
+MODULES=tokenizer grammar parser ast_converter pervasives_js list_js char_js string_js renderer file_helper main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli) ast.mli token.mli
 TEST=test.byte
+E2ETEST=end_to_end_test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -I "js_modules"
 PKGS=oUnit,str
@@ -17,8 +18,11 @@ build: grammar
 bin: build
 	$(OCAMLBUILD) $(MAIN) && mv $(MAIN) $(EXEC)
 
-test: grammar
+test: build
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
+
+e2e-test: bin
+	$(OCAMLBUILD) -tag 'debug' $(E2ETEST) && ./$(E2ETEST)
 
 temp-debug: build
 	$(OCAMLBUILD) -tag 'debug' temp.byte && ocamldebug ./temp.byte
