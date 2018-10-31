@@ -744,13 +744,13 @@ let ast_converter_tests = Ast.[
           Constant (Int 200)
         )
       ))];
-  
+
   make_ast_converter_test
     "order of ops in infix expression with floats"
     "let x = 1. in x -. 100. -. 200."
     [Expr (LetBinding (
         VarAssignment (
-          ValueName "x",
+          ValueNamePattern "x",
           Constant (Float 1.)
         ),
         InfixOp (
@@ -857,9 +857,9 @@ let ast_converter_tests = Ast.[
         "x",
         true,
         [
-          ValueName "a";
-          ValueName "b";
-          ValueName "c";
+          ValueNamePattern "a";
+          ValueNamePattern "b";
+          ValueNamePattern "c";
         ],
         InfixOp (
           InfixOp (
