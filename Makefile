@@ -7,7 +7,7 @@ TEST=test.byte
 E2ETEST=end_to_end_test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -I "js_modules"
-PKGS=oUnit,str
+PKGS=oUnit,str,yojson
 EXEC=camljs
 CONVERTER=converter.byte
 
@@ -42,7 +42,7 @@ docs-private: build
 	mkdir -p doc.private
 	ocamlfind ocamldoc -I _build -I "_build/js_modules" -package $(PKGS) \
 		-html -stars -d doc.private \
-		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
+		-inv-merge-ml-mli -m A $(MLIS) $(MLS) converter.ml
 
 clean:
 	ocamlbuild -clean
