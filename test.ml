@@ -1328,6 +1328,126 @@ let ast_converter_tests = Ast.[
         )
       )));
     ];
+
+  make_ast_converter_test
+    "let declaration, pattern matching against list with cons"
+    "let 1::x = [1;2;3;4]"
+    [LetDecl (VarAssignment (
+      ConsPattern (
+        ConstantPattern (Int 1),
+        ValueNamePattern "x"
+      ),
+      ListExpr [
+        Constant (Int 1);
+        Constant (Int 2);
+        Constant (Int 3);
+        Constant (Int 4);
+      ]
+    ))];
+
+  make_ast_converter_test
+    "let declaration, pattern matching against list with list"
+    "let [1;x;_;_] = [1;2;3;4]"
+    [LetDecl (VarAssignment (
+      ListPattern [
+        ConstantPattern (Int 1);
+        ValueNamePattern "x";
+        IgnorePattern;
+        IgnorePattern;
+      ],
+      ListExpr [
+        Constant (Int 1);
+        Constant (Int 2);
+        Constant (Int 3);
+        Constant (Int 4);
+      ]
+    ))];
+
+  make_ast_converter_test
+    "let declaration, pattern matching against constant"
+    "let 1 = 1"
+    [LetDecl (VarAssignment (
+      ConstantPattern (Int 1),
+      Constant (Int 1)
+    ))];
+
+  make_ast_converter_test
+    "let declaration, pattern matching against ignore"
+    "let _ = 'a'"
+    [LetDecl (VarAssignment (
+      IgnorePattern,
+      Constant (CharLiteral "'a'")
+    ))];
+
+  make_ast_converter_test
+    "let declaration, pattern matching against paren pattern"
+    "let (x) = \"asdfasdf\""
+    [LetDecl (VarAssignment (
+      ParenPattern (ValueNamePattern "x"),
+      Constant (StringLiteral "\"asdfasdf\"")
+    ))];
+
+  make_ast_converter_test
+    "let fun declaration, pattern matching against list with cons"
+    "let rec f (x::1::[]) y = [1;2;3;4]"
+    [LetDecl (FunctionAssignment (
+      "f", true,
+      [
+        ParenPattern (ConsPattern (
+          ValueNamePattern "x",
+          ConsPattern (
+            ConstantPattern (Int 1),
+            ConstantPattern (EmptyList)
+          )
+        ));
+        ValueNamePattern "y";
+      ],
+      ListExpr [
+        Constant (Int 1);
+        Constant (Int 2);
+        Constant (Int 3);
+        Constant (Int 4);
+      ]
+    ))];
+
+  make_ast_converter_test
+    "fun declaration, pattern matching against list with list"
+    "fun [1;x;_;_] -> \"qwertyuiop\""
+    [Expr (Function (
+      [ListPattern [
+        ConstantPattern (Int 1);
+        ValueNamePattern "x";
+        IgnorePattern;
+        IgnorePattern;
+      ]],
+      Constant (StringLiteral "\"qwertyuiop\"")
+    ))];
+
+  make_ast_converter_test
+    "fun declaration, pattern matching against constant"
+    "fun 1 -> 1.0"
+    [Expr (Function (
+      [ConstantPattern (Int 1)],
+      Constant (Float 1.0)
+    ))];
+
+  make_ast_converter_test
+    "let fun declaration, pattern matching against ignore"
+    "let f _ = '\\n'"
+    [LetDecl (FunctionAssignment (
+      "f", false,
+      [IgnorePattern],
+      Constant (CharLiteral "'\\n'")
+    ))];
+
+  make_ast_converter_test
+    "let fun declaration, pattern matching against alias"
+    "let rec yolo (1 as x) = \"asdfasdf\""
+    [LetDecl (FunctionAssignment (
+      "yolo", true,
+      [ParenPattern (AliasPattern (ConstantPattern (Int 1), "x"))],
+      Constant (StringLiteral "\"asdfasdf\"")
+    ))];
 ]
 
 let suite = "test suite"  >::: List.flatten [

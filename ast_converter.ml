@@ -1,3 +1,4 @@
+open Token
 open Parser
 open Ast
 
@@ -31,17 +32,64 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
-let convert_pattern = function
-  | Token (Token.LowercaseIdent ident_name) ->
-    ValueNamePattern (ident_name)
+let rec convert_pattern = function
+  | Token (LowercaseIdent ident_name) -> ValueNamePattern (ident_name)
+  | Token (Ignore) -> IgnorePattern
+  | Token (Int v) -> ConstantPattern (Int v)
+  | Token (Float v) -> ConstantPattern (Float v)
+  | Token (CharLiteral v) -> ConstantPattern (CharLiteral v)
+  | Token (StringLiteral v) -> ConstantPattern (StringLiteral v)
+  | Token (EmptyList) -> ConstantPattern (EmptyList)
+  | Token (Bool b) -> ConstantPattern (Bool b)
+  (* | Token (Unit) -> ConstantPattern (Unit) *)
+  | Node [
+      pat;
+      Token (Token.As);
+      Token (LowercaseIdent alias)
+    ] -> AliasPattern (convert_pattern pat, alias)
+  | Node [
+      paren_pat;
+      Token (Cons);
+      cons_pat;
+    ] -> ConsPattern (convert_pattern paren_pat, convert_pattern cons_pat)
+  | Node [
+      Token (LParen);
+      pat;
+      Token (RParen);
+    ] -> ParenPattern (convert_pattern pat)
+  | Node [
+      Token (StartList);
+      patterns_semicolon_sep;
+      Token (SemiColon);
+      Token (EndList);
+    ]
+  | Node [
+      Token (StartList);
+      patterns_semicolon_sep;
+      Token (EndList);
+    ] -> ListPattern (
+        convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
+        |> List.rev
+      )
   | _ -> failwith "not a valid pattern"
 
+and convert_one_or_more_patterns_semicolon_sep = function
+  | Node [
+      patterns_semicolon_sep;
+      Token (SemiColon);
+      pat;
+    ] ->
+      convert_pattern pat::
+      convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
+  | pat -> [convert_pattern pat]
+
 let rec get_patterns one_or_more_patterns acc =
-  match one_or_more_patterns with
-  | Node [params_ptree; pat] ->
-    get_patterns params_ptree ((convert_pattern pat)::acc)
-  | Token _ as single -> convert_pattern single::acc
-  | _ -> failwith "not a valid oneOrMorePatterns"
+  try convert_pattern one_or_more_patterns::acc
+  with _ ->
+    match one_or_more_patterns with
+    | Node [params_ptree; pat] ->
+      get_patterns params_ptree ((convert_pattern pat)::acc)
+    | _ -> failwith "not a valid one or more patterns"
 
 let rec convert_let_binding is_rec = function
   | Node [
