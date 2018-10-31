@@ -140,7 +140,10 @@ and render_module_accessor module_name value_name =
 
 and get_pattern_bindings curr_bind_idx target_var pattern =
   match pattern with
-  | IgnorePattern -> ([], [])
+  | IgnorePattern ->
+    let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
+    incr curr_bind_idx;
+    ([(curr_bind_name, target_var)], [])
   | ConstantPattern c ->
     let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
     incr curr_bind_idx;
