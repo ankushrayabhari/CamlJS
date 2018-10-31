@@ -257,7 +257,7 @@
       ["Definition"]
     ],
     "Expr": [
-      ["LetExpr"]
+      ["LetAnonFuncMatchExpr"]
     ],
     "Definition": [
       ["Let", "LetBinding"],
@@ -288,16 +288,13 @@
       ["OneOrMorePatternWithSemicolon", "SemiColon", "Pattern"]
     ],
     "LetBinding": [
-      ["Pattern", "Equal", "LetExpr"],
-      ["LowercaseIdent", "OneOrMorePattern", "Equal", "LetExpr"]
+      ["Pattern", "Equal", "LetAnonFuncMatchExpr"],
+      ["LowercaseIdent", "OneOrMorePattern", "Equal", "LetAnonFuncMatchExpr"]
     ],
-    "LetExpr": [
-      ["Let", "LetBinding", "In", "LetExpr"],
-      ["Let", "Rec", "LetBinding", "In", "LetExpr"],
-      ["AnonFuncExpr"]
-    ],
-    "AnonFuncExpr": [
-      ["Fun", "OneOrMorePattern", "FunctionArrow", "AnonFuncExpr"],
+    "LetAnonFuncMatchExpr": [
+      ["Let", "LetBinding", "In", "LetAnonFuncMatchExpr"],
+      ["Let", "Rec", "LetBinding", "In", "LetAnonFuncMatchExpr"],
+      ["Fun", "OneOrMorePattern", "FunctionArrow", "LetAnonFuncMatchExpr"],
       ["SemiColonExpr"]
     ],
     "OneOrMorePattern": [
