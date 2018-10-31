@@ -265,7 +265,27 @@
       ["Open", "ModulePath"]
     ],
     "Pattern": [
-      ["LowercaseIdent"]
+      ["AsPattern"]
+    ],
+    "AsPattern": [
+      ["ConsPattern", "As", "LowercaseIdent"],
+      ["ConsPattern"]
+    ],
+    "ConsPattern": [
+      ["ParenPattern", "Cons", "ConsPattern"],
+      ["ParenPattern"]
+    ],
+    "ParenPattern": [
+      ["LParen", "Pattern", "RParen"],
+      ["StartList", "OneOrMorePatternWithSemicolon", "EndList"],
+      ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
+      ["LowercaseIdent"],
+      ["Constant"],
+      ["Ignore"]
+    ],
+    "OneOrMorePatternWithSemicolon": [
+      ["Pattern"],
+      ["OneOrMorePatternWithSemicolon", "SemiColon", "Pattern"]
     ],
     "LetBinding": [
       ["Pattern", "Equal", "LetExpr"],
@@ -346,6 +366,8 @@
       ["LParen", "Expr", "RParen"],
       ["StartList", "OneOrMoreIfExprWithSemicolon", "EndList"],
       ["StartList", "OneOrMoreIfExprWithSemicolon", "SemiColon", "EndList"],
+      ["LowercaseIdent"],
+      ["ModulePath", "Period", "LowercaseIdent"],
       ["Constant"]
     ],
     "OneOrMoreIfExprWithSemicolon": [
@@ -361,8 +383,6 @@
       ["Float"],
       ["CharLiteral"],
       ["StringLiteral"],
-      ["LowercaseIdent"],
-      ["ModulePath", "Period", "LowercaseIdent"],
       ["EmptyList"]
     ]
   }

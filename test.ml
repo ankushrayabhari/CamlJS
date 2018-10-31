@@ -788,6 +788,59 @@ let parser_tests = Parser.(Tokenizer.[
             Token (Bool false)
           ];
         ]);
+
+    make_parser_test
+      "pattern matching precedence"
+      "let (1)::[2;_;] as x = []"
+      (Node [
+        Token (Let);
+        Node [
+          Node [
+            Node [
+              Node [
+                Token (LParen);
+                Token (Int 1);
+                Token (RParen);
+              ];
+              Token (Cons);
+              Node [
+                Token (StartList);
+                Node [
+                  Token (Int 2);
+                  Token (SemiColon);
+                  Token (Ignore);
+                ];
+                Token (SemiColon);
+                Token (EndList);
+              ];
+            ];
+            Token (As);
+            Token (LowercaseIdent "x");
+          ];
+          Token (Equal);
+          Token (EmptyList);
+        ];
+      ]);
+
+    make_parser_test
+      "pattern matching cons associativity"
+      "let 1::2::3 = []"
+      (Node [
+        Token (Let);
+        Node [
+          Node [
+            Token (Int 1);
+            Token (Cons);
+            Node [
+              Token (Int 2);
+              Token (Cons);
+              Token (Int 3);
+            ];
+          ];
+          Token (Equal);
+          Token (EmptyList);
+        ];
+      ]);
 ])
 
 let make_ast_converter_test name program expected_tree =
