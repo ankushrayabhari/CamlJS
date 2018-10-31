@@ -81,6 +81,8 @@ and convert_expr = function
 
   | Token (Token.Float v) -> Constant (Float v)
 
+  | Token (Token.CharLiteral v) -> Constant (CharLiteral v)
+
   | Token (Token.StringLiteral v) -> Constant (StringLiteral v)
 
   | Token (Token.EmptyList) -> Constant (EmptyList)

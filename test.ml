@@ -1244,6 +1244,20 @@ let ast_converter_tests = Ast.[
       ));
       OpenDecl "Pervasives";
     ];
+
+  make_ast_converter_test
+    "char literal with functioncall test"
+    "\n\nopen Char;;print_int (Char.code 'c')"
+    [
+      OpenDecl "Char";
+      Expr (FunctionCall (
+        VarName "print_int",
+        ParenExpr (FunctionCall (
+          ModuleAccessor ("Char", "code"),
+          Constant (CharLiteral "'c'")
+        )
+      )));
+    ];
 ]
 
 let suite = "test suite"  >::: List.flatten [
