@@ -1276,6 +1276,123 @@ let ast_converter_tests = Ast.[
         )
       )));
     ];
+
+    make_ast_converter_test
+      "simple and, ast conversion"
+      "let x = true && false"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            Constant (Bool true),
+            LogicalAnd,
+            Constant (Bool false)
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "simple or, ast conversion"
+      "let x = true || false"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            Constant (Bool true),
+            LogicalOr,
+            Constant (Bool false)
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "simple not, ast conversion"
+      "let x = not true"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          FunctionCall (
+            VarName "not",
+            Constant (Bool true)
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "complex or/not, ast conversion"
+      "let x = not true || false"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            FunctionCall (
+              VarName "not",
+              Constant (Bool true)
+            ),
+            LogicalOr,
+            Constant (Bool false)
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "complex and/or/not, ast conversion"
+      "let x = not true && false || true"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            InfixOp (
+              FunctionCall (
+                VarName "not",
+                Constant (Bool true)
+              ),
+              LogicalAnd,
+              Constant (Bool false)
+            ),
+            LogicalOr,
+            Constant (Bool true)
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "and associativity, ast conversion"
+      "let x = true && false && true"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            Constant (Bool true),
+            LogicalAnd,
+            InfixOp (
+              Constant (Bool false),
+              LogicalAnd,
+              Constant (Bool true)
+            )
+          )
+        ));
+      ];
+
+    make_ast_converter_test
+      "or associativity, ast conversion"
+      "let x = true || false || true"
+      [
+        LetDecl (VarAssignment (
+          ValueNamePattern "x",
+          InfixOp (
+            Constant (Bool true),
+            LogicalOr,
+            InfixOp (
+              Constant (Bool false),
+              LogicalOr,
+              Constant (Bool true)
+            )
+          )
+        ));
+      ];
+
+
 ]
 
 let suite = "test suite"  >::: List.flatten [
