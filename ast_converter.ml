@@ -168,6 +168,8 @@ and convert_expr tr = match tr with
 
   | Token (Token.LowercaseIdent n) -> VarName n
 
+  | Token (Token.Unit) -> Constant (Unit)
+
   | Node [
       Token (CapitalizedIdent module_name);
       Token (Period);

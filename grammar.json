@@ -126,6 +126,10 @@
       "tag": "infix"
     },
     {
+      "name": "Unit",
+      "regex": "()"
+    },
+    {
       "name": "LParen",
       "regex": "("
     },
@@ -386,6 +390,7 @@
       ["CapitalizedIdent"]
     ],
     "Constant": [
+      ["Unit"],
       ["Int"],
       ["Bool"],
       ["Float"],
