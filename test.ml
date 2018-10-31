@@ -199,7 +199,7 @@ let tokenizer_tests = Token.[
   make_tokenizer_test
     "simple bool test, tokenizer"
     "let x = true in ()"
-    [Let; LowercaseIdent "x"; Equal; Bool true; In; LParen; RParen];
+    [Let; LowercaseIdent "x"; Equal; Bool true; In; Unit];
 
   make_tokenizer_test
     "and test, tokenizer"
@@ -240,6 +240,7 @@ let tokenizer_tests = Token.[
     "pattern match expression in a let assignment"
     "match x with _ as n"
     [Match; LowercaseIdent "x"; With; Ignore; As; LowercaseIdent "n";];
+
 ]
 
 let make_parser_test name program expected_tree =
