@@ -146,61 +146,62 @@
       "regex": "\\."
     },
     {
-      "name": "Match",
-      "regex": "match"
-    },
-    {
-      "name": "With",
-      "regex": "with"
-    },
-    {
-      "name": "When",
-      "regex": "when"
-    },
-    {
       "name": "Ignore",
       "regex": "_"
     },
     {
+      "name": "Match",
+      "regex": "match[\n\r\t\b ]"
+    },
+    {
+      "name": "With",
+      "regex": "with[\n\r\t\b ]"
+    },
+    {
+      "name": "When",
+      "regex": "when[\n\r\t\b ]"
+    },
+
+    {
       "name": "Open",
-      "regex": "open"
+      "regex": "open[\n\r\t\b ]"
     },
     {
       "name": "If",
-      "regex": "if"
+      "regex": "if[\n\r\t\b ]"
     },
     {
       "name": "As",
-      "regex": "as"
+      "regex": "as[\n\r\t\b ]"
     },
     {
       "name": "Then",
-      "regex": "then"
+      "regex": "then[\n\r\t\b ]"
     },
     {
       "name": "Else",
-      "regex": "else"
+      "regex": "else[\n\r\t\b ]"
     },
     {
       "name": "Fun",
-      "regex": "fun"
+      "regex": "fun[\n\r\t\b ]"
     },
     {
       "name": "Let",
-      "regex": "let"
+      "regex": "let[\n\r\t\b ]"
     },
     {
       "name": "Rec",
-      "regex": "rec"
+      "regex": "rec[\n\r\t\b ]"
     },
     {
       "name": "In",
-      "regex": "in"
+      "regex": "in[\n\r\t\b ]"
     },
     {
       "name": "Bool",
       "parameter": "bool",
-      "regex": "true\\|false"
+      "regex": "true[\n\r\t\b ]\\|false[\n\r\t\b ]"
     },
     {
       "name": "Float",

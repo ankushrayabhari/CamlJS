@@ -43,7 +43,7 @@ const List = {
   },
   memq: el => lst => lst.indexOf(el) >= 0,
   find: f => lst => {
-    for (let i = 0; i < lst.length; i++) {
+    for (let i = lst.length - 1; i >= 0; i--) {
       if (f(el)) {
         return lst[i];
       }
@@ -51,7 +51,7 @@ const List = {
     throw new Error("Not found");
   },
   find_opt: f => lst => {
-    for (let i = 0; i < lst.length; i++) {
+    for (let i = lst.length - 1; i >= 0; i--) {
       if (f(el)) {
         return lst[i];
       }
@@ -59,11 +59,12 @@ const List = {
     return null;
   },
   filter: f => lst => lst.filter(f),
-  sort: f => lst => lst.slice().sort((el1, el2) => f(el1)(el2)),
+  sort: f => lst => lst.slice().sort((el1, el2) => f(el1)(el2)).reverse(),
   sort_uniq: f => lst => {
     return lst.slice()
               .sort((el1, el2) => f(el1)(el2))
               .filter((el, idx, lst) => idx == 0 || f(el)(lst[idx - 1]) != 0)
+              .reverse();
   }
 };
 |}

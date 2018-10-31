@@ -19,7 +19,8 @@ let rec render_let_binding = function
       rendered_target
       rendered_match_case
   | FunctionAssignment (function_name, _, arg_list, body_expr) ->
-      "let " ^ function_name ^ " = " ^ render_fun arg_list body_expr ^  ";"
+      "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
+      ^ render_fun arg_list body_expr ^  ";"
 
 and render_match_case bindings constants =
   let rendered_bindings =
@@ -154,7 +155,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
     incr curr_bind_idx;
     ([], [(curr_bind_name, target_var, render_constant c)])
   | ValueNamePattern v ->
-    ([(v, target_var)], [])
+    ([(Str.global_replace (Str.regexp "'") "$" v, target_var)], [])
   | AliasPattern (pat, alias) ->
     let (bindings, constant_assertions) =
       get_pattern_bindings curr_bind_idx target_var pat in
@@ -221,7 +222,7 @@ and render_expr = function
   | Function (arg_list, body_expr) -> render_fun arg_list body_expr
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
-  | VarName name -> name
+  | VarName name -> Str.global_replace (Str.regexp "'") "$" name
   | FunctionCall (expr_1, expr_2) -> render_function_call expr_1 expr_2
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
