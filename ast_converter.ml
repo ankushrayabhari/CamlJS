@@ -124,7 +124,38 @@ and convert_one_or_more_if_expr acc = function
     ] -> convert_one_or_more_if_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
-and convert_expr = function
+and convert_pattern_matching acc = function
+  | Node [
+      Token (VerticalBar);
+      pat;
+      Token (FunctionArrow);
+      value_expr;
+    ]
+  | Node [
+      pat;
+      Token (FunctionArrow);
+      value_expr;
+    ] ->
+    (convert_pattern pat, convert_expr value_expr, None)::acc
+  | Node [
+      pat;
+      Token (FunctionArrow);
+      value_expr;
+      further_pattern_matching;
+    ]
+  | Node [
+      Token (VerticalBar);
+      pat;
+      Token (FunctionArrow);
+      value_expr;
+      further_pattern_matching;
+    ] ->
+      convert_pattern_matching
+        ((convert_pattern pat, convert_expr value_expr, None)::acc)
+        further_pattern_matching
+  | _ -> failwith "not a valid pattern matching"
+
+and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
 
   | Token (Token.Float v) -> Constant (Float v)
@@ -241,6 +272,17 @@ and convert_expr = function
       Token (Token.EndList);
     ] ->
       ListExpr (convert_one_or_more_if_expr [] one_or_more_expr)
+
+  | Node [
+      Token (Match);
+      target_expr;
+      Token (With);
+      pattern_matching;
+    ] ->
+      MatchExpr (
+        convert_expr target_expr,
+        convert_pattern_matching [] pattern_matching |> List.rev
+      )
 
   | _ -> failwith "not a valid expression"
 

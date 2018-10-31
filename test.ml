@@ -1532,6 +1532,90 @@ let ast_converter_tests = Ast.[
       [ParenPattern (AliasPattern (ConstantPattern (Int 1), "x"))],
       Constant (StringLiteral "\"asdfasdf\"")
     ))];
+
+  make_ast_converter_test
+    "pattern match on list with list literal, no guard"
+    "match [] with | [1;2;3] -> 0"
+    [Expr (MatchExpr (
+      Constant (EmptyList),
+      [(
+        ListPattern [
+          ConstantPattern (Int 1);
+          ConstantPattern (Int 2);
+          ConstantPattern (Int 3);
+        ],
+        Constant (Int 0),
+        None
+      )]
+    ))];
+
+  make_ast_converter_test
+    "pattern match on list with cons expr, no guard"
+    "match [1;2;3] with h::t -> t"
+    [Expr (MatchExpr (
+      ListExpr [Constant (Int 1); Constant (Int 2); Constant (Int 3)],
+      [(
+        ConsPattern (
+          ValueNamePattern "h",
+          ValueNamePattern "t"
+        ),
+        VarName "t",
+        None
+      )]
+    ))];
+
+  make_ast_converter_test
+    "pattern match on list with cons, ignore and alias, no guard"
+    "match [1;2;3] with _::_ as t -> t"
+    [Expr (MatchExpr (
+      ListExpr [Constant (Int 1); Constant (Int 2); Constant (Int 3)],
+      [(
+        AliasPattern (
+          ConsPattern (
+            IgnorePattern,
+            IgnorePattern
+          ),
+          "t"
+        ),
+        VarName "t",
+        None
+      )]
+    ))];
+
+  make_ast_converter_test
+    "pattern match on int with paren, ignore, alias, no guard"
+    "match 1 with (_) as t -> t"
+    [Expr (MatchExpr (
+      Constant (Int 1),
+      [(
+        AliasPattern (
+          ParenPattern (
+            IgnorePattern
+          ),
+          "t"
+        ),
+        VarName "t",
+        None
+      )]
+    ))];
+
+  make_ast_converter_test
+    "nested pattern matcing on int, float, no guard"
+    "match match 1 with | 1 -> 1.0 | 0 -> 2.0 with 0.0 -> match 0 with 0 -> 'a'"
+    [Expr (MatchExpr (
+      MatchExpr (
+        Constant (Int 1),
+        [
+          (ConstantPattern (Int 1), Constant (Float 1.0), None);
+          (ConstantPattern (Int 0), Constant (Float 2.0), None);
+        ]
+      ),
+      [(
+        ConstantPattern (Float 0.0), MatchExpr (Constant (Int 0), [
+          (ConstantPattern (Int 0), Constant (CharLiteral "'a'"), None)
+        ]), None
+      )]
+    ))];
 ]
 
 let suite = "test suite"  >::: List.flatten [
