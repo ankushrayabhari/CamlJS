@@ -170,6 +170,10 @@
       "regex": "if"
     },
     {
+      "name": "As",
+      "regex": "as"
+    },
+    {
       "name": "Then",
       "regex": "then"
     },

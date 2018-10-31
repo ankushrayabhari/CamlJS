@@ -235,6 +235,11 @@ let tokenizer_tests = Token.[
     "pattern match expression in a let assignment"
     "let _ = 'c'"
     [Let; Ignore; Equal; CharLiteral "'c'";];
+
+  make_tokenizer_test
+    "pattern match expression in a let assignment"
+    "match x with _ as n"
+    [Match; LowercaseIdent "x"; With; Ignore; As; LowercaseIdent "n";];
 ]
 
 let make_parser_test name program expected_tree =
