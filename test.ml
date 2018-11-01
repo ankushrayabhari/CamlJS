@@ -85,6 +85,11 @@ let tokenizer_tests = Token.[
     [];
 
   make_tokenizer_test
+    "two chars"
+    "'a'     'b'"
+    [CharLiteral "'a'"; CharLiteral "'b'"];
+
+  make_tokenizer_test
     "let assign test"
     "let x = 1 in x + 100"
     [Let; LowercaseIdent "x"; Equal; Int 1; In; LowercaseIdent "x"; Plus;
