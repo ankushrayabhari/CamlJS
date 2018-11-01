@@ -93,6 +93,13 @@ let rec get_patterns one_or_more_patterns acc =
       get_patterns params_ptree ((convert_pattern pat)::acc)
     | _ -> failwith "not a valid one or more patterns"
 
+(** [convert_let_binding is_rec t] is the abstract syntax tree representing
+  * the let binding represented by parse_tree [t].
+  * 
+  * [is_rec] is true if the let binding is recursive and false otherwise.
+  *
+  * {b Raises}: Failure if [t] does not represent a type of let binding. 
+  *)
 let rec convert_let_binding is_rec = function
   | Node [
       Token(Token.LowercaseIdent f_name);
@@ -118,14 +125,53 @@ let rec convert_let_binding is_rec = function
       )
   | _ -> failwith "not a valid convert let binding"
 
-and convert_one_or_more_if_expr acc = function
+(** [convert_list_body_expr acc t] is the list of abstract syntax trees of 
+  * type expression in the parse_tree [t], where all expressions are seperated 
+  * by a semicolon.
+  *
+  * {b Requires}: [t] only has expressions of precedence equal to or higher than
+  * an if expression, and all expressions are separated by a semicolon.
+  *
+  * {b Example}: 
+  * [convert_list_body_expr 
+      [] 
+      (Node [
+        Token (StartList);
+        Node [
+          Node [
+            Token (Int 1);
+            Token (SemiColon);
+            Token (Int 2);
+          ];
+          Token (SemiColon);
+          Token (Int 3);
+        ];
+        Token (SemiColon);
+        Token (EndList);
+      ])
+    ]
+  * gives the AST list: 
+  * [Expr Constant (Int 1), Expr Constant (Int 2), Expr Constant (Int 3)].
+  *)
+and convert_list_body_expr acc = function
   | Node [
       one_or_more_expr;
       Token (Token.SemiColon);
       expr;
-    ] -> convert_one_or_more_if_expr ((convert_expr expr)::acc) one_or_more_expr
+    ] -> convert_list_body_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
+(** [convert_pattern_matching acc t] is the abstract syntax tree list of
+  * tuples (pattern, value, Some guard) representing the parse_tree [t] that
+  * represents a pattern matching with each pattern match being 
+  * Node [pat; Token (FunctionArrow); val]. 
+  *
+  * See that [pattern] is the AST
+  * representation of [pat], and [value] is the AST
+  * representation of [val].
+  *
+  * Raises: Failure if [t] is not a parse_tree representing pattern matching.
+  *)
 and convert_pattern_matching acc = function
   | Node [
       Token (VerticalBar);
@@ -157,6 +203,11 @@ and convert_pattern_matching acc = function
         further_pattern_matching
   | _ -> failwith "not a valid pattern matching"
 
+(** [convert_expr tr] is the abstract syntax tree representing the parse_tree
+  * [tr]. 
+  *
+  * Raises: Failure if [t] is not a parse_tree reprensenting an expr.
+  *)
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
 
@@ -277,7 +328,7 @@ and convert_expr tr = match tr with
       Token (Token.SemiColon);
       Token (Token.EndList);
     ] ->
-      ListExpr (convert_one_or_more_if_expr [] one_or_more_expr)
+      ListExpr (convert_list_body_expr [] one_or_more_expr)
 
   | Node [
       Token (Match);
@@ -292,6 +343,12 @@ and convert_expr tr = match tr with
 
   | _ -> failwith "not a valid expression"
 
+(** [convert_definition t] is the abstract syntax tree representing the
+  * parse_tree [t] which represents a definition (an [Open Module] or 
+  * [let var_name = expr]).
+  *
+  * Raises: Failure if [t] does not represent a valid definition.
+  *)
 let convert_definition = function
   | Node [
       Token (Open);
