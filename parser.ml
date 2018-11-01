@@ -2,6 +2,14 @@ type parse_tree =
   | Token of Token.t
   | Node of parse_tree list
 
+(** 
+ * [iterate_over_productions f] applies function [f] to each rule in the
+ * grammar. 
+ *
+ * [f] should take in inputs of the form [(int a, int b, int c)], which 
+ * represents the production rule [a -> b c] in the post CNF grammar where 
+ * a, b, c are variable identifiers.
+ *)
 let iterate_over_productions f =
   List.iteri (fun a el ->
     let a = a + Grammar.num_tokens in
