@@ -1,8 +1,9 @@
+open List
+
 (**
-   - [read_line_option in_ch] is either Some (s) where
-   - s is the line at the beginning of [in_ch], or
-   - None if [in_ch] contains no more lines.
- **)
+ * [read_line_option in_ch] is either Some (s) where s is the line/string to EOF
+ * at the beginning of [in_ch], or None if [in_ch] is at EOF.
+ *)
 let read_line_option in_ch =
   try
     Some (input_line in_ch)
@@ -17,7 +18,7 @@ let read_file file =
   in
   let rec read_file_lines curr_file =
     match read_line_option in_ch with
-    | None -> List.rev curr_file
+    | None -> rev curr_file
     | Some s -> read_file_lines (s::curr_file)
   in
   let lines = read_file_lines [] in
