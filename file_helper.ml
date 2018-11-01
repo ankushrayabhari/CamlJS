@@ -1,3 +1,8 @@
+(**
+   - [read_line_option in_ch] is either Some (s) where
+   - s is the line at the beginning of [in_ch], or
+   - None if [in_ch] contains no more lines.
+ **)
 let read_line_option in_ch =
   try
     Some (input_line in_ch)
