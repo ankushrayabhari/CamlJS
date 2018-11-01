@@ -196,7 +196,6 @@ let rec convert_let_binding is_rec = function
         get_patterns one_or_more_pattern [],
         convert_expr let_expr
       )
-
   | Node [
       bound_to_pattern;
       Token (Token.Equal);
@@ -392,48 +391,36 @@ and convert_pattern_matching acc = function
  *)
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
-
   | Token (Token.Bool b) -> Constant (Bool b)
-
   | Token (Token.Float v) -> Constant (Float v)
-
   | Token (Token.CharLiteral v) -> Constant (CharLiteral v)
-
   | Token (Token.StringLiteral v) -> Constant (StringLiteral v)
-
   | Token (Token.EmptyList) -> Constant (EmptyList)
-
   | Token (Token.LowercaseIdent n) -> VarName n
-
   | Token (Token.Unit) -> Constant (Unit)
-
   | Node [
       Token (CapitalizedIdent module_name);
       Token (Period);
       Token (LowercaseIdent value_name);
     ] ->
       ModuleAccessor (module_name, value_name)
-
   | Node [
       Token (Token.LParen);
       expr;
       Token (Token.RParen);
     ] ->
       ParenExpr (convert_expr expr)
-
   | Node [
       Token (pre);
       expr;
     ] when Tokenizer.has_tag pre "prefix" ->
       PrefixOp (convert_prefix pre, convert_expr expr)
-
   | Node [
       expr1;
       Token (infix);
       expr2;
     ] when Tokenizer.has_tag infix "infix" ->
       InfixOp (convert_expr expr1, convert_infix infix, convert_expr expr2)
-
   | Node [
       Token (Token.If);
       cond_expr;
@@ -441,7 +428,6 @@ and convert_expr tr = match tr with
       then_expr;
     ] ->
       Ternary (convert_expr cond_expr, convert_expr then_expr, None)
-
   | Node [
       Token (Token.If);
       cond_expr;
@@ -455,7 +441,6 @@ and convert_expr tr = match tr with
         convert_expr then_expr,
         Some (convert_expr else_expr)
       )
-
   | Node [
       Token(Token.Fun);
       one_or_more_patterns;
@@ -466,39 +451,38 @@ and convert_expr tr = match tr with
         get_patterns one_or_more_patterns [],
         convert_expr anon_func_expr
       )
-
   | Node [
       expr1;
       Token (Token.SemiColon);
       expr2;
     ] ->
       Sequential (convert_expr expr1, convert_expr expr2)
-
   | Node [
       Token(Token.Let);
       Token(Token.Rec);
       let_binding;
       Token(Token.In);
       let_expr;
-    ] -> LetBinding (
-      convert_let_binding true let_binding,
-      convert_expr let_expr
-    )
-
+    ] ->
+      LetBinding (
+        convert_let_binding true let_binding,
+        convert_expr let_expr
+      )
   | Node [
       Token(Token.Let);
       let_binding;
       Token (Token.In);
       let_expr;
     ] ->
-      LetBinding (convert_let_binding false let_binding, convert_expr let_expr)
-
+      LetBinding (
+        convert_let_binding false let_binding,
+        convert_expr let_expr
+      )
   | Node [
       fun_expr;
       arg_expr;
     ] ->
       FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
-
   | Node [
       Token (Token.StartList);
       one_or_more_expr;
@@ -511,7 +495,6 @@ and convert_expr tr = match tr with
       Token (Token.EndList);
     ] ->
       ListExpr (convert_list_body_expr [] one_or_more_expr)
-
   | Node [
       Token (Match);
       target_expr;
@@ -522,7 +505,6 @@ and convert_expr tr = match tr with
         convert_expr target_expr,
         convert_pattern_matching [] pattern_matching |> List.rev
       )
-
   | _ -> failwith "not a valid expression"
 
 (**

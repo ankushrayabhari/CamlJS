@@ -1,8 +1,9 @@
 open List
 
 (**
- * [read_line_option in_ch] is either Some (s) where s is the line/string to EOF
- * at the beginning of [in_ch], or None if [in_ch] is at EOF.
+ * [read_line_option in_ch] is either [Some s] where [s] is the string to the
+ * next endline or next EOF starting from the beginning of [in_ch], or [None]
+ * if [in_ch] is at EOF.
  *)
 let read_line_option in_ch =
   try
