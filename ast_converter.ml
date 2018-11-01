@@ -314,20 +314,19 @@ let convert_definition = function
 
 
 (**
- * [convert_module_item tr] is the expression or declaration of module [tr], 
- * where [tr] corresponds to some module.
+ * [convert_module_item tr] is the expression or declaration in [tr].
  * Requires:
  * - [tr] is a valid module expression or declaration.
-*)
+ *)
 let convert_module_item tr =
   try Expr (convert_expr tr) with _ -> (convert_definition tr)
 
 (**
  * [convert_one_plus_def_expr tr] is the list of declarations and expressions
- * of module [tr].
+ * of [tr] where [tr] represents one or more defintions or expressions.
  * Requires:
  * - [tr] is a valid module expression or declaration.
-*)
+ *)
 let rec convert_one_plus_def_expr = function
   | Node [
       Token (DoubleSemicolon);
@@ -347,11 +346,12 @@ let rec convert_one_plus_def_expr = function
       | _ -> failwith "not a valid expr def no start ;;"
 
 (**
- * [convert_expr_definition_no_start_double_semicolon tr] is the list of 
- * declarations and expressions of module [tr].
+ * [convert_expr_definition_no_start_double_semicolon tr] is the list of
+ * declarations and expressions of [tr] that has a parse tree where the
+ * first token is not a [DoubleSemicolon].
  * Requires:
  * - [tr] is a valid module expression or declaration.
-*)
+ *)
 let convert_expr_definition_no_start_double_semicolon = function
   | Node [
       tr;
@@ -373,8 +373,8 @@ let convert_expr_definition_no_start_double_semicolon = function
 (**
  * [convert_ast tr] is the list of declarations and expressions of module [tr].
  * Requires:
- * - [tr] is a valid module expression or declaration.
-*)
+ * - [tr] is a valid module expression or declaration parse tree.
+ *)
 let convert_ast = function
   | Node [
       Token (DoubleSemicolon);
