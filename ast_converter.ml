@@ -183,7 +183,7 @@ let rec convert_let_binding is_rec = function
  * an if expression, and all expressions are separated by a semicolon.
  *
  * {b Example}:
- * [convert_list_body_expr
+ * {v convert_list_body_expr
  *   []
  *   (Node [
  *     Token (StartList);
@@ -199,7 +199,7 @@ let rec convert_let_binding is_rec = function
  *     Token (SemiColon);
  *     Token (EndList);
  *   ])
- * ]
+ *  v}
  * gives the AST list:
  * [Expr Constant (Int 1), Expr Constant (Int 2), Expr Constant (Int 3)].
  *)
@@ -213,15 +213,15 @@ and convert_list_body_expr acc = function
 
 (**
  * [convert_pattern_matching acc t] is the abstract syntax tree list of
- * tuples (pattern, value, Some guard) representing the parse_tree [t] that
- * represents a pattern matching with each pattern match being
- * Node [pat; Token (FunctionArrow); val].
+ * tuples [(pattern, value, Some guard)] representing the parse_tree [t].
+ *
+ * Each pattern match being [Node [pattern; Token (FunctionArrow); value]].
  *
  * See that [pattern] is the AST
- * representation of [pat], and [value] is the AST
- * representation of [val].
+ * representation of [pattern], and [value] is the AST
+ * representation of [value].
  *
- * Raises: Failure if [t] is not a parse_tree representing pattern matching.
+ * @raise Failure if [t] is not a parse_tree representing pattern matching.
  *)
 and convert_pattern_matching acc = function
   | Node [
@@ -258,7 +258,7 @@ and convert_pattern_matching acc = function
  * [convert_expr tr] is the abstract syntax tree representing the parse_tree
  * [tr].
  *
- * Raises: Failure if [t] is not a parse_tree reprensenting an expr.
+ * @raise Failure if [t] is not a parse_tree reprensenting an expr.
  *)
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
@@ -397,10 +397,10 @@ and convert_expr tr = match tr with
 
 (**
  * [convert_definition t] is the abstract syntax tree representing the
- * parse_tree [t] which represents a definition (an [Open Module] or
+ * parse_tree [t] which represents a definition (an [open Module] or
  * [let var_name = expr]).
  *
- * Raises: Failure if [t] does not represent a valid definition.
+ * @raise Failure if [t] does not represent a valid definition.
  *)
 let convert_definition = function
   | Node [
