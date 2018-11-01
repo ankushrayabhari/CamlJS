@@ -1,3 +1,5 @@
+(** Autogeneration script of tokenizer/grammar metadata from an grammar file. *)
+
 open Yojson.Basic
 open Yojson.Basic.Util
 open Printf
@@ -142,13 +144,24 @@ let (tokens_in_order, variables_in_order) =
  * {b See:} to_hash for the table definition of [tokens]
  *)
 let tokens = tokens_in_order |> to_hash |> fst
+
+(**
+ * [variables] is the index to variable map of [variables_in_order].
+ *
+ * {b See:} to_hash for the table definition of [variables]
+ *)
 let variables = variables_in_order |> to_hash |> fst
+
+(** [num_tokens] is the number of tokens. *)
 let num_tokens = Hashtbl.length tokens
+(** [last_variable] is the last user provided variable number. *)
 let last_variable = Hashtbl.length variables - 1 + num_tokens
+(** [start_variable] is the number of the start variable of the grammar. *)
 let start_variable = num_tokens
+(** [num_variables] is total number of variables. *)
 let num_variables = ref (Hashtbl.length variables + num_tokens)
 
-(* Parse tokens and variables into hash map from variable name to id. *)
+(** [variable_to_id_map] maps from the variable identifier to its number. *)
 let variable_to_id_map =
   Hashtbl.create (Hashtbl.length tokens + Hashtbl.length variables);;
 
@@ -162,16 +175,32 @@ for idx = start_variable to last_variable do
   Hashtbl.add variable_to_id_map variable.name idx
 done;;
 
+(**
+ * [get_variable_id name] is the variable number of the variable with
+ * identifier [name].
+ *)
 let get_variable_id name = Hashtbl.find variable_to_id_map name
 
+(**
+ * [is_unit_production production] is whether or not the [production] is of the
+ * form [V]{_ [i]} [->] [V]{_ [j]} where [V]{_ [j]} is not a token.
+ *)
 let is_unit_production production =
   List.length production = 1 &&
   get_variable_id (List.hd production) >= num_tokens
 
+(**
+ * [get_productions var_id] is the list of productions of the variable with
+ * number [var_id].
+ *)
 let get_productions var_id =
   if var_id < num_tokens then []
   else (Hashtbl.find variables (var_id - num_tokens)).productions
 
+(**
+ * [set_productions var_id new_prod] updates the variable with number [var_id]
+ * to have productions [new_prod].
+ *)
 let set_productions var_id new_prod =
   let no_duplicates_productions = List.sort_uniq compare new_prod in
   let var = Hashtbl.find variables (var_id - num_tokens) in
@@ -179,6 +208,11 @@ let set_productions var_id new_prod =
     var with productions = no_duplicates_productions;
   }
 
+(**
+ * [add_variable var1 var2] creates a new variable with a production to
+ * [var1] concatenated with [var2]. It evaluates to the idenfitier of the new
+ * variable.
+ *)
 let add_variable var_1_name var_2_name =
   let new_var = {
     name =
@@ -192,12 +226,28 @@ let add_variable var_1_name var_2_name =
   incr num_variables;
   new_var.name
 
+(**
+ * [is_large_production prod] is whether or not [prod] is considered a large
+ * production (i.e. has more than two terminal or variable symbols).
+ *)
 let is_large_production prod =
   Stack.length prod > 2
 
+(**
+ * [is_token_production prod] is whether or not [prod] is considered a large
+ * production (i.e. has more than two terminal or variable symbols).
+ *)
 let is_token_production prod =
   List.length prod = 1 && get_variable_id (List.hd prod) < num_tokens
 
+(**
+ * [remove_large_productions ()] decomposes all productions [p] such that
+ * [is_large_production p] is [true] into smaller productions.
+ *
+ * It does this by repeatedly replacing the last two symbols of the production
+ * with a new variable that has a production to those symbols until it is no
+ * longer large.
+ *)
 let remove_large_productions () =
   for var_id = start_variable to last_variable do
     get_productions var_id
@@ -219,6 +269,13 @@ let remove_large_productions () =
     |> set_productions var_id
   done
 
+(**
+ * [remove_unit_productions var_id] recursively removes all unit productions
+ * from [var_id] by copying all productions of its children unit production
+ * variables.
+ *
+ * {b Requires:} There must not be any unit production cycles in the grammar.
+ *)
 let rec remove_unit_productions var_id =
   let to_add_productions = ref [] in
   let to_remove = Hashtbl.create 10 in
@@ -248,6 +305,11 @@ for var_id = start_variable to last_variable do
   remove_unit_productions var_id
 done;;
 
+(**
+ * [token_to_varid_fn ()] is the OCaml code of the [token_to_varid] function.
+ *
+ * {b See:} Grammar for documentation of this method.
+ *)
 let token_to_varid_fn () =
   let tokenToVarId = Hashtbl.create (Hashtbl.length tokens) in
   for var_id = 0 to num_tokens - 1 do
@@ -276,6 +338,11 @@ let token_to_varid_fn () =
   |> String.concat ""
   |> sprintf "let token_to_varid = Token.(function\n%s)\n";;
 
+(**
+ * [rules_lst ()] is the OCaml code of the [rules] list.
+ *
+ * {b See:} Grammar for documentation of this property.
+ *)
 let rules_lst () =
   let rules = ref "" in
   for var_id = start_variable to !num_variables - 1 do
@@ -301,18 +368,44 @@ let rules_lst () =
   done;
   sprintf "let rules = [%s\n]\n" !rules;;
 
+(**
+ * [start_variable_int ()] is the OCaml code of the [start_variable] number.
+ *
+ * {b See:} Grammar for documentation of this property.
+ *)
 let start_variable_int () =
   sprintf "let start_variable = %d\n" start_variable;;
 
+(**
+ * [num_tokens_int ()] is the OCaml code of the [num_tokens] number.
+ *
+ * {b See:} Grammar for documentation of this property.
+ *)
 let num_tokens_int () =
   sprintf "let num_tokens = %d\n" num_tokens;;
 
+(**
+ * [num_variables_int ()] is the OCaml code of the [num_tokens] number.
+ *
+ * {b See:} Grammar for documentation of this property.
+ *)
 let num_variables_int () =
   sprintf "let num_variables = %d\n" !num_variables;;
 
+(**
+ * [auto_generated_variable ()] is the OCaml code of the
+ * [auto_generated_variable] function.
+ *
+ * {b See:} Grammar for documentation of this method.
+ *)
 let auto_generated_variable () =
   sprintf "let auto_generated_variable var = var > %d\n" last_variable;;
 
+(**
+ * [token_decl ()] is the OCaml code of the [Token.t] variant.
+ *
+ * {b See:} Token for documentation of this type.
+ *)
 let token_decl () =
   List.map (fun el ->
     match el.parameter with
@@ -322,6 +415,11 @@ let token_decl () =
   |> String.concat ""
   |> sprintf "type t =\n%s";;
 
+(**
+ * [tokenize_sig ()] is the OCaml code of the signature for Tokenizer.
+ *
+ * {b See:} Tokenizer for documentation of these methods.
+ *)
 let tokenize_sig () = {|
 val tokenize : string -> Token.t array
 
@@ -330,6 +428,11 @@ val has_tag : Token.t -> string -> bool
 val token_to_string : Token.t -> string
 |};;
 
+(**
+ * [regexp_of_token_fn ()] is the OCaml code of the [regexp_of_token] function.
+ *
+ * {b See:} Tokenizer for documentation of these methods.
+ *)
 let regexp_of_token_fn () =
   List.map (fun el ->
     let output_regex = String.escaped el.regex in
@@ -340,6 +443,11 @@ let regexp_of_token_fn () =
   |> String.concat ""
   |> sprintf "let regexp_of_token tok = Str.regexp (match tok with\n%s)\n";;
 
+(**
+ * [precedence_arr ()] is the OCaml code of the [precedence] list of tokens.
+ *
+ * {b See:} Tokenizer for documentation of this property.
+ *)
 let precedence_arr () =
   List.map (fun el ->
     match el.parameter with
@@ -354,6 +462,11 @@ let precedence_arr () =
   |> String.concat ""
   |> sprintf "let precedence = [\n%s]\n";;
 
+(**
+ * [parametrize_tok_fn ()] is the OCaml code of the [parametrize_tok] function.
+ *
+ * {b See:} Tokenizer for documentation of this method.
+ *)
 let parametrize_tok_fn () =
   List.filter (fun el -> el.parameter != None) tokens_in_order
   |> List.map (fun el ->
@@ -373,6 +486,11 @@ let parametrize_tok_fn () =
   |> String.concat ""
   |> sprintf "let parametrize_tok str = function\n%s  | t -> t\n";;
 
+(**
+ * [tokenize_impl ()] is the OCaml code of the [tokenize] function.
+ *
+ * {b See:} Tokenizer for documentation of this method.
+ *)
 let tokenize_impl = {|
 let rec tokenize_rec str start tok_lst =
   let whitespace_regex = Str.regexp "[ \n\r\t]*" in
@@ -405,6 +523,11 @@ let tokenize str =
   tokenize_rec str 0 [] |> Array.of_list
 |};;
 
+(**
+ * [has_tag_fn ()] is the OCaml code of the [has_tag] function.
+ *
+ * {b See:} Tokenizer for documentation of this method.
+ *)
 let has_tag_fn () =
   List.filter (fun el -> el.tag != None) tokens_in_order
   |> List.map (fun el ->
@@ -421,6 +544,11 @@ let has_tag_fn () =
     "let has_tag tok tag = match (tok, tag) with\n%s -> true\n  | _ -> false\n"
   ;;
 
+(**
+ * [token_to_string_fn ()] is the OCaml code of the [token_to_string] function.
+ *
+ * {b See:} Tokenizer for documentation of this method.
+ *)
 let token_to_string_fn () =
   List.map (fun el ->
     match el.parameter with
@@ -430,10 +558,16 @@ let token_to_string_fn () =
   |> String.concat ""
   |> sprintf "let token_to_string = function\n%s";;
 
+(**
+ * [header] is the warning comment telling not to change any autogenerated file.
+ *)
 let header = {|(* DO NOT UPDATE THIS FILE! *)
 (* Update grammar.json and then run make grammar! *)
 |};;
 
+(**
+ * [grammar_text] is the content of the grammar metadata file.
+ *)
 let grammar_text =
   sprintf "%s\n%s\n%s\n%s\n%s\n%s\n%s"
     header
@@ -444,16 +578,25 @@ let grammar_text =
     (num_variables_int ())
     (auto_generated_variable ());;
 
+(**
+ * [token_mli_text] is the content of token inteface file.
+ *)
 let token_mli_text =
   sprintf "%s\n%s"
     header
     (token_decl ());;
 
+(**
+ * [tokenizer_mli_text] is the content of tokenizer inteface file.
+ *)
 let tokenizer_mli_text =
   sprintf "%s%s"
     header
     (tokenize_sig ());;
 
+(**
+ * [tokenizer_text] is the content of tokenizer implementation file.
+ *)
 let tokenizer_text =
   sprintf "%s%s\n%s\n%s\n%s%s\n%s\n%s"
     header
@@ -465,6 +608,10 @@ let tokenizer_text =
     (has_tag_fn ())
     (token_to_string_fn ());;
 
+(**
+ * [write_to_file f txt] writes [txt] to a file with name [f] and prints a
+ * success message to standard out.
+ *)
 let write_to_file f txt =
   let oc = open_out f in
   fprintf oc "%s" txt;
