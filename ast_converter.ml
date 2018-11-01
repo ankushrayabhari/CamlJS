@@ -1,14 +1,15 @@
+(** Conveter from Parse Tree to AST *)
 open Token
 open Parser
 open Ast
 
 (**
-   - [convert_prefix tok] is the AST-representation of the prefix token, [tok].
-   - Requires (fails if not satisfied):
-   - 1) [tok] is a token corresponding to a valid prefix operation
-   - (Negation or FloatNegation)
-   - 2) [tok] is a Token leaf
-**)
+ * [convert_prefix tok] is the AST-representation of the prefix token, [tok].
+ *
+ * {b Requires}:
+ * - [tok] corresponds to a valid prefix operator
+ * - [tok] is a Token leaf
+ *)
 let convert_prefix = function
   | Token.Negation -> Negation
   | t -> failwith (
@@ -17,13 +18,12 @@ let convert_prefix = function
     )
 
 (**
-   - [convert_infix tok] is the AST-representation of the infix token, [tok].
-   - Requires (fails if not satisfied):
-   - 1) [tok] is a token corresponding to a valid infix operation
-   - (Int-Arithmetic, Float-Arithmetic, Comparison, Logical,
-   - Cons, Concat, Append)
-   - 2) [tok] is a Token leaf
- **)
+ * [convert_infix tok] is the AST-representation of the infix token, [tok].
+ *
+ * {b Requires}:
+ * - [tok] corresponds to a valid infix operation
+ * - [tok] is a Token leaf
+ *)
 let convert_infix = function
   | Token.Plus -> Plus
   | Token.PlusFloat -> PlusFloat
@@ -50,12 +50,15 @@ let convert_infix = function
     )
 
 (**
-   - [convert_pattern tree] is the AST-representation of the pattern
-   - production at the head of [tree].
-   - Requires (fails if not satisfied):
-   - 1) the head of [tree] corresponds to a valid pattern production
-   - (anything production in grammar.json with "Pattern" in its name)
- **)
+ * [convert_pattern tr] is the AST-representation of the pattern
+ * production of [tr].
+ *
+ * {b Requires}:
+ * - [tr] corresponds to a valid pattern production according to [grammar.json].
+ *
+ * {b Raises}:
+ * - [Failure] if [tr] does not correspond to a valid pattern tree.
+ *)
 let rec convert_pattern = function
   | Token (LowercaseIdent ident_name) -> ValueNamePattern (ident_name)
   | Token (Ignore) -> IgnorePattern
@@ -98,16 +101,16 @@ let rec convert_pattern = function
   | _ -> failwith "not a valid pattern"
 
 (**
-   - [convert_one_or_more_patterns_semicolon_sep tree] is the
-   - AST-representation of [tree] where the head of [tree]
-   - must either be directly convertible by [convert_pattern],
-   - or has a [convert_one_or_more_patterns_semicolon_sep]-legal
-   - left child,
-   - a Token (Semicolon) as a middle child,
-   - and a [convert_pattern]-legal right child.
-   - Requires (fails if not satisfied):
-   - 1) the head of [tree] is as specified above.
- **)
+ * [convert_one_or_more_patterns_semicolon_sep tree] is the AST-representation
+ * of [tree] where [tree] must either be:
+ * - directly convertible by [convert_pattern]
+ * - has a pattern semicolon sep-legal left child, a Token (Semicolon) as a
+ * middle child, and a pattern-legal right child.
+ *
+ * {b Raises}:
+ * - [Failure] if [tr] does not correspond to a valid pattern semicolon sep
+ * tree.
+ *)
 and convert_one_or_more_patterns_semicolon_sep = function
   | Node [
       patterns_semicolon_sep;
@@ -119,15 +122,17 @@ and convert_one_or_more_patterns_semicolon_sep = function
   | pat -> [convert_pattern pat]
 
 (**
-   - [get_patterns one_or_more_patterns acc] is [acc] with the
-   - AST-representation of the first parse-tree of [one_or_more_patterns],
-   - p, added to the front of it.
-   - Requires (fails if not satisfied):
-   - 1) the first element of one_or_more_patterns, p, is a parse tree
-   - whose parent represents a function declaration (anonymous or let
-   - declaration), and that p is found after it.s parent's LowercaseIdent
-   - and before its parent's Equal tokens.
- **)
+ * [get_patterns one_or_more_patterns acc] is the patterns in
+ * [one_or_more_patterns] appended to [acc].
+ *
+ * {b Requires}:
+ * - one_or_more_pattern is a valid pattern
+ * - one_or_more_pattern is a Node where the first element is another
+ * one or more patterns tree and the second node is a valid pattern.
+ *
+ * {b Raises}:
+ * - [Failure] if it is not a one or more patterns
+ *)
 let rec get_patterns one_or_more_patterns acc =
   try convert_pattern one_or_more_patterns::acc
   with _ ->
