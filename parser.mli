@@ -5,6 +5,9 @@
  * - [Token tok] is a token where [tok] is a [Token.t].
  * - [Node lst] is a non-leaf node in the tree where [lst] is a
  * [parse_tree list] of its children nodes.
+ *
+ * Note that all unit production paths in the parse tree get squashed to a 
+ * single edge.
  *)
 type parse_tree =
   | Token of Token.t

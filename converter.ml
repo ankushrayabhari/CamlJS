@@ -1,4 +1,25 @@
-(** Autogeneration script of tokenizer/grammar metadata from an grammar file. *)
+(** Autogeneration script of tokenizer/grammar metadata from an grammar file. 
+ * 
+ * The grammar json file should be an association with a [tokens] and 
+ * a [productions] member, where each [tok] in [tokens] is a
+ * token recognizable by the grammar, and each [prod] in [productions] is
+ * a production rule using the tokens in [tokens]. 
+ * 
+ * Each [tok] is represented by an assoc with the following structure:
+ * - a [name] attribute which is the name of [tok]
+ * - a [regex] attribute which is the regular expression representing [tok] 
+ * - a [tag] attribute which is what kind of [tok] it is
+ *
+ * Each [prod] is an assoc key-value pair [p, rules] where:
+ * - [p] is a production
+ * - [rules] is a list of production rules containing [p] where each item is a 
+ * list [t1..tn] representing the production rule t1 -> t2 t3 ... tn
+ *
+ * Note that you cannot have unit production cycles or epsilon productions in
+ * your grammar.
+ *
+ * Please see grammar.json for an example.
+ *)
 
 open Yojson.Basic
 open Yojson.Basic.Util
