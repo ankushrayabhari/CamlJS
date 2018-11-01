@@ -2,6 +2,18 @@ open Yojson.Basic
 open Yojson.Basic.Util
 open Printf
 
+(**
+ * [token] contains the information represented by a token in the grammar.
+ * - [name] represents the name of the token that is used as an idenfitier in
+ * the grammar file.
+ * - [regex] is the OCaml regular expression that matches against valid strings
+ * that represent this token.
+ * - [tag] is an optional parameter that denotes whether or not the token had a
+ * specific tag. Currently, the two tags used are prefix and infix.
+ * - [parameter] is an optional parameter that contains any data associated
+ * with the token. Current types supported are [int], [string], [float], [bool],
+ * and [char].
+ *)
 type token = {
   name: string;
   regex: string;
@@ -9,11 +21,32 @@ type token = {
   parameter: string option;
 }
 
+(**
+ * [variable] contains the information represented by a variable in the grammar.
+ * - [name] represents the name of the variable that is used as an idenfitier in
+ * the grammar file.
+ * - [productions] is a list of the production rules that appear on the right
+ * hand side of [variable] in the grammar.
+ * - Each production is a list of token and variable identifiers that
+ * represents the concatenation of the elements from left to right.
+ *)
 type variable = {
   name: string;
   productions: string list list;
 }
 
+(**
+ * [parse_token json] is the token record that contains the information in
+ * [json].
+ *
+ * {b Requires:}
+ * - [json] must be a [`Assoc].
+ * - [json] must have a member [name] of type [`String]
+ * - [json] must have a member [regex] of type [`String]
+ * - [json] can have a member [tag] or [parameter], both of type [`String]
+ *
+ * @raise Type_error if [json] does not conform to the above structure.
+ *)
 let parse_token json =
   {
     name = member "name" json |> to_string;
@@ -22,6 +55,14 @@ let parse_token json =
     parameter = member "parameter" json  |> to_string_option;
   }
 
+(**
+ * [parse_variable (name, productions)] is the variable record that contains the
+ * information in the tuple.
+ * - [name] is the idenfitier of the variable.
+ * - [productions] is a JSON of type [`List] where each element is a
+ * [`String `List]
+ * @raise Type_error if [json] does not conform to the above structure.
+ *)
 let parse_variable (n, p) = {
   name = n;
   productions =
@@ -30,26 +71,50 @@ let parse_variable (n, p) = {
     |> List.map (fun el -> el |> to_list |> List.map to_string)
 }
 
+(**
+ * [get_tokens json] is the list of tokens contained in the "tokens" property of
+ * [json].
+ * @raise Type_error if [json] does not have a list "tokens" member or if each
+ * token does not match the signature of a token.
+ *)
 let get_tokens grammar_json =
   member "tokens" grammar_json
   |> to_list
   |> List.map parse_token
 
+(**
+ * [get_variables json] is the list of variables contained in the "productions"
+ * property of [json].
+ * @raise Type_error if [json] does not have a list "productions" member or if
+ * each variable does not match the signature of a variable.
+ *)
 let get_variables grammar_json =
   member "productions" grammar_json
   |> to_assoc
   |> List.map parse_variable
 
+(**
+ * [to_hash lst] is the [Hashtbl] mapping from element index to the element.
+ * Each element of [lst] will be contained in the resulting map.
+ *)
 let to_hash lst = List.fold_left
   (fun (acc, idx) el -> Hashtbl.add acc idx el;(acc, idx + 1))
   (Hashtbl.create (List.length lst), 0)
   lst
 
+(**
+ * [parse_grammar json] is the tuple [(t, v)] where [t] contains the token
+ * records and [v] contains the variable records.
+ *)
 let parse_grammar json =
   let tokens = get_tokens json in
   let variables = get_variables json in
   (tokens, variables)
 
+(**
+ * [parse_args ()] parses the first argument to the executable that should
+ * contain the file name containing the grammar JSON.
+ *)
 let parse_args () =
   try
     Sys.argv.(1)
@@ -57,7 +122,13 @@ let parse_args () =
     print_endline "Invalid arguments: missing input file";
     exit 0
 
-(* Parse grammar into tokens and variables. *)
+(**
+ * [tokens_in_order] is the list of tokens in the order specified in the
+ * grammar file.
+ *
+ * [variables_in_order] is the list of variables in the order specified in the
+ * grammar file.
+ *)
 let (tokens_in_order, variables_in_order) =
   try
     Yojson.Basic.from_file (parse_args ()) |> parse_grammar
@@ -65,6 +136,11 @@ let (tokens_in_order, variables_in_order) =
     print_endline "Invalid arguments: invalid input file";
     exit 1
 
+(**
+ * [tokens] is the index to token map of [tokens_in_order].
+ *
+ * {b See:} to_hash for the table definition of [tokens]
+ *)
 let tokens = tokens_in_order |> to_hash |> fst
 let variables = variables_in_order |> to_hash |> fst
 let num_tokens = Hashtbl.length tokens
