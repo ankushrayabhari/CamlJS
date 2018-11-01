@@ -421,10 +421,28 @@ let token_decl () =
  * {b See:} Tokenizer for documentation of these methods.
  *)
 let tokenize_sig () = {|
+(**
+ * [tokenize program] is the list of tokens that make up [program].
+ *
+ * It will greedily pick the largest token that matches any given starting
+ * position and then recurse on the rest of the stirng.
+ * Ties are resolved in the order that the tokens were defined.
+ *
+ * {b Requires}:
+ * - [program] is a valid program according to the grammar defined in
+ * grammar.json.
+ *)
 val tokenize : string -> Token.t array
 
+(**
+ * [has_tag tok tag] is whether [tok] has the tag [tag] according
+ * to its definition in grammar.
+ *)
 val has_tag : Token.t -> string -> bool
 
+(**
+ * [token_to_string tok] is the string representation of [tok].
+ *)
 val token_to_string : Token.t -> string
 |};;
 
@@ -565,6 +583,9 @@ let header = {|(* DO NOT UPDATE THIS FILE! *)
 (* Update grammar.json and then run make grammar! *)
 |};;
 
+let token_mli_header = "(** The definition of all the tokens. *)";;
+let tokenizer_mli_text = "(** The interface of the tokenizer. *)";;
+
 (**
  * [grammar_text] is the content of the grammar metadata file.
  *)
@@ -582,7 +603,8 @@ let grammar_text =
  * [token_mli_text] is the content of token inteface file.
  *)
 let token_mli_text =
-  sprintf "%s\n%s"
+  sprintf "%s\n%s\n%s"
+    token_mli_header
     header
     (token_decl ());;
 
@@ -590,7 +612,8 @@ let token_mli_text =
  * [tokenizer_mli_text] is the content of tokenizer inteface file.
  *)
 let tokenizer_mli_text =
-  sprintf "%s%s"
+  sprintf "%s\n%s%s"
+    tokenizer_mli_text
     header
     (tokenize_sig ());;
 
