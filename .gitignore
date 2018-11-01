@@ -22,6 +22,7 @@ e2e-compiled.js
 e2e-js-result.txt
 e2e-ml-result.txt
 e2e-diff.txt
+camljs_src.zip
 
 # temporary files
 *.swp
