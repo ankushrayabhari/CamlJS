@@ -1,3 +1,5 @@
+(** Converter from Parse Tree to AST *)
+
 (**
  * [convert parse_tr] is the ast conversion of the declarations and expressions
  * of the module parse tree [tr].

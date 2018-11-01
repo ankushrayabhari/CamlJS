@@ -1,4 +1,3 @@
-(** Conveter from Parse Tree to AST *)
 open Token
 open Parser
 open Ast

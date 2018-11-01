@@ -33,6 +33,9 @@ docs: docs-public docs-private
 grammar:
 	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER) grammar.json
 
+zip: grammar
+	zip camljs_src.zip *.ml *.mli end_to_end_tests/* js_modules/* *.json _tags Makefile README.md
+
 docs-public: build
 	mkdir -p doc.public
 	ocamlfind ocamldoc -I _build -I "_build/js_modules" -package $(PKGS) \
@@ -48,5 +51,6 @@ clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private
 	rm -rf grammar.ml tokenizer.ml tokenizer.mli token.mli temp.js temp.ml
+	rm -rf camljs_src.zip
 
 .PHONY: test, test-debug, bin, grammar
