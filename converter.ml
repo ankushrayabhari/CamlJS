@@ -1,18 +1,18 @@
-(** Autogeneration script of tokenizer/grammar metadata from an grammar file. 
- * 
- * The grammar json file should be an association with a [tokens] and 
+(** Autogeneration script of tokenizer/grammar metadata from an grammar file.
+ *
+ * The grammar json file should be an association with a [tokens] and
  * a [productions] member, where each [tok] in [tokens] is a
  * token recognizable by the grammar, and each [prod] in [productions] is
- * a production rule using the tokens in [tokens]. 
- * 
+ * a production rule using the tokens in [tokens].
+ *
  * Each [tok] is represented by an assoc with the following structure:
  * - a [name] attribute which is the name of [tok]
- * - a [regex] attribute which is the regular expression representing [tok] 
+ * - a [regex] attribute which is the regular expression representing [tok]
  * - a [tag] attribute which is what kind of [tok] it is
  *
  * Each [prod] is an assoc key-value pair [p, rules] where:
  * - [p] is a production
- * - [rules] is a list of production rules containing [p] where each item is a 
+ * - [rules] is a list of production rules containing [p] where each item is a
  * list [t1..tn] representing the production rule t1 -> t2 t3 ... tn
  *
  * Note that you cannot have unit production cycles or epsilon productions in
@@ -446,12 +446,12 @@ let tokenize_sig () = {|
  * [tokenize program] is the list of tokens that make up [program].
  *
  * It will greedily pick the largest token that matches any given starting
- * position and then recurse on the rest of the stirng.
+ * position and then recurse on the rest of the string.
+ *
  * Ties are resolved in the order that the tokens were defined.
  *
- * {b Requires}:
- * - [program] is a valid program according to the grammar defined in
- * grammar.json.
+ * @raise Failure if [program] contains a substring at a valid token start index
+ * from the greedy strategy that does not match any known token.
  *)
 val tokenize : string -> Token.t array
 
@@ -480,7 +480,14 @@ let regexp_of_token_fn () =
     | None -> sprintf "  | %s -> \"%s\"\n" el.name output_regex
   ) tokens_in_order
   |> String.concat ""
-  |> sprintf "let regexp_of_token tok = Str.regexp (match tok with\n%s)\n";;
+  |> sprintf {|
+(**
+ * [regexp_of_token tok] is the regular expression of [tok] as defined in
+ * the grammar file.
+ *)
+let regexp_of_token tok = Str.regexp (match tok with
+%s)
+|};;
 
 (**
  * [precedence_arr ()] is the OCaml code of the [precedence] list of tokens.
@@ -499,7 +506,16 @@ let precedence_arr () =
     | _ -> failwith "unknown parameter type"
   ) tokens_in_order
   |> String.concat ""
-  |> sprintf "let precedence = [\n%s]\n";;
+  |> sprintf {|
+(**
+ * [precedence] is the precedence (preferred tokens match order) of the tokens
+ * in grammar.json, sorted by order of highest to lowest precendence.
+ *
+ * This corresponds to the order that tokens are defined in the grammar file.
+ *)
+let precedence = [
+%s]
+|};;
 
 (**
  * [parametrize_tok_fn ()] is the OCaml code of the [parametrize_tok] function.
@@ -523,7 +539,17 @@ let parametrize_tok_fn () =
       | _ -> failwith "should not be called on None"
     )
   |> String.concat ""
-  |> sprintf "let parametrize_tok str = function\n%s  | t -> t\n";;
+  |> sprintf {|
+(**
+ * [parametrize_tok val_str tok] updates [tok] to contain the data in [val_str].
+ * - If a token has no parameter, the function does nothing but evaluate to the
+ * token.
+ * - The type of conversion performed by the method depends on the parameter
+ * type of the token as defined in the grammar file.
+ *)
+let parametrize_tok str = function
+%s  | t -> t
+|};;
 
 (**
  * [tokenize_impl ()] is the OCaml code of the [tokenize] function.
@@ -531,6 +557,13 @@ let parametrize_tok_fn () =
  * {b See:} Tokenizer for documentation of this method.
  *)
 let tokenize_impl = {|
+(**
+ * [tokenize_rec str start tok_lst] is the list of tokens following the
+ * strategy defined in [tokenize] starting at the index [start] in [str].
+ *
+ * @raise Failure if at any valid starting index the string does not match
+ * any token regular expressions.
+ *)
 let rec tokenize_rec str start tok_lst =
   let whitespace_regex = Str.regexp "[ \n\r\t]*" in
   let _ = Str.string_match whitespace_regex str start in
@@ -604,8 +637,15 @@ let header = {|(* DO NOT UPDATE THIS FILE! *)
 (* Update grammar.json and then run make grammar! *)
 |};;
 
-let token_mli_header = "(** The definition of all the tokens. *)";;
-let tokenizer_mli_text = "(** The interface of the tokenizer. *)";;
+(**
+ * The documentation comment for token.mli
+ *)
+let token_mli_header = "(** The definition of every token. *)";;
+
+(**
+ * The documentation comment for tokenizer.mli
+ *)
+let tokenizer_mli_text = "(** Converts an input string to a token array. *)";;
 
 (**
  * [grammar_text] is the content of the grammar metadata file.
