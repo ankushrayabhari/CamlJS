@@ -12,3 +12,6 @@ Running ``` make test ``` will run the unit test suite. The standard OCaml insta
 ## Running End to End Tests
 Running ``` make e2e-test ``` will run the end to end test suite. 
 Note that you must be on MacOS and have a recent version of NodeJS installed in order to execute the test suite.
+
+## Generating Docs
+Running ``` make docs ``` will generate the documentation in a folder called ```doc.private``` and ```doc.public``` folders.
