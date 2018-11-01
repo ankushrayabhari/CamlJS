@@ -255,7 +255,7 @@ and convert_pattern_matching acc = function
   | _ -> failwith "not a valid pattern matching"
 
 (**
- * [convert_expr tr] is the abstract syntax tree representing the parse_tree
+ * [convert_expr tr] is the abstract syntax tree representing the expression in
  * [tr].
  *
  * @raise Failure if [t] is not a parse_tree reprensenting an expr.
