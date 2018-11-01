@@ -1,5 +1,5 @@
 JS_MODULES=pervasives_js list_js char_js string_js
-MODULES=tokenizer grammar parser ast_converter renderer file_helper main
+MODULES=tokenizer grammar parser ast_converter renderer file_helper
 OBJECTS=$(MODULES:=.cmo) $(JS_MODULES:=.cmo)
 MLS=$(MODULES:=.ml) $(JS_MODULES:%=js_modules/%.ml)
 MLIS=$(MODULES:=.mli) ast.mli token.mli $(JS_MODULES:%=js_modules/%.mli)
