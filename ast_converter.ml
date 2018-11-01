@@ -5,10 +5,7 @@ open Ast
 
 (**
  * [convert_prefix tok] is the AST-representation of the prefix token, [tok].
- *
- * {b Requires}:
- * - [tok] corresponds to a valid prefix operator
- * - [tok] is a Token leaf
+ * @raise Failure if [tok] does not correspond to a valid prefix operator
  *)
 let convert_prefix = function
   | Token.Negation -> Negation
@@ -20,10 +17,7 @@ let convert_prefix = function
 
 (**
  * [convert_infix tok] is the AST-representation of the infix token, [tok].
- *
- * {b Requires}:
- * - [tok] corresponds to a valid infix operation
- * - [tok] is a Token leaf
+ * @raise Failure if [tok] does not correspond to a valid infix operator
  *)
 let convert_infix = function
   | Token.Plus -> Plus
@@ -52,13 +46,37 @@ let convert_infix = function
 
 (**
  * [convert_pattern tr] is the AST-representation of the pattern
- * production of [tr].
+ * production of the parse tree [tr].
  *
- * {b Requires}:
- * - [tr] corresponds to a valid pattern production according to [grammar.json].
- *
- * {b Raises}:
- * - [Failure] if [tr] does not correspond to a valid pattern tree.
+ * @raise Failure if [tr] does not correspond to one of the following
+ * structures:
+ * - [tr] is a Token representing an identifier or constant.
+ * - [tr] is an alias pattern parse tree with the elements of [Node] being
+ * {ol
+ * {li the pattern}
+ * {li the [As] token}
+ * {li the [LowercaseIdent] token that binds to the value of the whole pattern}
+ * }
+ * - [tr] is a cons pattern parse tree with the elements of [Node] being
+ * {ol
+ * {li the head of list pattern}
+ * {li the [Cons] token}
+ * {li the pattern for the tail of the list}
+ * }
+ * - [tr] is a paren pattern parse tree with the elements of [Node] being
+ * {ol
+ * {li a [LParen] token}
+ * {li the pattern}
+ * {li  a [RParen] token}
+ * }
+ * - [tr] is a list pattern parse tree with the elements of [Node] being
+ * {ol
+ * {li a [StartList] token}
+ * {li a valid semicolon separated pattern parse see. {b See:}
+ * [convert_one_or_more_patterns_semicolon_sep]}
+ * {li an optional [SemiColon] token}
+ * {li a [EndList] token}
+ * }
  *)
 let rec convert_pattern = function
   | Token (LowercaseIdent ident_name) -> ValueNamePattern (ident_name)
@@ -102,15 +120,17 @@ let rec convert_pattern = function
   | _ -> failwith "not a valid pattern"
 
 (**
- * [convert_one_or_more_patterns_semicolon_sep tree] is the AST-representation
- * of [tree] where [tree] must either be:
- * - directly convertible by [convert_pattern]
- * - has a pattern semicolon sep-legal left child, a Token (Semicolon) as a
- * middle child, and a pattern-legal right child.
- *
- * {b Raises}:
- * - [Failure] if [tr] does not correspond to a valid pattern semicolon sep
- * tree.
+ * [convert_one_or_more_patterns_semicolon_sep tr] is the list of patterns
+ * contained in [tr].
+ * @raise Failure if [tr] does not correspond to one of the following
+ * structures:
+ * - [tr] is a valid pattern parse tree. {b See:} [convert_pattern]
+ * - [tr] is a [Node] with the following elements
+ * {ol
+ * {li a valid semicolon separated pattern parse tree}
+ * {li a [SemiColon] token}
+ * {li the pattern}
+ * }
  *)
 and convert_one_or_more_patterns_semicolon_sep = function
   | Node [
@@ -123,16 +143,14 @@ and convert_one_or_more_patterns_semicolon_sep = function
   | pat -> [convert_pattern pat]
 
 (**
- * [get_patterns one_or_more_patterns acc] is the patterns in
- * [one_or_more_patterns] appended to [acc].
+ * [get_patterns tr acc] is the list of patterns in [tr] appended to [acc].
  *
- * {b Requires}:
- * - one_or_more_pattern is a valid pattern
- * - one_or_more_pattern is a Node where the first element is another
- * one or more patterns tree and the second node is a valid pattern.
- *
- * {b Raises}:
- * - [Failure] if it is not a one or more patterns
+ * @raise Failure if [tr] does not correspond to one of the following
+ * structures:
+ * - [tr] is a valid pattern. {b See:} [convert_pattern]
+ * - [tr] is a Node where the first element is a valid parse tree according to
+ * this definition and the second node is a valid pattern
+ * ({b See:} [convert_pattern]).
  *)
 let rec get_patterns one_or_more_patterns acc =
   try convert_pattern one_or_more_patterns::acc
@@ -143,12 +161,28 @@ let rec get_patterns one_or_more_patterns acc =
     | _ -> failwith "not a valid one or more patterns"
 
 (**
- * [convert_let_binding is_rec t] is the abstract syntax tree representing
- * the let binding represented by parse_tree [t].
+ * [convert_let_binding is_rec t] is the AST representing the let binding
+ * represented by parse_tree [t].
  *
  * [is_rec] is true if the let binding is recursive and false otherwise.
  *
- * {b Raises}: Failure if [t] does not represent a type of let binding.
+ * @raise Failure if [t] does not correspond to one of the following
+ * structures:
+ * - [t] is a function decl pattern parse tree with the elements of [Node]:
+ * {ol
+ * {li a [LowercaseIdent] token that describes the function name}
+ * {li the pattern arguments parse tree. {b See:} get_patterns }
+ * {li a [Equal] token}
+ * {li an expr parse tree that contains the body expression of the function.
+ * {b See:} convert_expr}
+ * }
+ * - [t] is a normal let decl pattern parse tree with the elements of [Node]:
+ * {ol
+ * {li the pattern that binds the variable. {b See:} get_patterns }
+ * {li a [Equal] token}
+ * {li an expr parse tree that contains the value expression of the declaration.
+ * {b See:} convert_expr}
+ * }
  *)
 let rec convert_let_binding is_rec = function
   | Node [
@@ -175,15 +209,21 @@ let rec convert_let_binding is_rec = function
       )
   | _ -> failwith "not a valid convert let binding"
 
-(** [convert_list_body_expr acc t] is the list of abstract syntax trees of
- * type expression in the parse_tree [t], where all expressions are seperated
- * by a semicolon.
+(** [convert_list_body_expr acc t] is the list of AST expression nodes
+ * in the parse tree [t] preprended to acc, where all expressions are
+ * seperated by a semicolon.
  *
- * {b Requires}: [t] only has expressions of precedence equal to or higher than
- * an if expression, and all expressions are separated by a semicolon.
+ * @raise Failure if [t] does not correspond to one of the following structures:
+ * - [t] is a parse tree with the elements of [Node]:
+ * {ol
+ * {li a list body expression that follows the structure of this definition.}
+ * {li a [SemiColon] token. }
+ * {li an expr parse tree that contains the last element of the list.
+ * {b See:} convert_expr}
+ * }
+ * - [t] is a valid expression. (b See:) [convert_expr]
  *
- * {b Example}:
- * {v convert_list_body_expr
+ * {b Example}: {v convert_list_body_expr
  *   []
  *   (Node [
  *     Token (StartList);
@@ -212,16 +252,22 @@ and convert_list_body_expr acc = function
   | expr -> (convert_expr expr)::acc
 
 (**
- * [convert_pattern_matching acc t] is the abstract syntax tree list of
- * tuples [(pattern, value, Some guard)] representing the parse_tree [t].
+ * [convert_pattern_matching acc t] is the AST list of tuples
+ * [(pattern, value, Some guard)] representing the match cases in [t]
+ * prepended to [acc].
  *
- * Each pattern match being [Node [pattern; Token (FunctionArrow); value]].
- *
- * See that [pattern] is the AST
- * representation of [pattern], and [value] is the AST
- * representation of [value].
- *
- * @raise Failure if [t] is not a parse_tree representing pattern matching.
+ * @raise Failure if [t] does not match one of the following structures:
+ * - [t] is a [Node] with the elements being:
+ * {ol
+ * {li An optional [VerticalBar] token. }
+ * {li The pattern parse tree being matched against. {b See:}
+ * [convert_pattern].}
+ * {li a [FunctionArrow] token. }
+ * {li the result expr parse tree that contains the expression to return if the
+ * pattern matches. {b See:} convert_expr}
+ * {li An optional further pattern matching case that follows the structure
+ * defined here.}
+ * }
  *)
 and convert_pattern_matching acc = function
   | Node [
@@ -258,7 +304,92 @@ and convert_pattern_matching acc = function
  * [convert_expr tr] is the abstract syntax tree representing the expression in
  * [tr].
  *
- * @raise Failure if [t] is not a parse_tree reprensenting an expr.
+ * @raise Failure if [t] does not conform to one of the following structures:
+ * - An [Int], [Bool], [Float], [CharLiteral], [StringLiteral], [EmptyList],
+ * [LowercaseIdent], [Unit] or token.
+ * - A module accessor parse tree with the following elements:
+ * {ol
+ * {li The [CapitalizedIdent] describing the module name. }
+ * {li A [Period] token. }
+ * {li The [LowercaseIdent] describing the value accessed from that module.}
+ * }
+ * - A parenthesized expression parse tree with the following elements:
+ * {ol
+ * {li An [LParen] token. }
+ * {li A valid expression parse tree according to these definitions. }
+ * {li An [RParen] token. }
+ * }
+ * - A prefix expression parse tree with the following elements:
+ * {ol
+ * {li A token that was tagged as "prefix" }
+ * {li A valid expression parse tree according to these definitions. }
+ * }
+ * - An infix expression parse tree with the following elements:
+ * {ol
+ * {li A valid expression parse tree according to these definitions. }
+ * {li A token that was tagged as "infix" }
+ * {li A valid expression parse tree according to these definitions. }
+ * }
+ * - An if expression parse tree with the following elements:
+ * {ol
+ * {li An [If] token. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the condition of the if expression. }
+ * {li A [Then] token. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the true body expression. }
+ * {li A optional [Else] token. }
+ * {li An optional expression parse tree according to these definitions that
+ * represents the else body expression that should be provided. }
+ * }
+ * - An anonymous function expression parse tree with the following elements:
+ * {ol
+ * {li An [Fun] token. }
+ * {li A pattern list parse tree. {b See:} [get_patterns] }
+ * {li A [FunctionArrow] token. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the body. }
+ * }
+ * - A semicolon expression parse tree with the following elements:
+ * {ol
+ * {li A valid expression parse tree according to these definitions that
+ * represents the first expression. }
+ * {li A [SemiColon] token. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the second expression and return value. }
+ * }
+ * - A let expression parse tree with the following elements:
+ * {ol
+ * {li A [Let] token. }
+ * {li An optional [Rec] token. }
+ * {li A let binding parse tree {b See:} [convert_let_binding]. }
+ * {li A [In] keyword.}
+ * {li A valid expression parse tree according to these definitions that
+ * represents the expression where the binding occurs in. }
+ * }
+ * - A function call expression parse tree with the following elements:
+ * {ol
+ * {li A valid expression parse tree according to these definitions that
+ * represents the function. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the argument to that function. }
+ * }
+ * - A list literal expression parse tree with the following elements:
+ * {ol
+ * {li A [StartList] token. }
+ * {li A valid list body parse tree. {b See:} [convert_list_body_expr]. }
+ * {li An optional [SemiColon] token. }
+ * {li An [EndList] token. }
+ * }
+ * - A match expression parse tree with the following elements:
+ * {ol
+ * {li A [Match] token. }
+ * {li A valid expression parse tree according to these definitions that
+ * represents the value being matched against. }
+ * {li An [With] token. }
+ * {li A pattern matching cases parse tree is {b See:}
+ * [convert_pattern_matching] }
+ * }
  *)
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
@@ -397,10 +528,21 @@ and convert_expr tr = match tr with
 
 (**
  * [convert_definition t] is the abstract syntax tree representing the
- * parse_tree [t] which represents a definition (an [open Module] or
- * [let var_name = expr]).
+ * a definition (an [open Module] or [let var_name = expr]) in the top level
+ * of a module.
  *
- * @raise Failure if [t] does not represent a valid definition.
+ * @raise Failure if [t] does not conform to one of the following structures:
+ * - An open declaration [Node] with the following elements:
+ * {ol
+ * {li An [Open] token. }
+ * {li A [CapitalizedIdent] token representing the module name. }
+ * }
+ * - A let binding with the following elements
+ * {ol
+ * {li An [Let] token. }
+ * {li An optional [Rec] token.}
+ * {li A valid let binding. {b See:} [convert_let_binding] }
+ * }
  *)
 let convert_definition = function
   | Node [
@@ -424,17 +566,26 @@ let convert_definition = function
 
 (**
  * [convert_module_item tr] is the expression or declaration in [tr].
- * Requires:
- * - [tr] is a valid module expression or declaration.
+ *
+ * @raise Failure if [t] does not conform to one of the following structures:
+ * - [tr] is a valid expression. {b See:} [convert_expr]
+ * - [tr] is a valid definition. {b See:} [convert_definition]
  *)
 let convert_module_item tr =
   try Expr (convert_expr tr) with _ -> (convert_definition tr)
 
 (**
  * [convert_one_plus_def_expr tr] is the list of declarations and expressions
- * of [tr] where [tr] represents one or more defintions or expressions.
- * Requires:
- * - [tr] is a valid module expression or declaration.
+ * of [tr] where [tr] represents one or more definitions or expressions.
+ *
+ * @raise Failure if [t] does not conform to one of the following structures:
+ * - A module item parse tree with the following structure:
+ * {ol
+ * {li An optional [DoubleSemicolon] token. }
+ * {li A valid module item tree. {b See:} [convert_module_item].}
+ * {li An optional further parse tree that conforms to these definitions. }
+ * }
+ * - A single module item tree. {b See:} [convert_module_item]
  *)
 let rec convert_one_plus_def_expr = function
   | Node [
@@ -456,10 +607,16 @@ let rec convert_one_plus_def_expr = function
 
 (**
  * [convert_expr_definition_no_start_double_semicolon tr] is the list of
- * declarations and expressions of [tr] that has a parse tree where the
- * first token is not a [DoubleSemicolon].
- * Requires:
- * - [tr] is a valid module expression or declaration.
+ * declarations and expressions of [tr].
+ *
+ * @raise Failure if [t] does not conform to one of the following structures:
+ * - A module item parse tree with the following structure:
+ * {ol
+ * {li A valid module item tree. {b See:} [convert_module_item].}
+ * {li An optional further parse tree that conforms to these definitions. }
+ * {li An optional [DoubleSemicolon] token. }
+ * }
+ * - A single module item tree. {b See:} [convert_module_item]
  *)
 let convert_expr_definition_no_start_double_semicolon = function
   | Node [
@@ -480,9 +637,11 @@ let convert_expr_definition_no_start_double_semicolon = function
       | _ -> failwith "not a valid expr def no start ;;"
 
 (**
- * [convert_ast tr] is the list of declarations and expressions of module [tr].
- * Requires:
- * - [tr] is a valid module expression or declaration parse tree.
+ * [convert_ast tr] is the list of declarations and expressions of the module
+ * parse tree [tr].
+ *
+ * @raise Failure if [tr] is not a valid module expression or declaration parse
+ * tree.
  *)
 let convert_ast = function
   | Node [
@@ -493,9 +652,9 @@ let convert_ast = function
 
 (**
  * [convert parse_tr] is the ast conversion of the declarations and expressions
- * of module [tr].
- * Requires:
- * - [tr] is a valid module expression or declaration.
+ * of the module parse tree [tr].
+ *
+ * @raise Failure if [tr] is not valid module items parse tree.
 *)
 let convert parse_tr =
   convert_ast parse_tr
