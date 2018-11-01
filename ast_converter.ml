@@ -650,11 +650,5 @@ let convert_ast = function
     ]
   | tr -> convert_expr_definition_no_start_double_semicolon tr
 
-(**
- * [convert parse_tr] is the ast conversion of the declarations and expressions
- * of the module parse tree [tr].
- *
- * @raise Failure if [tr] is not valid module items parse tree.
-*)
 let convert parse_tr =
   convert_ast parse_tr
