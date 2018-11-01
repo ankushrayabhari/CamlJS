@@ -1,7 +1,15 @@
+(** Conveter from Parse Tree to AST *)
 open Token
 open Parser
 open Ast
 
+(**
+ * [convert_prefix tok] is the AST-representation of the prefix token, [tok].
+ *
+ * {b Requires}:
+ * - [tok] corresponds to a valid prefix operator
+ * - [tok] is a Token leaf
+ *)
 let convert_prefix = function
   | Token.Negation -> Negation
   | Token.NegationFloat -> NegationFloat
@@ -10,6 +18,13 @@ let convert_prefix = function
       (Tokenizer.token_to_string t)
     )
 
+(**
+ * [convert_infix tok] is the AST-representation of the infix token, [tok].
+ *
+ * {b Requires}:
+ * - [tok] corresponds to a valid infix operation
+ * - [tok] is a Token leaf
+ *)
 let convert_infix = function
   | Token.Plus -> Plus
   | Token.PlusFloat -> PlusFloat
@@ -35,6 +50,16 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
+(**
+ * [convert_pattern tr] is the AST-representation of the pattern
+ * production of [tr].
+ *
+ * {b Requires}:
+ * - [tr] corresponds to a valid pattern production according to [grammar.json].
+ *
+ * {b Raises}:
+ * - [Failure] if [tr] does not correspond to a valid pattern tree.
+ *)
 let rec convert_pattern = function
   | Token (LowercaseIdent ident_name) -> ValueNamePattern (ident_name)
   | Token (Ignore) -> IgnorePattern
@@ -76,6 +101,17 @@ let rec convert_pattern = function
       )
   | _ -> failwith "not a valid pattern"
 
+(**
+ * [convert_one_or_more_patterns_semicolon_sep tree] is the AST-representation
+ * of [tree] where [tree] must either be:
+ * - directly convertible by [convert_pattern]
+ * - has a pattern semicolon sep-legal left child, a Token (Semicolon) as a
+ * middle child, and a pattern-legal right child.
+ *
+ * {b Raises}:
+ * - [Failure] if [tr] does not correspond to a valid pattern semicolon sep
+ * tree.
+ *)
 and convert_one_or_more_patterns_semicolon_sep = function
   | Node [
       patterns_semicolon_sep;
@@ -86,6 +122,18 @@ and convert_one_or_more_patterns_semicolon_sep = function
       convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
   | pat -> [convert_pattern pat]
 
+(**
+ * [get_patterns one_or_more_patterns acc] is the patterns in
+ * [one_or_more_patterns] appended to [acc].
+ *
+ * {b Requires}:
+ * - one_or_more_pattern is a valid pattern
+ * - one_or_more_pattern is a Node where the first element is another
+ * one or more patterns tree and the second node is a valid pattern.
+ *
+ * {b Raises}:
+ * - [Failure] if it is not a one or more patterns
+ *)
 let rec get_patterns one_or_more_patterns acc =
   try convert_pattern one_or_more_patterns::acc
   with _ ->
@@ -94,6 +142,14 @@ let rec get_patterns one_or_more_patterns acc =
       get_patterns params_ptree ((convert_pattern pat)::acc)
     | _ -> failwith "not a valid one or more patterns"
 
+(**
+ * [convert_let_binding is_rec t] is the abstract syntax tree representing
+ * the let binding represented by parse_tree [t].
+ *
+ * [is_rec] is true if the let binding is recursive and false otherwise.
+ *
+ * {b Raises}: Failure if [t] does not represent a type of let binding.
+ *)
 let rec convert_let_binding is_rec = function
   | Node [
       Token(Token.LowercaseIdent f_name);
@@ -119,14 +175,54 @@ let rec convert_let_binding is_rec = function
       )
   | _ -> failwith "not a valid convert let binding"
 
-and convert_one_or_more_if_expr acc = function
+(** [convert_list_body_expr acc t] is the list of abstract syntax trees of
+ * type expression in the parse_tree [t], where all expressions are seperated
+ * by a semicolon.
+ *
+ * {b Requires}: [t] only has expressions of precedence equal to or higher than
+ * an if expression, and all expressions are separated by a semicolon.
+ *
+ * {b Example}:
+ * {v convert_list_body_expr
+ *   []
+ *   (Node [
+ *     Token (StartList);
+ *     Node [
+ *       Node [
+ *         Token (Int 1);
+ *         Token (SemiColon);
+ *         Token (Int 2);
+ *       ];
+ *       Token (SemiColon);
+ *       Token (Int 3);
+ *     ];
+ *     Token (SemiColon);
+ *     Token (EndList);
+ *   ])
+ *  v}
+ * gives the AST list:
+ * [Expr Constant (Int 1), Expr Constant (Int 2), Expr Constant (Int 3)].
+ *)
+and convert_list_body_expr acc = function
   | Node [
       one_or_more_expr;
       Token (Token.SemiColon);
       expr;
-    ] -> convert_one_or_more_if_expr ((convert_expr expr)::acc) one_or_more_expr
+    ] -> convert_list_body_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
+(**
+ * [convert_pattern_matching acc t] is the abstract syntax tree list of
+ * tuples [(pattern, value, Some guard)] representing the parse_tree [t].
+ *
+ * Each pattern match being [Node [pattern; Token (FunctionArrow); value]].
+ *
+ * See that [pattern] is the AST
+ * representation of [pattern], and [value] is the AST
+ * representation of [value].
+ *
+ * @raise Failure if [t] is not a parse_tree representing pattern matching.
+ *)
 and convert_pattern_matching acc = function
   | Node [
       Token (VerticalBar);
@@ -158,6 +254,12 @@ and convert_pattern_matching acc = function
         further_pattern_matching
   | _ -> failwith "not a valid pattern matching"
 
+(**
+ * [convert_expr tr] is the abstract syntax tree representing the expression in
+ * [tr].
+ *
+ * @raise Failure if [t] is not a parse_tree reprensenting an expr.
+ *)
 and convert_expr tr = match tr with
   | Token (Token.Int v) -> Constant (Int v)
 
@@ -278,7 +380,7 @@ and convert_expr tr = match tr with
       Token (Token.SemiColon);
       Token (Token.EndList);
     ] ->
-      ListExpr (convert_one_or_more_if_expr [] one_or_more_expr)
+      ListExpr (convert_list_body_expr [] one_or_more_expr)
 
   | Node [
       Token (Match);
@@ -293,6 +395,13 @@ and convert_expr tr = match tr with
 
   | _ -> failwith "not a valid expression"
 
+(**
+ * [convert_definition t] is the abstract syntax tree representing the
+ * parse_tree [t] which represents a definition (an [open Module] or
+ * [let var_name = expr]).
+ *
+ * @raise Failure if [t] does not represent a valid definition.
+ *)
 let convert_definition = function
   | Node [
       Token (Open);
