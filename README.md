@@ -1,17 +1,23 @@
 # CamlJS
 
 ## Building and Running the Transpiler
-Running ``` make ``` will generate an executable named ```camljs```. To compile a file, run:
+Running ``` make ``` will generate an executable named ```camljs```.
+To compile a file, run:
 ```
 ./camljs [input source file] [output js file path]
 ```
 
 ## Running Tests
-Running ``` make test ``` will run the unit test suite. The standard OCaml installation of all assignments is required.
+Running ``` make test ``` will run the unit test suite. The standard OCaml
+installation of all assignments is required.
 
 ## Running End to End Tests
-Running ``` make e2e-test ``` will run the end to end test suite. 
-Note that you must be on MacOS and have a recent version of NodeJS installed in order to execute the test suite.
+Running ``` make e2e-test ``` will run the end to end test suite.
+Note that you must be on MacOS and have a recent version of NodeJS
+(with an executable named ```node``` located in your PATH) and an OCaml runtime
+(with an executable named ```ocaml``` located in your PATH) in order to execute
+the test suite.
 
 ## Generating Docs
-Running ``` make docs ``` will generate the documentation in a folder called ```doc.private``` and ```doc.public``` folders.
+Running ``` make docs ``` will generate the documentation in a folder called
+```doc.private``` and ```doc.public``` folders.
