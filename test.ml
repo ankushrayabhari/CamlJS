@@ -272,6 +272,11 @@ let tokenizer_tests = Token.[
     "unit test 2, tokenizer"
     "let () = print_string \"hi\""
     [Let; Unit; Equal; LowercaseIdent "print_string"; StringLiteral ("\"hi\"")];
+
+  make_tokenizer_test
+    "let binding where ident is a prefix of a keyword"
+    "let mat = 1"
+    [Let; LowercaseIdent "mat"; Equal; Int 1];
 ]
 
 let parser_tests = Parser.(Tokenizer.[
