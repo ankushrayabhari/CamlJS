@@ -281,6 +281,39 @@ let tokenizer_tests = Token.[
 
 let parser_tests = Parser.(Tokenizer.[
   make_parser_test
+    "arithmetic order of operations"
+    "1*2/3+4-10/(2 +1)"
+    (Node [
+      Node [
+        Node [
+          Node [
+            Token (Int 1);
+            Token (Times);
+            Token (Int 2);
+          ];
+          Token (Divide);
+          Token (Int 3);
+        ];
+        Token (Plus);
+        Token (Int 4);
+      ];
+      Token (Minus);
+      Node [
+        Token (Int 10);
+        Token (Divide);
+        Node [
+          Token (LParen);
+          Node [
+            Token (Int 2);
+            Token (Plus);
+            Token (Int 1);
+          ];
+          Token (RParen);
+        ];
+      ]
+    ]);
+
+  make_parser_test
     "concat 2 strings"
     "\"a\" ^ \"b\";;"
     (Node [
