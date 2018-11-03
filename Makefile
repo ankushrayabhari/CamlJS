@@ -31,7 +31,10 @@ temp-debug: build
 docs: docs-public docs-private
 
 grammar:
-	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER) grammar.json
+	$(OCAMLBUILD) $(CONVERTER) && ./$(CONVERTER)
+
+grammar-debug:
+	$(OCAMLBUILD) -tag 'debug' $(CONVERTER) && ocamldebug ./$(CONVERTER)
 
 zip: grammar
 	zip camljs_src.zip *.ml *.mli end_to_end_tests/* js_modules/* *.json _tags Makefile README.md
