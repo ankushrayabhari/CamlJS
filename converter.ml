@@ -118,6 +118,12 @@ let get_tokens grammar_json =
   |> to_list
   |> Array.of_list
   |> Array.map parse_token
+  |> Array.append [|{
+      name = "_EOF";
+      regex = "";
+      tag = None;
+      parameter = None;
+    }|]
 
 (**
  * [get_variables json] is the list of variables contained in the "productions"
@@ -130,6 +136,15 @@ let get_variables grammar_json =
   |> to_assoc
   |> List.map parse_variable
   |> Array.of_list
+  |> (fun variables ->
+      let hd = Array.get variables 0 in
+      Array.append [|{
+        name = "_START";
+        productions = [|[|
+          hd.name; "_EOF"
+        |]|];
+      }|] variables
+    )
 
 (**
  * [parse_grammar json] is the tuple [(t, v)] where [t] contains the token
@@ -165,7 +180,6 @@ let (tokens_in_order, variables_in_order) =
     print_endline "Invalid arguments: invalid input file";
     exit 1
 
-(* Step #1: Compute FIRST set for every variable. *)
 let num_tokens = Array.length tokens_in_order
 let num_variables = Array.length variables_in_order
 let start_variable = num_tokens
@@ -193,6 +207,7 @@ let get_variable_id var_name =
 let get_variable var_id =
   Array.get variables_in_order (var_id - start_variable);;
 
+(* Step #1: Compute FIRST set for every variable. *)
 for idx = start_variable to last_variable do
   let closure_set = Hashtbl.create num_tokens in
   let bfs = Queue.create () in
@@ -216,3 +231,42 @@ for idx = start_variable to last_variable do
   done;
   Hashtbl.add first_set idx closure_set;
 done;;
+
+(* Step #2: Compute item set 0. *)
+let closure initial_items =
+  let prods = Queue.create () in
+  let initial_set = Hashtbl.create (List.length initial_items) in
+  let visited = Hashtbl.create num_variables in
+  List.iter (fun item ->
+    Queue.push item prods;
+    Hashtbl.add visited item true;
+    Hashtbl.add initial_set item true;
+  ) initial_items;
+  while not (Queue.is_empty prods) do
+    let (var_id, prod_id, pos) = Queue.pop prods in
+    let curr_var = get_variable var_id in
+    let curr_prod = Array.get curr_var.productions prod_id in
+    if pos < Array.length curr_prod then begin
+      let next_var_name = Array.get curr_prod pos in
+      let next_var_id = get_variable_id next_var_name in
+      if not (is_token next_var_id) then begin
+        let next_var = get_variable next_var_id in
+        for prod_id = 0 to Array.length next_var.productions - 1 do
+          if not (Hashtbl.mem visited (next_var_id, prod_id, 0)) then begin
+            Hashtbl.add visited (next_var_id, prod_id, 0) true;
+            Queue.push (next_var_id, prod_id, 0) prods;
+            Hashtbl.remove initial_set (next_var_id, prod_id, 0)
+          end
+        done
+      end
+    end
+  done;
+  (
+    Hashtbl.fold (fun item _ acc -> item::acc) initial_set [],
+    Hashtbl.fold (fun item _ acc -> item::acc) visited []
+  );;
+
+let (initial, items) = closure [(start_variable, 0, 0)];;
+List.iter (fun (a,b,c) ->
+  print_endline (string_of_int a ^ "," ^ string_of_int b ^ "," ^ string_of_int c)
+) initial
