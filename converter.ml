@@ -208,6 +208,12 @@ let get_variable var_id =
   Array.get variables_in_order (var_id - start_variable);;
 
 (* Step #1: Compute FIRST set for every variable. *)
+for idx = 0 to num_tokens - 1 do
+  let token_set = Hashtbl.create 1 in
+  Hashtbl.add token_set idx true;
+  Hashtbl.add first_set idx token_set
+done;;
+
 for idx = start_variable to last_variable do
   let closure_set = Hashtbl.create num_tokens in
   let bfs = Queue.create () in
@@ -216,7 +222,7 @@ for idx = start_variable to last_variable do
   Hashtbl.add visited idx true;
   while not (Queue.is_empty bfs) do
     let curr = Queue.pop bfs in
-    if is_token curr then Hashtbl.add closure_set curr 0
+    if is_token curr then Hashtbl.add closure_set curr true
     else begin
       let variable = get_variable curr in
       Array.iter (fun prod ->
@@ -243,20 +249,33 @@ let closure initial_items =
     Hashtbl.add initial_set item true;
   ) initial_items;
   while not (Queue.is_empty prods) do
-    let (var_id, prod_id, pos) = Queue.pop prods in
+    let (var_id, prod_id, pos, lookahead) = Queue.pop prods in
     let curr_var = get_variable var_id in
     let curr_prod = Array.get curr_var.productions prod_id in
     if pos < Array.length curr_prod then begin
       let next_var_name = Array.get curr_prod pos in
       let next_var_id = get_variable_id next_var_name in
+      let next_next_first_set =
+        if pos + 1 < Array.length curr_prod then begin
+          let next_next_var_name = Array.get curr_prod (pos + 1) in
+          let next_next_var_id = get_variable_id next_next_var_name in
+          Hashtbl.find first_set next_next_var_id
+        end
+        else match lookahead with
+        | None -> Hashtbl.create 0
+        | Some x -> Hashtbl.find first_set x
+      in
       if not (is_token next_var_id) then begin
         let next_var = get_variable next_var_id in
         for prod_id = 0 to Array.length next_var.productions - 1 do
-          if not (Hashtbl.mem visited (next_var_id, prod_id, 0)) then begin
-            Hashtbl.add visited (next_var_id, prod_id, 0) true;
-            Queue.push (next_var_id, prod_id, 0) prods;
-            Hashtbl.remove initial_set (next_var_id, prod_id, 0)
-          end
+          Hashtbl.iter (fun tok _ ->
+            if not (Hashtbl.mem visited (next_var_id, prod_id, 0, Some tok))
+            then begin
+              Hashtbl.add visited (next_var_id, prod_id, 0, Some tok) true;
+              Queue.push (next_var_id, prod_id, 0, Some tok) prods;
+              Hashtbl.remove initial_set (next_var_id, prod_id, 0, Some tok)
+            end
+          ) next_next_first_set
         done
       end
     end
@@ -266,7 +285,7 @@ let closure initial_items =
     Hashtbl.fold (fun item _ acc -> item::acc) visited []
   );;
 
-let (initial, items) = closure [(start_variable, 0, 0)];;
-List.iter (fun (a,b,c) ->
-  print_endline (string_of_int a ^ "," ^ string_of_int b ^ "," ^ string_of_int c)
+let (initial, items) = closure [(start_variable, 0, 0, None)];;
+List.iter (fun (a,b,c,x) ->
+  print_endline (string_of_int a ^ "," ^ string_of_int b ^ "," ^ string_of_int c ^ "," ^ (match x with | None -> "None" | Some x -> string_of_int x))
 ) initial
