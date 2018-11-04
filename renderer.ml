@@ -18,6 +18,7 @@ let render_constant = function
   | StringLiteral s -> s
   | CharLiteral c -> c
   | Unit -> "null"
+  | EmptyArray -> "[]"
 
 (**
  * [render_let_binding l] is the JavaScript equivalent code of declaring a
@@ -236,6 +237,9 @@ and render_list_expr lst =
   |> String.concat ","
   |> (fun lst_body -> "[" ^ lst_body ^ "]")
 
+and render_array_expr lst =
+  render_list_expr (List.rev lst)
+
 (**
  * [render_module_accessor module value] is the JavaScript equivalent code of
  * accessing the property [value] in a object [module].
@@ -360,6 +364,7 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
   | MatchExpr (expr, lst) -> render_match_expr expr lst
+  | ArrayExpr expr_lst -> render_array_expr expr_lst
 
 (**
  * [render_open_decl m] is the JavaScript equivalent code of bringing all of
