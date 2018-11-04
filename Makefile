@@ -13,7 +13,7 @@ CONVERTER=converter.byte
 
 default: bin
 
-build: grammar
+build:
 	$(OCAMLBUILD) $(OBJECTS)
 
 bin: build

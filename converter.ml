@@ -351,9 +351,30 @@ while not (Queue.is_empty item_set_construction) do
     )
 done;;
 
+Hashtbl.fold (fun id (canonical, items) acc ->
+  let str = List.map (fun (var_id, prod_id, pos, lookahead) ->
+    let var = get_variable var_id in
+    let prod = Array.get var.productions prod_id in
+    let first_prod = Array.sub prod 0 pos |> Array.to_list in
+    let second_prod = Array.sub prod pos (Array.length prod - pos) |> Array.to_list in
+    let prod_str = (String.concat "," first_prod) ^ " . " ^ (String.concat "," second_prod)  in
+    let lookahead_str = (Array.get tokens_in_order lookahead).name in
+    "\t" ^ var.name ^ " -> " ^ prod_str ^ " ; " ^ lookahead_str
+  ) items in
+  (id, (String.concat "\n" str))::acc
+) item_sets []
+|> List.sort (fun (id1, str1) (id2, str2) ->
+  let comp = compare id1 id2 in
+  if comp <> 0 then comp else compare str1 str2
+)
+|> List.iter (fun (id, str) ->
+  print_endline ("State: " ^ (string_of_int id));
+  print_endline str;
+);;
+
 type action =
   | Shift of int
-  | Reduce of int
+  | Reduce of int * int
   | Accept
   | Goto of int
   | Error;;
@@ -378,10 +399,10 @@ for item_id = 0 to last_item do
       get_variable_id next_name
     end else empty_token in
     if next_id = empty_token then begin
-      if var.name = "_START" && lookahead = empty_token then
+      if var.name = "START'" && lookahead = empty_token then
         action_table.(item_id).(empty_token) <- Accept
       else begin
-        action_table.(item_id).(lookahead) <- Reduce (Array.length prod)
+        action_table.(item_id).(lookahead) <- Reduce (Array.length prod, var_id)
       end
     end else begin
       let to_state = Hashtbl.find_opt transitions (item_id, next_id) in
@@ -399,7 +420,7 @@ let action_table_arr () =
     Array.mapi (fun idx el ->
       match el with
       | Shift s -> sprintf "Shift %d" s
-      | Reduce r -> sprintf "Reduce %d" r
+      | Reduce (r, v) -> sprintf "Reduce (%d, %d)" r v
       | Accept -> "Accept"
       | Goto g -> sprintf "Goto %d" g
       | Error -> "Error"
