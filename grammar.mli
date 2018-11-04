@@ -4,45 +4,6 @@
  * {b See:} Converter for a description of the format of the grammar file.
  *)
 
-(**
- * [token_to_varid t] is the list of variable numbers that contain a direct
- * production to the terminal [t].
- *
- * That is, it returns all [V]{_ [i]} such that there exists a production
- * [V]{_ [i]} [->] [t] in the grammar after CNF conversion.
- *)
-val token_to_varid : Token.t -> int list
+val action_table : Lr_action.t array array
 
-(**
- * [rules] are the non-terminal production rules of the grammar after CNF
- * conversion.
- *
- * The first element of [rules] contains the production rules of the variable
- * with id [start_variable].
- *
- * More generally, each element at index [i] of [rules] contains the production
- * rules for variable number [start_variable + i].
- *)
-val rules : (int * int) list list
-
-(**
- * [start_variable] is the variable number of the start variable of the grammar.
- *)
-val start_variable : int
-
-(**
- * [num_tokens] is the number of tokens in the grammar.
- *)
-val num_tokens : int
-
-(**
- * [num_variables] is the total number of variables in the grammar.
- *)
-val num_variables : int
-
-(**
- * [auto_generated_variable var] is whether or not the variable with id [var]
- * was automatically generated as an intermediate variable during the CNF
- * conversion process.
- *)
-val auto_generated_variable : int -> bool
+val production_length : int array array
