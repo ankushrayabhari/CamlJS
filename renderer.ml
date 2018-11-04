@@ -351,6 +351,20 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
         in
         (prop_bindings@bindings, prop_assertions@assertions)
       ) ([], []) pat_lst
+  | VariantPattern (name, data_pat) ->
+      let (name_binding, name_assertion) =
+        get_pattern_bindings
+          curr_bind_idx
+          (target_var^".$NAME")
+          (ConstantPattern (StringLiteral name))
+      in
+      let (data_binding, data_assertion) =
+        get_pattern_bindings
+          curr_bind_idx
+          (target_var^".$DATA")
+          data_pat
+      in
+      (name_binding@data_binding, name_assertion@data_assertion)
 
 (**
  * [render_match_expr target_expr pat_lst] is the JavaScript
@@ -387,12 +401,15 @@ and render_match_expr target_expr pat_lst =
     rendered_target
     rendered_match_cases
 
-and render_record prop_lst =
+and render_record_expr prop_lst =
   List.map (fun (prop, val_expr) ->
     sprintf "%s: %s" prop (render_expr val_expr)
   ) prop_lst
   |> String.concat ","
   |> sprintf "{%s}"
+
+and render_variant_expr name arg_expr =
+  sprintf "{$NAME: \"%s\", $DATA: %s}" name (render_expr arg_expr)
 
 (**
  * [render_expr e] is the JavaScript equivalent code of [e]. This function
@@ -413,7 +430,8 @@ and render_expr = function
   | ModuleAccessor (m, v) -> render_module_accessor m v
   | MatchExpr (expr, lst) -> render_match_expr expr lst
   | ArrayExpr expr_lst | Tuple expr_lst -> render_array_tuple_expr expr_lst
-  | Record prop_lst -> render_record prop_lst
+  | Record prop_lst -> render_record_expr prop_lst
+  | Variant (name, arg_expr) -> render_variant_expr name arg_expr
 
 (**
  * [render_open_decl m] is the JavaScript equivalent code of bringing all of
@@ -442,7 +460,7 @@ let render_module_items_list lst =
         (left_body ^ render_open_decl module_name ^ "{", right_body ^ "}")
       | Expr e ->
         (left_body ^ render_expr e ^ ";", right_body)
-      | TypeDefinition (RecordDecl _) -> (left_body, right_body)
+      | TypeDefinition _ -> (left_body, right_body)
   ) ("", "") lst in
   left ^ right
 
