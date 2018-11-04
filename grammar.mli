@@ -7,3 +7,7 @@
 val action_table : Lr_action.t array array
 
 val production_length : int array array
+
+val start_variable : int
+
+val num_variables : int

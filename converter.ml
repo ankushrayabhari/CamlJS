@@ -124,6 +124,12 @@ let get_tokens grammar_json =
       regex = "";
       tag = None;
       parameter = None;
+    };
+    {
+      name = "EMPTY'";
+      regex = "";
+      tag = None;
+      parameter = None;
     }
     |]
 
@@ -182,7 +188,8 @@ let (tokens_in_order, variables_in_order) =
     print_endline "Invalid arguments: invalid input file";
     exit 1
 
-let empty_token = 0;;
+let eof_token = 0;;
+let empty_token = 1;;
 let num_tokens = Array.length tokens_in_order
 let num_variables = Array.length variables_in_order
 let start_variable = num_tokens
@@ -386,6 +393,42 @@ for item_id = 0 to last_item do
   ) items;
 done;;
 
+let action_table_arr () =
+  Array.map (fun el ->
+    Array.mapi (fun idx el ->
+      match el with
+      | Shift s -> sprintf "Shift %d" s
+      | Reduce (r1, r2) -> sprintf "Reduce (%d, %d)" r1 r2
+      | Accept -> "Accept"
+      | Goto g -> sprintf "Goto %d" g
+      | Error -> "Error"
+    ) el
+    |> Array.to_list
+    |> String.concat ";"
+    |> sprintf "[|%s|]"
+  ) action_table
+  |> Array.to_list
+  |> String.concat ";\n"
+  |> sprintf "let action_table = [|\n%s\n|]\n"
+
+let production_length_arr () =
+  Array.map (fun var ->
+    Array.map (fun prod ->
+      Array.length prod |> string_of_int
+    ) var.productions
+    |> Array.to_list
+    |> String.concat ";"
+    |> sprintf "[|%s|]"
+  ) variables_in_order
+  |> Array.to_list
+  |> String.concat ";\n"
+  |> sprintf "let production_length = [|\n%s\n|]\n"
+
+let start_variable_int () =
+  sprintf "let start_variable = %d\n" start_variable
+
+let num_variables_int () =
+  sprintf "let num_variables = %d\n" num_variables
 
 (**
  * [token_decl ()] is the OCaml code of the [Token.t] variant.
@@ -651,6 +694,15 @@ let tokenizer_text =
     (has_tag_fn ())
     (token_to_string_fn ());;
 
+let grammar_text =
+  sprintf "%s%s%s%s%s%s"
+    header
+    "open Lr_action\n"
+    (action_table_arr ())
+    (production_length_arr ())
+    (start_variable_int ())
+    (num_variables_int ())
+
 (**
  * [write_to_file f txt] writes [txt] to a file with name [f] and prints a
  * success message to standard out.
@@ -661,6 +713,7 @@ let write_to_file f txt =
   close_out oc;
   print_endline (f ^ " updated!");;
 
+write_to_file "grammar.ml" grammar_text;;
 write_to_file "token.mli" token_mli_text;;
 write_to_file "tokenizer.mli" tokenizer_mli_text;;
 write_to_file "tokenizer.ml" tokenizer_text;;
