@@ -242,7 +242,7 @@ and render_list_expr lst =
   |> String.concat ","
   |> (fun lst_body -> "[" ^ lst_body ^ "]")
 
-and render_array_expr lst =
+and render_array_tuple_expr lst =
   render_list_expr (List.rev lst)
 
 (**
@@ -297,12 +297,13 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
        (render_defined_assertion alias)::constant_assertions)
   | ParenPattern p -> get_pattern_bindings curr_bind_idx target_var p
   | (ArrayPattern lst as pat)
+  | (TuplePattern lst as pat)
   | (ListPattern lst as pat) -> begin
       let pat_lst_length = List.length lst in
       let (_, bindings, constant_assertions) =
         List.fold_left (fun (idx, bindings, constant_assertions) pat ->
           let curr_idx = match pat with
-            | ArrayPattern _ -> idx
+            | ArrayPattern _ | TuplePattern _ -> idx
             | ListPattern _ -> pat_lst_length - 1 - idx
             | _ -> failwith "should not be anything by array/list pattern"
           in
@@ -339,6 +340,17 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
           tl_pat
       in
       (hd_bindings@tl_bindings, hd_assertions@tl_assertions)
+  | RecordPattern pat_lst ->
+      List.fold_left (fun (bindings, assertions) (prop, pat) ->
+        let prop_target_var = Printf.sprintf "%s.%s" target_var prop in
+        let (prop_bindings, prop_assertions) =
+          get_pattern_bindings
+            curr_bind_idx
+            prop_target_var
+            pat
+        in
+        (prop_bindings@bindings, prop_assertions@assertions)
+      ) ([], []) pat_lst
 
 (**
  * [render_match_expr target_expr pat_lst] is the JavaScript
@@ -375,6 +387,13 @@ and render_match_expr target_expr pat_lst =
     rendered_target
     rendered_match_cases
 
+and render_record prop_lst =
+  List.map (fun (prop, val_expr) ->
+    sprintf "%s: %s" prop (render_expr val_expr)
+  ) prop_lst
+  |> String.concat ","
+  |> sprintf "{%s}"
+
 (**
  * [render_expr e] is the JavaScript equivalent code of [e]. This function
  * simply calls all the previous expression rendering functions.
@@ -393,7 +412,8 @@ and render_expr = function
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v
   | MatchExpr (expr, lst) -> render_match_expr expr lst
-  | ArrayExpr expr_lst -> render_array_expr expr_lst
+  | ArrayExpr expr_lst | Tuple expr_lst -> render_array_tuple_expr expr_lst
+  | Record prop_lst -> render_record prop_lst
 
 (**
  * [render_open_decl m] is the JavaScript equivalent code of bringing all of
@@ -422,6 +442,7 @@ let render_module_items_list lst =
         (left_body ^ render_open_decl module_name ^ "{", right_body ^ "}")
       | Expr e ->
         (left_body ^ render_expr e ^ ";", right_body)
+      | TypeDefinition (RecordDecl _) -> (left_body, right_body)
   ) ("", "") lst in
   left ^ right
 
