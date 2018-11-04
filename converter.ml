@@ -353,7 +353,7 @@ done;;
 
 type action =
   | Shift of int
-  | Reduce of int * int
+  | Reduce of int
   | Accept
   | Goto of int
   | Error;;
@@ -380,8 +380,9 @@ for item_id = 0 to last_item do
     if next_id = empty_token then begin
       if var.name = "_START" && lookahead = empty_token then
         action_table.(item_id).(empty_token) <- Accept
-      else
-        action_table.(item_id).(lookahead) <- Reduce (var_id, prod_id)
+      else begin
+        action_table.(item_id).(lookahead) <- Reduce (Array.length prod)
+      end
     end else begin
       let to_state = Hashtbl.find_opt transitions (item_id, next_id) in
       match to_state with
@@ -398,7 +399,7 @@ let action_table_arr () =
     Array.mapi (fun idx el ->
       match el with
       | Shift s -> sprintf "Shift %d" s
-      | Reduce (r1, r2) -> sprintf "Reduce (%d, %d)" r1 r2
+      | Reduce r -> sprintf "Reduce %d" r
       | Accept -> "Accept"
       | Goto g -> sprintf "Goto %d" g
       | Error -> "Error"
@@ -410,25 +411,6 @@ let action_table_arr () =
   |> Array.to_list
   |> String.concat ";\n"
   |> sprintf "let action_table = [|\n%s\n|]\n"
-
-let production_length_arr () =
-  Array.map (fun var ->
-    Array.map (fun prod ->
-      Array.length prod |> string_of_int
-    ) var.productions
-    |> Array.to_list
-    |> String.concat ";"
-    |> sprintf "[|%s|]"
-  ) variables_in_order
-  |> Array.to_list
-  |> String.concat ";\n"
-  |> sprintf "let production_length = [|\n%s\n|]\n"
-
-let start_variable_int () =
-  sprintf "let start_variable = %d\n" start_variable
-
-let num_variables_int () =
-  sprintf "let num_variables = %d\n" num_variables
 
 (**
  * [token_decl ()] is the OCaml code of the [Token.t] variant.
@@ -695,13 +677,10 @@ let tokenizer_text =
     (token_to_string_fn ());;
 
 let grammar_text =
-  sprintf "%s%s%s%s%s%s"
+  sprintf "%s%s%s"
     header
     "open Lr_action\n"
     (action_table_arr ())
-    (production_length_arr ())
-    (start_variable_int ())
-    (num_variables_int ())
 
 (**
  * [write_to_file f txt] writes [txt] to a file with name [f] and prints a
