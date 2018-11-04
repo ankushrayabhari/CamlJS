@@ -3,6 +3,7 @@
 type constant =
   | Int of int
   | EmptyList
+  | EmptyArray
   | Bool of bool
   | StringLiteral of string
   | CharLiteral of string
@@ -25,7 +26,12 @@ type pattern =
   | AliasPattern of pattern * string
   | ParenPattern of pattern
   | ListPattern of pattern list
+  | ArrayPattern of pattern list
   | ConsPattern of pattern * pattern
+  | RangedCharacterPattern of char * char
+  | VariantPattern of string * pattern
+  | TuplePattern of pattern list
+  | RecordPattern of (string * pattern) list
 
 type let_binding =
   | VarAssignment of pattern * expr
@@ -43,11 +49,20 @@ and expr =
   | FunctionCall of expr * expr list
   | ParenExpr of expr
   | ListExpr of expr list
+  | ArrayExpr of expr list
   | MatchExpr of expr * (pattern * expr * expr option) list
+  | Tuple of expr list
+  | Record of (string * expr) list
+  | Variant of string * expr
+
+type type_definition =
+  | VariantDecl of (string * string list) list
+  | RecordDecl of (string * string) list
 
 type module_item =
   | LetDecl of let_binding
   | OpenDecl of string
   | Expr of expr
+  | TypeDefinition of type_definition
 
 type t = module_item list
