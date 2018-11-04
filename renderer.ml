@@ -424,7 +424,7 @@ and render_expr = function
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName name -> Str.global_replace (Str.regexp "'") "$" name
-  | FunctionCall (expr_1, [expr_2]) -> render_function_call expr_1 expr_2
+  | FunctionCall (expr_1, expr_2) -> render_function_call expr_1 expr_2
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v

@@ -483,7 +483,7 @@ and convert_expr tr = match tr with
       fun_expr;
       arg_expr;
     ] ->
-      FunctionCall (convert_expr fun_expr, [convert_expr arg_expr])
+      FunctionCall (convert_expr fun_expr, convert_expr arg_expr)
   | Node [
       Token (Token.StartList);
       one_or_more_expr;
