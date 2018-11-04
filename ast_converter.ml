@@ -570,6 +570,7 @@ let convert_module_item tr =
  * - A single module item tree. {b See:} [convert_module_item]
  *)
 let rec convert_one_plus_def_expr = function
+  | Token (DoubleSemicolon) -> []
   | Node [
       Token (DoubleSemicolon);
       tr;
@@ -600,23 +601,14 @@ let rec convert_one_plus_def_expr = function
  * }
  * - A single module item tree. {b See:} [convert_module_item]
  *)
-let convert_expr_definition_no_start_double_semicolon = function
-  | Node [
-      tr;
-      def_expr_tr;
-      Token (DoubleSemicolon);
-    ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
-  | Node [
-      tr;
-      Token (DoubleSemicolon);
-    ] -> [convert_module_item tr]
-  | tr -> try [convert_module_item tr] with _ ->
-    match tr with
-      | Node [
-          tr;
-          def_expr_tr;
-        ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
-      | _ -> failwith "not a valid expr def no start ;;"
+let convert_expr_definition_no_start_double_semicolon tr =
+    try [convert_module_item tr] with _ ->
+      match tr with
+        | Node [
+            tr;
+            def_expr_tr;
+          ] -> (convert_module_item tr)::(convert_one_plus_def_expr def_expr_tr)
+        | _ -> failwith "not a valid expr def no start ;;"
 
 (**
  * [convert_ast tr] is the list of declarations and expressions of the module

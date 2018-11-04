@@ -246,11 +246,7 @@
       ["Expr"],
       ["Definition"],
       ["Expr", "OneOrMoreDefinitionOrExpr"],
-      ["Definition", "OneOrMoreDefinitionOrExpr"],
-      ["Expr", "DoubleSemicolon"],
-      ["Definition", "DoubleSemicolon"],
-      ["Expr", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"],
-      ["Definition", "OneOrMoreDefinitionOrExpr", "DoubleSemicolon"]
+      ["Definition", "OneOrMoreDefinitionOrExpr"]
     ],
     "OneOrMoreDefinitionOrExpr": [
       ["DoubleSemicolon", "Definition", "OneOrMoreDefinitionOrExpr"],
@@ -258,7 +254,8 @@
       ["DoubleSemicolon", "Definition"],
       ["DoubleSemicolon", "Expr"],
       ["Definition", "OneOrMoreDefinitionOrExpr"],
-      ["Definition"]
+      ["Definition"],
+      ["DoubleSemicolon"]
     ],
     "Expr": [
       ["LetAnonFuncMatchExpr"]

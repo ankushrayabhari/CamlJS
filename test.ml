@@ -531,8 +531,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
             Token (Plus);
             Token (Int 1);
           ];
+          Token (DoubleSemicolon);
         ];
-        Token (DoubleSemicolon);
       ]
     ]);
 
@@ -574,28 +574,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token (Plus);
           Token (Int 1);
         ];
-      ];
-      Token (DoubleSemicolon);
-    ]);
-
-  make_parser_test
-    "compilation unit, end with ;;, double expr"
-    "1+1;;1+1;;"
-    (Node [
-      Node [
-        Token (Int 1);
-        Token (Plus);
-        Token (Int 1);
-      ];
-      Node [
         Token (DoubleSemicolon);
-        Node [
-          Token (Int 1);
-          Token (Plus);
-          Token (Int 1);
-        ];
       ];
-      Token (DoubleSemicolon);
     ]);
 
   make_parser_test
@@ -686,13 +666,13 @@ let parser_tests = Parse_tree.(Tokenizer.[
               Token (Int 1);
             ];
           ];
+          Token (DoubleSemicolon);
         ];
-        Token (DoubleSemicolon);
       ]
     ]);
 
   make_parser_test
-    "compilation unit, start/end with ;;, double definition"
+    "compilation unit, start/end with ;;, double definition, float"
     ";;let x = 1.;;let rec x = 01.0;;"
     (Node [
       Token (DoubleSemicolon);
@@ -716,8 +696,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
               Token (Float 1.);
             ];
           ];
+          Token (DoubleSemicolon);
         ];
-        Token (DoubleSemicolon);
       ]
     ]);
 
@@ -767,8 +747,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
             Token (Int 1);
           ];
         ];
+        Token (DoubleSemicolon);
       ];
-      Token (DoubleSemicolon);
     ]);
 
   make_parser_test
