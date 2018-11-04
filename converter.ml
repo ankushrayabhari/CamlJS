@@ -351,26 +351,6 @@ while not (Queue.is_empty item_set_construction) do
     )
 done;;
 
-Hashtbl.fold (fun id (canonical, items) acc ->
-  let str = List.map (fun (var_id, prod_id, pos, lookahead) ->
-    let var = get_variable var_id in
-    let prod = Array.get var.productions prod_id in
-    let first_prod = Array.sub prod 0 pos |> Array.to_list in
-    let second_prod = Array.sub prod pos (Array.length prod - pos) |> Array.to_list in
-    let prod_str = (String.concat "," first_prod) ^ " . " ^ (String.concat "," second_prod)  in
-    let lookahead_str = (Array.get tokens_in_order lookahead).name in
-    "\t" ^ var.name ^ " -> " ^ prod_str ^ " ; " ^ lookahead_str
-  ) items in
-  (id, (String.concat "\n" str))::acc
-) item_sets []
-|> List.sort (fun (id1, str1) (id2, str2) ->
-  let comp = compare id1 id2 in
-  if comp <> 0 then comp else compare str1 str2
-)
-|> List.iter (fun (id, str) ->
-  print_endline ("State: " ^ (string_of_int id));
-  print_endline str;
-);;
 
 type action =
   | Shift of int

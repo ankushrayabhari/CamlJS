@@ -64,6 +64,7 @@ let parse tok_arr =
         end
         | State s -> failwith "Invalid Program"
     end
-    | _ -> failwith "Invalid Program."
+    | Goto _ -> failwith "should not have a goto in main parse loop"
+    | Error -> failwith "Invalid Program."
   done;
   !ret_val |> remove_unit_productions
