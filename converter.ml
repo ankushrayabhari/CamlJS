@@ -412,6 +412,16 @@ let action_table_arr () =
   |> String.concat ";\n"
   |> sprintf "let action_table = [|\n%s\n|]\n"
 
+let token_to_var_id_fn () =
+  Array.mapi (fun idx el ->
+    match el.parameter with
+    | Some _ -> sprintf "  | %s _ -> %d\n" el.name idx
+    | None -> sprintf "  | %s -> %d\n" el.name idx
+  ) tokens_in_order
+  |> Array.to_list
+  |> String.concat ""
+  |> sprintf "let token_to_var_id = function\n%s";;
+
 (**
  * [token_decl ()] is the OCaml code of the [Token.t] variant.
  *
@@ -677,10 +687,11 @@ let tokenizer_text =
     (token_to_string_fn ());;
 
 let grammar_text =
-  sprintf "%s%s%s"
+  sprintf "%s%s%s%s"
     header
-    "open Lr_action\n"
+    "open Lr_action\nopen Token\n"
     (action_table_arr ())
+    (token_to_var_id_fn ())
 
 (**
  * [write_to_file f txt] writes [txt] to a file with name [f] and prints a

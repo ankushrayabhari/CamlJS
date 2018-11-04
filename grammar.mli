@@ -5,3 +5,5 @@
  *)
 
 val action_table : Lr_action.t array array
+
+val token_to_var_id : Token.t -> int
