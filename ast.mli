@@ -28,7 +28,7 @@ type pattern =
   | ListPattern of pattern list
   | ArrayPattern of pattern list
   | ConsPattern of pattern * pattern
-  | RangedCharacterPattern of char * char
+  | RangedCharacterPattern of string * string
   | VariantPattern of string * pattern
   | TuplePattern of pattern list
   | RecordPattern of (string * pattern) list
