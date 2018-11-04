@@ -40,7 +40,7 @@ and expr =
   | Function of pattern list * expr
   | Sequential of expr * expr
   | LetBinding of let_binding * expr
-  | FunctionCall of expr * expr
+  | FunctionCall of expr * expr list
   | ParenExpr of expr
   | ListExpr of expr list
   | MatchExpr of expr * (pattern * expr * expr option) list
