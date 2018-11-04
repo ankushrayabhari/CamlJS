@@ -279,7 +279,7 @@ let tokenizer_tests = Token.[
     [Let; LowercaseIdent "mat"; Equal; Int 1];
 ]
 
-let parser_tests = Parser.(Tokenizer.[
+let parser_tests = Parse_tree.(Tokenizer.[
   make_parser_test
     "arithmetic order of operations"
     "1*2/3+4-10/(2 +1)"

@@ -6,4 +6,4 @@
  *
  * @raise Failure if [tr] is not valid module items parse tree.
 *)
-val convert : Parser.parse_tree -> Ast.t
+val convert : Parse_tree.t -> Ast.t

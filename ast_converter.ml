@@ -1,5 +1,6 @@
 open Token
 open Parser
+open Parse_tree
 open Ast
 
 (**
