@@ -33,7 +33,7 @@ let rec render_let_binding = function
     let rendered_target =
       Printf.sprintf "let TARGET = (%s);" (render_expr expr) in
     let (bindings, constants) = get_pattern_bindings (ref 0) "TARGET" pat in
-    let rendered_match_case = render_match_case bindings constants in
+    let rendered_match_case = render_match_case bindings constants None in
     Printf.sprintf "%s%s"
       rendered_target
       rendered_match_case
@@ -56,7 +56,7 @@ let rec render_let_binding = function
  * - A list of constant assertions to check that each constant pattern matched
  * its expected value.
  *)
-and render_match_case bindings constants =
+and render_match_case bindings constants guard =
   let rendered_bindings =
     List.fold_left (fun acc (target_var, target_value) ->
       acc ^ (Printf.sprintf "let %s = %s;" target_var target_value)
@@ -82,11 +82,18 @@ and render_match_case bindings constants =
         expected_value
     ) "" constants
   in
-  Printf.sprintf "%s%s%s%s"
+  let rendered_guard_assertion = match guard with
+    | Some expr -> Printf.sprintf
+        "if (!(%s)) { throw new Error('Match failure');}"
+        (render_expr expr)
+    | None -> ""
+  in
+  Printf.sprintf "%s%s%s%s%s"
     rendered_bindings
     rendered_constant_bindings
     rendered_binding_assertions
     rendered_constant_binding_assertions
+    rendered_guard_assertion
 
 (**
  * [render_fun arg_list body_expr] is the JavaScript equivalent code of
@@ -333,10 +340,10 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
 and render_match_expr target_expr pat_lst =
   let rendered_target =
     Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
-  let rendered_match_cases = List.fold_left (fun acc (pat, expr, _) ->
+  let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
     let rendered_value = render_expr expr in
     let (bindings, constants) = get_pattern_bindings (ref 0) "TARGET" pat in
-    let rendered_match_case = render_match_case bindings constants in
+    let rendered_match_case = render_match_case bindings constants guard in
     acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
       rendered_match_case
       rendered_value
