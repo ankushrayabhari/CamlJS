@@ -142,8 +142,20 @@
       "regex": ";"
     },
     {
+      "name": "Colon",
+      "regex": ":"
+    },
+    {
       "name": "VerticalBar",
       "regex": "|"
+    },
+    {
+      "name": "LCurlyBrace",
+      "regex": "{"
+    },
+    {
+      "name": "RCurlyBrace",
+      "regex": "}"
     },
     {
       "name": "Period",
@@ -192,6 +204,10 @@
     {
       "name": "Let",
       "regex": "let"
+    },
+    {
+      "name": "Type",
+      "regex": "type"
     },
     {
       "name": "Rec",

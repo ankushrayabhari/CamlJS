@@ -277,7 +277,15 @@ let tokenizer_tests = Token.[
     "let binding where ident is a prefix of a keyword"
     "let mat = 1"
     [Let; LowercaseIdent "mat"; Equal; Int 1];
+
+  make_tokenizer_test
+    "record definitions tokenizable"
+    "type animal = {name: string; age: int;}"
+    [Type; LowercaseIdent "animal"; Equal; LCurlyBrace; LowercaseIdent "name";
+     Colon; LowercaseIdent "string"; SemiColon; LowercaseIdent "age";
+     Colon; LowercaseIdent "int"; SemiColon; RCurlyBrace];
 ]
+
 
 let parser_tests = Parse_tree.(Tokenizer.[
   make_parser_test
