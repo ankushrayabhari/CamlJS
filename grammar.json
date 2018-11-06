@@ -202,6 +202,14 @@
       "regex": "in"
     },
     {
+      "name": "Type",
+      "regex": "type"
+    },
+    {
+      "name": "Of",
+      "regex": "of"
+    },
+    {
       "name": "Bool",
       "parameter": "bool",
       "regex": "true\\|false"
@@ -263,7 +271,8 @@
     "Definition": [
       ["Let", "LetBinding"],
       ["Let", "Rec", "LetBinding"],
-      ["Open", "ModulePath"]
+      ["Open", "ModulePath"],
+      ["Type", "LowercaseIdent", "Equal", "TypeRepresentation"]
     ],
     "Pattern": [
       ["AsPattern"]
@@ -280,6 +289,8 @@
       ["LParen", "Pattern", "RParen"],
       ["StartList", "OneOrMorePatternWithSemicolon", "EndList"],
       ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
+      ["CapitalizedIdent"],
+      ["CapitalizedIdent", "ParenPattern"],
       ["LowercaseIdent"],
       ["Constant"],
       ["Ignore"]
@@ -311,6 +322,27 @@
     "OneOrMorePattern": [
       ["OneOrMorePattern", "Pattern"],
       ["Pattern"]
+    ],
+    "TypeRepresentation": [
+      ["ConstrDecl", "OneOrMoreConstrDeclWithVerticalBar"],
+      ["OneOrMoreConstrDeclWithVerticalBar"],
+      ["ConstrDecl"]
+    ],
+    "OneOrMoreConstrDeclWithVerticalBar": [
+      ["VerticalBar", "ConstrDecl", "OneOrMoreConstrDeclWithVerticalBar"],
+      ["VerticalBar", "ConstrDecl"]
+    ],
+    "ConstrDecl": [
+      ["CapitalizedIdent"],
+      ["CapitalizedIdent", "Of", "TypExpr"]
+    ],
+    "TypExpr": [
+      ["LParen", "TypExpr", "RParen"],
+      ["TypExpr", "OneOrMoreTimesTypExpr"],
+      ["LowercaseIdent"]
+    ],
+    "OneOrMoreTimesTypExpr": [
+      ["Times", "TypExpr"]
     ],
     "SemiColonExpr": [
       ["IfExpr", "SemiColon", "SemiColonExpr"],
@@ -363,7 +395,9 @@
     ],
     "FunctionCallExpr": [
       ["FunctionCallExpr", "PrefixExpr"],
-      ["PrefixExpr"]
+      ["PrefixExpr"],
+      ["CapitalizedIdent"],
+      ["CapitalizedIdent", "PrefixExpr"]
     ],
     "PrefixExpr": [
       ["Negation", "PrefixExpr"],
