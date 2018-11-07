@@ -35,7 +35,7 @@ type pattern =
 
 type let_binding =
   | VarAssignment of pattern * expr
-  | FunctionAssignment of string * bool * pattern list * expr
+  | FunctionAssignment of string * bool * pattern list * expr * bool
 and expr =
   | Constant of constant
   | VarName of string
@@ -46,7 +46,7 @@ and expr =
   | Function of pattern list * expr
   | Sequential of expr * expr
   | LetBinding of let_binding * expr
-  | FunctionCall of expr * expr list
+  | FunctionCall of expr * expr list * bool
   | ParenExpr of expr
   | ListExpr of expr list
   | ArrayExpr of expr list

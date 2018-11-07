@@ -1503,17 +1503,21 @@ let ast_converter_tests = Ast.[
           ),
           Times,
           VarName "c"
-        )
+        ),
+        true
       ),
       FunctionCall (
         FunctionCall (
           FunctionCall (
             VarName "x",
-            [Constant (Int 1)]
+            [Constant (Int 1)],
+            true
           ),
-          [Constant (Int 2)]
+          [Constant (Int 2)],
+          true
         ),
-        [Constant (Int 3)]
+        [Constant (Int 3)],
+        true
       )
     ))];
 
@@ -1537,17 +1541,21 @@ let ast_converter_tests = Ast.[
           ),
           TimesFloat,
           VarName "c"
-        )
+        ),
+        true
       ),
       FunctionCall (
         FunctionCall (
           FunctionCall (
             VarName "x",
-            [Constant (Float 1.)]
+            [Constant (Float 1.)],
+            true
           ),
-          [Constant (Float 2.)]
+          [Constant (Float 2.)],
+          true
         ),
-        [Constant (Float 3.)]
+        [Constant (Float 3.)],
+        true
       )
     ))];
 
@@ -1697,7 +1705,8 @@ let ast_converter_tests = Ast.[
     "List.length []"
     [Expr (FunctionCall (
       ModuleAccessor ("List", "length"),
-      [Constant (EmptyList)]
+      [Constant (EmptyList)],
+      true
     ))];
 
   make_ast_converter_test
@@ -1708,7 +1717,8 @@ let ast_converter_tests = Ast.[
       [PrefixOp (
         Negation,
         ModuleAccessor ("List", "empty_size")
-      )]
+      )],
+      true
     ))];
 
   make_ast_converter_test
@@ -1737,10 +1747,13 @@ let ast_converter_tests = Ast.[
                       VarName "x",
                       Minus,
                       Constant (Int 1)
-                    ))]))))),
+                    ))],
+                  true)))),
+          true),
         FunctionCall(
           VarName "fact",
-          [Constant (Int 3)]
+          [Constant (Int 3)],
+          true
         )
       ))];
 
@@ -1761,7 +1774,8 @@ let ast_converter_tests = Ast.[
       "id",
       true,
       [ValueNamePattern "x"],
-      VarName "x"
+      VarName "x",
+      true
     ))];
 
   make_ast_converter_test
@@ -1771,7 +1785,8 @@ let ast_converter_tests = Ast.[
       "id",
       true,
       [ValueNamePattern "x"],
-      VarName "x"
+      VarName "x",
+      true
     ))];
 
   make_ast_converter_test
@@ -1780,11 +1795,13 @@ let ast_converter_tests = Ast.[
     [
       Expr (FunctionCall (
         VarName "print_int",
-        [Constant (Int 1)]
+        [Constant (Int 1)],
+        true
       ));
       Expr (FunctionCall (
         VarName "print_int",
-        [Constant (Int 2)]
+        [Constant (Int 2)],
+        true
       ));
     ];
 
@@ -1799,7 +1816,8 @@ let ast_converter_tests = Ast.[
       ));
       Expr (FunctionCall (
         VarName "print_int",
-        [VarName "x"]
+        [VarName "x"],
+        true
       ));
     ];
 
@@ -1833,9 +1851,11 @@ let ast_converter_tests = Ast.[
         VarName "print_int",
         [ParenExpr (FunctionCall (
           ModuleAccessor ("Char", "code"),
-          [Constant (CharLiteral "'c'")]
+          [Constant (CharLiteral "'c'")],
+          true
         )
-      )]));
+        )],
+        true));
     ];
 
   make_ast_converter_test
@@ -1916,7 +1936,8 @@ let ast_converter_tests = Ast.[
         Constant (Int 2);
         Constant (Int 3);
         Constant (Int 4);
-      ]
+      ],
+      true
     ))];
 
   make_ast_converter_test
@@ -1946,7 +1967,8 @@ let ast_converter_tests = Ast.[
     [LetDecl (FunctionAssignment (
       "f", false,
       [IgnorePattern],
-      Constant (CharLiteral "'\\n'")
+      Constant (CharLiteral "'\\n'"),
+      true
     ))];
 
   make_ast_converter_test
@@ -1955,7 +1977,8 @@ let ast_converter_tests = Ast.[
     [LetDecl (FunctionAssignment (
       "yolo", true,
       [ParenPattern (AliasPattern (ConstantPattern (Int 1), "x"))],
-      Constant (StringLiteral "\"asdfasdf\"")
+      Constant (StringLiteral "\"asdfasdf\""),
+      true
     ))];
 
   make_ast_converter_test
@@ -2088,7 +2111,8 @@ let ast_converter_tests = Ast.[
         ValueNamePattern "x",
         FunctionCall (
           VarName "not",
-          [Constant (Bool true)]
+          [Constant (Bool true)],
+          true
         )
       ));
     ];
@@ -2102,7 +2126,8 @@ let ast_converter_tests = Ast.[
         InfixOp (
           FunctionCall (
             VarName "not",
-            [Constant (Bool true)]
+            [Constant (Bool true)],
+            true
           ),
           LogicalOr,
           Constant (Bool false)
@@ -2120,7 +2145,8 @@ let ast_converter_tests = Ast.[
           InfixOp (
             FunctionCall (
               VarName "not",
-              [Constant (Bool true)]
+              [Constant (Bool true)],
+              true
             ),
             LogicalAnd,
             Constant (Bool false)
@@ -2175,8 +2201,10 @@ let ast_converter_tests = Ast.[
         "x", false, [ConstantPattern (Unit)],
         FunctionCall (
           VarName "print_string",
-          [Constant (StringLiteral "\"x\"")]
-        )
+          [Constant (StringLiteral "\"x\"")],
+          true
+        ),
+        true
       ));
     ];
 

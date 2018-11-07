@@ -60,9 +60,9 @@ let rec render_let_binding = function
     Printf.sprintf "%s%s"
       rendered_target
       rendered_match_case
-  | FunctionAssignment (function_name, _, arg_list, body_expr) ->
+  | FunctionAssignment (function_name, _, arg_list, body_expr, curry) ->
       "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
-      ^ render_fun arg_list body_expr ^  ";"
+      ^ render_fun arg_list body_expr curry ^  ";"
 
 (**
  * [render_match_case bindings constant] is the JavaScript equivalent code of
@@ -104,11 +104,15 @@ and render_match_case bindings assertions guard =
  * - The function is declared as a curry to match OCaml's default behavior.
  * - Immediately, pattern matching each Ai against the ith pattern.
  *)
-and render_fun arg_list body_expr =
+and render_fun arg_list body_expr curry =
   let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_list in
-  let arguments = List.fold_left (fun acc el ->
-      acc ^ el ^ " => "
-    ) "" arg_names
+  let arguments =
+    if curry then
+      List.fold_left (fun acc el ->
+        acc ^ el ^ " => "
+      ) "" arg_names
+    else
+      "(" ^ String.concat "," arg_names ^ ") =>"
   in
   let argument_match_expr =
     List.fold_right2 (fun arg_pat arg_name prev_expr ->
@@ -223,10 +227,18 @@ and render_paren_expr expr =
  * [render_function_call f_expr arg_expr] is the JavaScript equivalent code of
  * calling [f_expr] with [arg_expr].
  *)
-and render_function_call f_expr arg_expr =
+and render_function_call f_expr args curry =
   let rendered_function = render_expr f_expr in
-  let rendered_argument = render_expr arg_expr in
-  rendered_function ^ "(" ^ rendered_argument ^ ")"
+  let rendered_argument =
+    List.map render_expr args
+    |> (fun lst ->
+        if curry then "(" ^ String.concat "," lst ^ ")"
+        else
+          List.map (fun el -> "(" ^ el ^ ")") lst
+          |> String.concat ""
+      )
+  in
+  rendered_function ^ rendered_argument
 
 (**
  * [render_list_expr lst] is the JavaScript equivalent code of declaring a
@@ -426,11 +438,11 @@ and render_expr = function
   | PrefixOp (prefix, expr) -> render_prefix_expr prefix expr
   | InfixOp (l, op, r) -> render_infix_expr l op r
   | Ternary (c, t, f) -> render_ternary c t f
-  | Function (arg_list, body_expr) -> render_fun arg_list body_expr
+  | Function (arg_list, body_expr) -> render_fun arg_list body_expr true
   | Sequential (expr_1, expr_2) -> render_sequential_expr expr_1 expr_2
   | LetBinding (assign, expr) -> render_let_binding_expr assign expr
   | VarName name -> Str.global_replace (Str.regexp "'") "$" name
-  | FunctionCall (expr_1, [expr_2]) -> render_function_call expr_1 expr_2
+  | FunctionCall (fn, args, curry) -> render_function_call fn args curry
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
   | ModuleAccessor (m, v) -> render_module_accessor m v

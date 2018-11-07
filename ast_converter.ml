@@ -202,7 +202,8 @@ let rec convert_let_binding is_rec = function
         f_name,
         is_rec,
         get_patterns one_or_more_pattern [],
-        convert_expr let_expr
+        convert_expr let_expr,
+        true
       )
   | Node [
       bound_to_pattern;
@@ -497,7 +498,7 @@ and convert_expr tr = match tr with
       fun_expr;
       arg_expr;
     ] ->
-      FunctionCall (convert_expr fun_expr, [convert_expr arg_expr])
+      FunctionCall (convert_expr fun_expr, [convert_expr arg_expr], true)
   | Node [
       Token (Token.StartList);
       one_or_more_expr;
