@@ -1404,6 +1404,40 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token (FunctionArrow);
           Token (Unit);
         ];
+      ]);
+
+  make_parser_test
+    "record pattern precedence test"
+    "match x with {name = \"Bill\"; age = _}::[] -> ()"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "x");
+      Token With;
+      Node [
+        Node [
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Node [
+                Token (LowercaseIdent "name");
+                Token (Equal);
+                Token (StringLiteral "\"Bill\"");
+              ];
+              Token (SemiColon);
+              Node [
+                Token (LowercaseIdent "age");
+                Token (Equal);
+                Token (Ignore);
+              ];
+            ];
+            Token (RCurlyBrace);
+          ];
+          Token (Cons);
+          Token (EmptyList);
+        ];
+        Token (FunctionArrow);
+        Token (Unit);
+      ];
     ]);
 ])
 
