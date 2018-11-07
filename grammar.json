@@ -300,7 +300,15 @@
     "ConstructorPattern": [
       ["CapitalizedIdent"],
       ["CapitalizedIdent", "ParenPattern"],
-      ["ParenPattern"]
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "RCurlyBrace"],
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "RCurlyBrace"],      ["ParenPattern"]
+    ],
+    "OneOrMoreSemicolonSeparatedFieldPattern": [
+      ["FieldPattern"],
+      ["OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "FieldPattern"]
+    ],
+    "FieldPattern": [
+      ["LowercaseIdent", "Equal", "Pattern"]
     ],
     "ParenPattern": [
       ["LParen", "Pattern", "RParen"],

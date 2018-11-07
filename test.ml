@@ -3,13 +3,13 @@ open OUnit2
 let rec print_parse_tree (parse_tree:Parse_tree.t) : unit =
   let rec rec_print_parse_tree line_acc (parse_tree:Parse_tree.t) =
     match parse_tree with
-    | Token t -> print_string ("\n" ^ line_acc ^ "Token (" ^(Tokenizer.token_to_string t) ^ "),")
+    | Token t -> print_string ("\n" ^ line_acc ^ "Token (" ^(Tokenizer.token_to_string t) ^ ");")
     | Node children ->
       let () = print_string ("\n" ^ line_acc ^ "Node [") in
       let () = List.iter
-          (rec_print_parse_tree (line_acc ^ " "))
+          (rec_print_parse_tree (line_acc ^ "   "))
         children in
-      print_string ("\n" ^ line_acc^"]")
+      print_string ("\n" ^ line_acc^"];")
   in rec_print_parse_tree "" parse_tree
 
 let print_program_parse_tree program : unit =
@@ -1366,6 +1366,60 @@ let parser_tests = Parse_tree.(Tokenizer.[
         ];
         Token (Period);
         Token (LowercaseIdent "name");
+      ]);
+
+  (*
+      "match [] with h::t -> true | [] -> false"
+      (Node [
+        Token (Match);
+        Token (EmptyList);
+        Token (With);
+        Node [
+          Node [
+            Token (LowercaseIdent "h");
+            Token (Cons);
+            Token (LowercaseIdent "t");
+          ];
+          Token (FunctionArrow);
+          Token (Bool true);
+          Node [
+            Token (VerticalBar);
+            Token (EmptyList);
+            Token (FunctionArrow);
+            Token (Bool false);
+          ];
+        ];
+      ]);
+  *)
+
+  make_parser_test
+    "parsing a record pattern"
+    "match x with {name = a; age = _} -> ()"
+    (Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Node [
+                Token (LowercaseIdent "name");
+                Token (Equal);
+                Token (LowercaseIdent "a");
+              ];
+              Token (SemiColon);
+              Node [
+                Token (LowercaseIdent "age");
+                Token (Equal);
+                Token (Ignore);
+              ];
+            ];
+            Token (RCurlyBrace);
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
     ]);
 ])
 
