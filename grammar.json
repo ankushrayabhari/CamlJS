@@ -361,15 +361,12 @@
       ["CapitalizedIdent", "Of", "TypExpr"]
     ],
     "TypExpr": [
-      ["ParenTypExpr", "OneOrMoreTimesTypExpr"],
+      ["ParenTypExpr", "Times", "TypExpr"],
       ["ParenTypExpr"]
     ],
     "ParenTypExpr": [
       ["LParen", "TypExpr", "RParen"],
       ["LowercaseIdent"]
-    ],
-    "OneOrMoreTimesTypExpr": [
-      ["Times", "TypExpr"]
     ],
     "SemiColonExpr": [
       ["IfExpr", "SemiColon", "SemiColonExpr"],

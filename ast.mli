@@ -56,17 +56,17 @@ and expr =
   | Variant of string * expr option
 
 type tuple =
-  | String of string
+  | Type of string
   | Tuple of tuple list
 
 type type_definition =
-  | VariantDecl of string * (string * tuple list) list
+  | VariantDecl of (string * tuple option) list
   | RecordDecl of (string * string) list
 
 type module_item =
   | LetDecl of let_binding
   | OpenDecl of string
   | Expr of expr
-  | TypeDefinition of type_definition
+  | TypeDefinition of string * type_definition
 
 type t = module_item list

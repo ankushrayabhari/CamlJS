@@ -532,33 +532,50 @@ let rec convert_typexpr = function (* list of tuple items *)
     typexpr;
     Token (Times);
     more_typexprs
-  ] -> (convert_typexpr typexpr)@(convert_typexpr more_typexprs)
-| Token (LowercaseIdent constr) -> [String constr]
-| _ ->
+  ] ->
+    let tl = match convert_typexpr more_typexprs with 
+    | Type _ as tr -> [tr]
+    | Tuple lst -> lst 
+    in
+    Tuple ((convert_typexpr typexpr)::tl)
+| Token (LowercaseIdent constr) -> Type constr
+| _ -> failwith "not valid typexpr"
 
 let convert_constr_decl = function
-| Token (CapitalizedIdent constr) -> (constr, [])
+| Token (CapitalizedIdent constr) -> (constr, None)
 | Node [
     Token (CapitalizedIdent constr);
     Token (Of);
     typexpr
-  ] -> (constr, convert_typexpr typexpr)
+  ] -> (constr, Some (convert_typexpr typexpr))
 | _ -> failwith "not a valid constr decl"
 
-let convert_repr = function
-| Node [
-    constr_decl
-  ] -> [convert_constr_decl constr_decl]
+let rec convert_constr_decl_vert_bar_sep = function
 | Node [
     Token (VerticalBar);
-    constr_decl
-  ] -> [(convert_constr_decl constr_decl)]
-|  Node [
+    constr_tr;
+    further_constr_decls;
+  ] -> 
+    (convert_constr_decl constr_tr)::
+    (convert_constr_decl_vert_bar_sep further_constr_decls)
+| Node [
     Token (VerticalBar);
-    constr_decl;
-    further_constr_decls
-  ] -> (convert_constr_decl constr_decl)::(convert_repr further_constr_decls)
-| _ -> failwith "not a valid representation"
+    constr_tr;
+  ] -> [convert_constr_decl constr_tr]
+| _ -> failwith "not valid constr decls with vertical bar sep"
+
+let rec convert_repr tr =
+  try [convert_constr_decl tr] with _ ->
+  try convert_constr_decl_vert_bar_sep tr with _ ->
+  match tr with
+  | Node [
+      constr_decl_tr;
+      constr_decl_vert_bar_tr;
+    ] -> 
+      let lst = convert_constr_decl_vert_bar_sep constr_decl_vert_bar_tr in 
+      let constr = convert_constr_decl constr_decl_tr in 
+      constr::lst
+  | _ -> failwith "not a valid representation"
 
 (**
  * [convert_definition t] is the abstract syntax tree representing the
@@ -595,7 +612,7 @@ let convert_definition = function
       Token (LowercaseIdent typ);
       Token (Equal);
       repr
-    ] -> VariantDecl (typ, convert_repr repr)
+    ] -> TypeDefinition (typ, VariantDecl (convert_repr repr))
   | Node [
       Token(Token.Let);
       let_binding;
