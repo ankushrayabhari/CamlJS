@@ -23,7 +23,7 @@ let make_ast_converter_test name program expected_tree =
     assert_equal expected_tree ast
   )
 
-let tokenizer_tests = [
+let tokenizer_tests = Token.[
   make_tokenizer_test
     "concatenate two strings"
     "\"a\" ^ \"b\""
