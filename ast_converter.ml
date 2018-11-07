@@ -522,36 +522,43 @@ and convert_expr tr = match tr with
       )
   | _ -> failwith "not a valid expression"
 
-let convert_typexpr = function
+let rec convert_typexpr acc = function
 | Node [
     Token (LParen);
     typexpr;
     Token (RParen);
-  ] ->
+  ] -> convert_typexpr acc typexpr
+| Node [
+    typexpr1;
+    Token (Times);
+    typexpr2
+  ] -> (Tuple [(convert_typexpr acc typexpr1); (convert_typexpr acc typexpr2)])
+| Token (LowercaseIdent constr) -> 
+| _ ->
 
 let convert_constr_decl = function
-| Token (CapitalizedIdent constr) -> 
+| Token (CapitalizedIdent constr) -> (constr, [])
 | Node [
     Token (CapitalizedIdent constr);
     Token (Of);
     typexpr
-  ] ->
+  ] -> (constr, convert_typexpr typexpr)
 | _ -> failwith "not a valid constr decl"
 
 let convert_repr = function
 | Node [
-    Token (CapitalizedIdent constr)
-  ] -> 
+    constr_decl
+  ] -> [(convert_constr_decl constr_decl)]
 | Node [
     Token (VerticalBar);
-    Token (CapitalizedIdent constr)
-  ] ->
+    constr_decl
+  ] -> [(convert_constr_decl constr_decl)]
 |  Node [
     Token (VerticalBar);
-    Token (CapitalizedIdent constr);
+    constr_decl;
     Token (VerticalBar);
-    
-  ] ->
+    further_constr_decls
+  ] -> 
 | _ -> failwith "not a valid representation"
 
 (**
