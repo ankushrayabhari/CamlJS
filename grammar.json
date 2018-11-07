@@ -302,10 +302,19 @@
       ["CapitalizedIdent", "ParenPattern"],
       ["ParenPattern"]
     ],
+    "OneOrMoreSemicolonSeparatedFieldPattern": [
+      ["FieldPattern"],
+      ["OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "FieldPattern"]
+    ],
+    "FieldPattern": [
+      ["LowercaseIdent", "Equal", "Pattern"]
+    ],
     "ParenPattern": [
       ["LParen", "Pattern", "RParen"],
       ["StartList", "OneOrMorePatternWithSemicolon", "EndList"],
       ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "RCurlyBrace"],
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "RCurlyBrace"],
       ["LowercaseIdent"],
       ["Constant"],
       ["Ignore"]

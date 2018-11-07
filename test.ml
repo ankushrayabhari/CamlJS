@@ -9,9 +9,9 @@ let rec print_parse_tree (parse_tree:Parse_tree.t) : unit =
     | Node children ->
       let () = print_string ("\n" ^ line_acc ^ "Node [") in
       let () = List.iter
-          (rec_print_parse_tree (line_acc ^ " "))
+          (rec_print_parse_tree (line_acc ^ "   "))
         children in
-      print_string ("\n" ^ line_acc^"]")
+      print_string ("\n" ^ line_acc ^ "];")
   in rec_print_parse_tree "" parse_tree
 
 let print_program_parse_tree program : unit =
@@ -352,6 +352,13 @@ let tokenizer_tests = Token.[
     [Type; LowercaseIdent "animal"; Equal; LCurlyBrace; LowercaseIdent "name";
      Colon; LowercaseIdent "string"; SemiColon; LowercaseIdent "age";
      Colon; LowercaseIdent "int"; SemiColon; RCurlyBrace];
+
+ make_tokenizer_test
+   "record patterns tokenizable"
+   "match x with {name = a; age = _} -> ()"
+   [Match; LowercaseIdent "x"; With; LCurlyBrace; LowercaseIdent "name"; Equal;
+    LowercaseIdent "a"; SemiColon; LowercaseIdent "age"; Equal; Ignore;
+    RCurlyBrace; FunctionArrow; Unit];
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
@@ -1338,7 +1345,6 @@ let parser_tests = Parse_tree.(Tokenizer.[
       ]
     );
 
-
   make_parser_test
     "parsing accessing a simple record field"
     "t.name"
@@ -1371,6 +1377,69 @@ let parser_tests = Parse_tree.(Tokenizer.[
         ];
         Token (Period);
         Token (LowercaseIdent "name");
+      ]);
+
+  make_parser_test
+    "parsing a record pattern"
+    "match x with {name = a; age = _} -> ()"
+    (Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Node [
+                Token (LowercaseIdent "name");
+                Token (Equal);
+                Token (LowercaseIdent "a");
+              ];
+              Token (SemiColon);
+              Node [
+                Token (LowercaseIdent "age");
+                Token (Equal);
+                Token (Ignore);
+              ];
+            ];
+            Token (RCurlyBrace);
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
+      ]);
+
+  make_parser_test
+    "record pattern precedence test"
+    "match x with Node {name = \"Bill\"; age = _} -> ()"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "x");
+      Token With;
+      Node [
+        Node [
+          Token (CapitalizedIdent "Node");
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Node [
+                Token (LowercaseIdent "name");
+                Token (Equal);
+                Token (StringLiteral "\"Bill\"");
+              ];
+              Token (SemiColon);
+              Node [
+                Token (LowercaseIdent "age");
+                Token (Equal);
+                Token (Ignore);
+              ];
+            ];
+            Token (RCurlyBrace);
+          ];
+        ];
+        Token (FunctionArrow);
+        Token (Unit);
+      ];
     ]);
 ])
 
