@@ -55,8 +55,12 @@ and expr =
   | Record of (string * expr) list
   | Variant of string * expr option
 
+type tuple =
+  | String of string
+  | Tuple of tuple list
+
 type type_definition =
-  | VariantDecl of (string * string list) list
+  | VariantDecl of string * (string * tuple list) list
   | RecordDecl of (string * string) list
 
 type module_item =
