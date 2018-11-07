@@ -206,6 +206,14 @@ let tokenizer_tests = Token.[
     [If; Int 0; NotEqual; Int 0; Then; Int 0; Else; Int 1; ];
 
   make_tokenizer_test
+    "pattern match range of chars"
+    "match t with 'a'..'k' -> true | 'l'..'z' -> false"
+    [Match; LowercaseIdent "t"; With; CharLiteral "'a'"; DoublePeriod; 
+     CharLiteral "'k'"; FunctionArrow; Bool true; VerticalBar; 
+     CharLiteral "'l'"; DoublePeriod; CharLiteral "'z'"; FunctionArrow; 
+     Bool false];
+  
+  make_tokenizer_test
     "anonymous function expression"
     "fun a b -> a + b"
     [Fun; LowercaseIdent "a"; LowercaseIdent "b"; FunctionArrow;
@@ -1102,6 +1110,34 @@ let parser_tests = Parse_tree.(Tokenizer.[
         ];
         Token FunctionArrow;
         Token (LowercaseIdent "c")
+      ]
+    ]);
+
+  make_parser_test
+    "pattern matching range of chars"
+    "match t with 'a'..'k' -> true | 'l'..'z' -> false"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "t"); 
+      Token With;
+      Node [
+        Node [
+          Token (CharLiteral "'a'");
+          Token DoublePeriod;
+          Token (CharLiteral "'k'")
+        ];
+        Token FunctionArrow;
+        Token (Bool true);
+        Node [
+          Token VerticalBar;
+          Node [
+            Token (CharLiteral "'l'");
+            Token DoublePeriod;
+            Token (CharLiteral "'z'")
+          ];
+          Token FunctionArrow;
+          Token (Bool false)
+        ]
       ]
     ]);
 
@@ -2059,6 +2095,24 @@ let ast_converter_tests = Ast.[
       [ParenPattern (AliasPattern (ConstantPattern (Int 1), "x"))],
       Constant (StringLiteral "\"asdfasdf\""),
       true
+    ))];
+
+  make_ast_converter_test
+    "pattern match on char range"
+    "match t with 'a'..'k' -> true | 'l'..'z' -> false"
+    [Expr (MatchExpr (
+      VarName "t",
+      [(
+        RangedCharacterPattern ("'a'", "'k'"),
+        Constant (Bool true), 
+        None
+       );
+       (
+        RangedCharacterPattern ("'l'", "'z'"), 
+        Constant (Bool false), 
+        None
+       )
+      ]
     ))];
 
   make_ast_converter_test
