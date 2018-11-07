@@ -46,6 +46,17 @@ let make_ast_converter_test name program expected_tree =
     assert_equal expected_tree ast
   )
 
+let make_ast_optimizer_test optimizer_fn name program expected_tree =
+  name >:: (fun _ ->
+    let ast =
+      Tokenizer.tokenize program
+      |> Parser.parse
+      |> Ast_converter.convert
+      |> optimizer_fn
+    in
+    assert_equal expected_tree ast
+  )
+
 let tokenizer_tests = Token.[
   make_tokenizer_test
     "concatenate two strings"
@@ -2214,10 +2225,19 @@ let ast_converter_tests = Ast.[
     [Expr (PrefixOp (NegationFloat, Constant (Float 1.0)))];
 ]
 
+let make_curry_optimizer_test =
+  make_ast_optimizer_test Curry_optimizer.optimize;;
+let make_unused_optimizer_test =
+  make_ast_optimizer_test Unused_binding_optimizer.optimize;;
+
+let optimizer_tests = Ast.[
+]
+
 let suite = "test suite"  >::: List.flatten [
   tokenizer_tests;
   parser_tests;
   ast_converter_tests;
+  optimizer_tests;
 ]
 
 let _ = run_test_tt_main suite

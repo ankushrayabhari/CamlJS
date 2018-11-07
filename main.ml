@@ -1,15 +1,16 @@
 (**
  * [compile code] is the transpiled JS code from the original OCaml [code].
- * 
+ *
  * Raises: Failure if [code] is not a valid program and cannot be transpiled.
  *)
 let compile code =
   Tokenizer.tokenize code
   |> Parser.parse
   |> Ast_converter.convert
+  |> Optimizer.optimize
   |> Renderer.render
 
-(** 
+(**
  * [parse_args ()] is a tuple of an input file name and an output file name
  * if two inputs are provided. Otherwise it prints an error message and exits.
  *)
@@ -21,11 +22,11 @@ let parse_args () =
     exit 0
 
 (**
- * This retrieves the user's input file and output file, reads the input OCaml 
+ * This retrieves the user's input file and output file, reads the input OCaml
  * file, compiles it into JS code, and writes the result in the output file.
  * Exits if there are not two files provided.
- * 
- * Raises: Failure if the input OCaml file is not valid and cannot be 
+ *
+ * Raises: Failure if the input OCaml file is not valid and cannot be
  * transpiled.
  *)
 let _ =
