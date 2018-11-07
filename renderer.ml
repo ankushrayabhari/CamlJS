@@ -358,11 +358,13 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
           (target_var^".$NAME")
           (ConstantPattern (StringLiteral name))
       in
-      let (data_binding, data_assertion) =
-        get_pattern_bindings
-          curr_bind_idx
-          (target_var^".$DATA")
-          data_pat
+      let (data_binding, data_assertion) = match data_pat with
+        | None -> ([], [])
+        | Some pat ->
+          get_pattern_bindings
+            curr_bind_idx
+            (target_var^".$DATA")
+            pat
       in
       (name_binding@data_binding, name_assertion@data_assertion)
 
@@ -409,7 +411,11 @@ and render_record_expr prop_lst =
   |> sprintf "{%s}"
 
 and render_variant_expr name arg_expr =
-  sprintf "{$NAME: \"%s\", $DATA: %s}" name (render_expr arg_expr)
+  let rendered_arg = match arg_expr with
+    | Some arg -> render_expr arg
+    | None -> "null"
+  in
+  sprintf "{$NAME: \"%s\", $DATA: %s}" name rendered_arg
 
 (**
  * [render_expr e] is the JavaScript equivalent code of [e]. This function

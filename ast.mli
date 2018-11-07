@@ -29,7 +29,7 @@ type pattern =
   | ArrayPattern of pattern list
   | ConsPattern of pattern * pattern
   | RangedCharacterPattern of string * string
-  | VariantPattern of string * pattern
+  | VariantPattern of string * pattern option
   | TuplePattern of pattern list
   | RecordPattern of (string * pattern) list
 
@@ -53,7 +53,7 @@ and expr =
   | MatchExpr of expr * (pattern * expr * expr option) list
   | Tuple of expr list
   | Record of (string * expr) list
-  | Variant of string * expr
+  | Variant of string * expr option
 
 type type_definition =
   | VariantDecl of (string * string list) list
