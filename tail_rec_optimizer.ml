@@ -2,6 +2,9 @@ open Ast
 
 let optimize_function_assign = function
   | FunctionAssignment (name, true, args, body_expr, true) as tr -> tr
+    (* Need to check that all code branches result in a function call with
+       function reference not appearing anywhere else. If so, mark as tail rec
+       or if not then return *)
   | tr -> tr
 
 let rec optimize_expr = function
