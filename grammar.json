@@ -158,6 +158,10 @@
       "regex": "}"
     },
     {
+      "name": "DoublePeriod",
+      "regex": "\\.\\."
+    },
+    {
       "name": "Period",
       "regex": "\\."
     },
@@ -315,6 +319,7 @@
       ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "RCurlyBrace"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "RCurlyBrace"],
+      ["CharLiteral", "DoublePeriod", "CharLiteral"],
       ["LowercaseIdent"],
       ["Constant"],
       ["Ignore"]
