@@ -64,6 +64,46 @@ let rec render_let_binding = function
   | FunctionAssignment (function_name, _, arg_list, body_expr, curry) ->
       "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
       ^ render_fun arg_list body_expr curry ^  ";"
+  | TailRecursiveFunctionAssignment (function_name, arg_list, body_expr) ->
+      "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
+      ^ render_loop_fn function_name arg_list body_expr ^  ";"
+
+and render_loop_body_expr name = function
+  | Ternary (cond, then_body_expr, Some else_body_expr) ->
+      sprintf "if (%s) {%s} else {%s}"
+        (render_expr cond)
+        (render_loop_body_expr name then_body_expr)
+        (render_loop_body_expr name else_body_expr)
+  | MatchExpr (target_expr, pat_lst) ->
+      let rendered_target =
+        Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
+      let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
+        let rendered_value = render_loop_body_expr name expr in
+        let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
+        let rendered_match_case = render_match_case bindings assertions guard in
+        acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
+          rendered_match_case
+          rendered_value
+      ) "" pat_lst
+      in
+      Printf.sprintf "{%s%sthrow new Error('Match Failure');}"
+        rendered_target
+        rendered_match_cases
+  | FunctionCall (VarName name, arg_lst, true) ->
+      arg_lst
+      |> List.mapi (fun idx arg_expr ->
+        let arg_name = "A"^(string_of_int idx) in
+        render_binding_assignment false arg_name (render_expr arg_expr)
+      )
+      |> String.concat ""
+      |> (fun x -> x ^ "continue;")
+  | tr -> sprintf "return %s;" (render_expr tr)
+
+and render_loop_fn function_name arg_lst body_expr =
+  let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_lst in
+  let arguments = String.concat "," arg_names in
+  let rendered_body_expr = render_loop_body_expr function_name body_expr in
+  sprintf "((%s) => { while(true){%s} })" arguments rendered_body_expr
 
 (**
  * [render_match_case bindings constant] is the JavaScript equivalent code of
