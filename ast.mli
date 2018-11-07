@@ -61,7 +61,7 @@ type type_tuple =
 
 type type_definition =
   | VariantDecl of (string * type_tuple option) list
-  | RecordDecl of (string * string) list
+  | RecordDecl of (string * type_tuple) list
 
 type module_item =
   | LetDecl of let_binding
