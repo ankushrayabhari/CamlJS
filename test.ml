@@ -1146,14 +1146,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
     ]);
 
 
-  (*
-  make_parser_test
-    "parsing a record pattern"
-    ""
-    (Node [
 
-    ]);
-  *)
+
 ])
 
 
