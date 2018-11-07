@@ -111,6 +111,26 @@ let tokenizer_tests = Token.[
     [CharLiteral "'a'"; CharLiteral "'b'"];
 
   make_tokenizer_test
+    "simple type t"
+    "type t = Test"
+    [Type; LowercaseIdent "t"; Equal; CapitalizedIdent "Test"];
+
+  make_tokenizer_test
+    "simple variant type t"
+    "type t = Test | Nil"
+    [Type; LowercaseIdent "t"; Equal; CapitalizedIdent "Test"; VerticalBar; CapitalizedIdent "Nil"];
+
+  make_tokenizer_test
+    "simple variant type t with vertical bars before"
+    "type t = | Test | Nil"
+    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Test"; VerticalBar; CapitalizedIdent "Nil"];
+
+  make_tokenizer_test
+    "simple variant type t with vertical bars before"
+    "type t = | Cons of int * t | Nil"
+    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Cons"; Of; LowercaseIdent "int"; Times; LowercaseIdent "t"; VerticalBar; CapitalizedIdent "Nil"];
+
+  make_tokenizer_test
     "let assign test"
     "let x = 1 in x + 100"
     [Let; LowercaseIdent "x"; Equal; Int 1; In; LowercaseIdent "x"; Plus;
@@ -262,6 +282,11 @@ let tokenizer_tests = Token.[
     [Let; LowercaseIdent "x"; Equal; LowercaseIdent "not"; Bool false];
 
   make_tokenizer_test
+    "expression with variant"
+    "let x = Cons 2"
+    [Let; LowercaseIdent "x"; Equal; CapitalizedIdent "Cons"; Int 2];
+
+  make_tokenizer_test
     "complicated and/or/not test, tokenizer"
     "let x = not (true && false)"
     [Let; LowercaseIdent "x"; Equal; LowercaseIdent "not"; LParen; Bool true;
@@ -273,6 +298,11 @@ let tokenizer_tests = Token.[
     [Match; LowercaseIdent "x"; With; VerticalBar; Int 1; When;
      LowercaseIdent "x"; Equal; Int 1; FunctionArrow; Bool true; VerticalBar;
      Ignore; FunctionArrow; Bool false;];
+
+  make_tokenizer_test
+    "pattern match expression in a let assignment with variant"
+    "match x with Int 2"
+    [Match; LowercaseIdent "x"; With; CapitalizedIdent "Int"; Int 2;];
 
   make_tokenizer_test
     "pattern match expression in a let assignment"
@@ -353,6 +383,110 @@ let parser_tests = Parse_tree.(Tokenizer.[
       Token (DoubleSemicolon);
     ]);
 
+  make_parser_test
+    "simple type t parse"
+    "type t = Test"
+    (Node [
+      Token (Type);
+      Token (LowercaseIdent "t");
+      Token (Equal);
+      Token (CapitalizedIdent "Test")
+    ]);
+
+  make_parser_test
+    "type t parse with vertical bar in middle"
+    "type t = Cons of int * t | Nil"
+    (Node [
+      Token (Type);
+      Token (LowercaseIdent "t");
+      Token (Equal);
+      Node [
+        Node [
+          Token (CapitalizedIdent "Cons");
+          Token (Of);
+          Node [
+            Token (LowercaseIdent "int");
+            Node [
+              Token (Times);
+              Token (LowercaseIdent "t");
+            ]
+          ]
+        ];
+        Node [
+          Token (VerticalBar);
+          Token (CapitalizedIdent "Nil")
+        ]
+      ]
+    ]);
+
+  make_parser_test
+    "type t parse with vertical bar in front and mid"
+    "type t = | Cons of int * t | Nil"
+    (Node [
+      Token (Type);
+      Token (LowercaseIdent "t");
+      Token (Equal);
+      Node [
+        Token (VerticalBar);
+        Node [
+          Token (CapitalizedIdent "Cons");
+          Token (Of);
+          Node [
+            Token (LowercaseIdent "int");
+            Node [
+              Token (Times);
+              Token (LowercaseIdent "t");
+            ]
+          ]
+        ];
+        Node [
+          Token (VerticalBar);
+          Token (CapitalizedIdent "Nil")
+        ]
+      ]
+    ]);
+
+  make_parser_test
+    "type t parse cons of big tuple"
+    "type t = Cons of int * (l * float * int) * bool"
+    (Node [
+      Token Type;
+      Token (LowercaseIdent "t");
+      Token Equal;
+      Node [
+        Token (CapitalizedIdent "Cons");
+        Token Of;
+        Node [
+          Token (LowercaseIdent "int");
+          Node [
+            Token Times;
+            Node [
+              Node [
+                Token LParen;
+                Node [
+                  Token (LowercaseIdent "l");
+                  Node [
+                    Token Times;
+                    Node [
+                      Token (LowercaseIdent "float");
+                      Node [
+                        Token Times;
+                        Token (LowercaseIdent "int")
+                      ];
+                    ];
+                  ];
+                ];
+                Token RParen;
+              ];
+              Node [
+                Token Times;
+                Token (LowercaseIdent "bool")
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]);
 
   make_parser_test
     "append three lists, right associativity"
@@ -635,6 +769,21 @@ let parser_tests = Parse_tree.(Tokenizer.[
     ]);
 
   make_parser_test
+    "variant definition"
+    "let x = Test 2"
+    (Node [
+      Token (Let);
+      Node [
+        Token (LowercaseIdent "x");
+        Token (Equal);
+        Node [
+          Token (CapitalizedIdent "Test");
+          Token (Int 2);
+        ]
+      ]
+    ]);
+
+  make_parser_test
     "compilation unit, end with ;;, single expr"
     "let rec x = 1;;"
     (Node [
@@ -902,6 +1051,49 @@ let parser_tests = Parse_tree.(Tokenizer.[
     ]);
 
   make_parser_test
+    "precedence for variant expressions"
+    "Node \"asdf\"::Nil 1::[]"
+    (Node [
+      Node [
+        Token (CapitalizedIdent "Node");
+        Token (StringLiteral "\"asdf\"")
+      ];
+      Token Cons;
+      Node [
+        Node [
+          Token (CapitalizedIdent "Nil");
+          Token (Int 1)
+        ];
+        Token Cons;
+        Token EmptyList
+      ]
+    ]);
+
+  make_parser_test
+    "precedence for pattern expressions"
+    "match lst with Node \"asdf\"::Nil c -> c"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "lst");
+      Token With;
+      Node [
+        Node [
+          Node [
+            Token (CapitalizedIdent "Node");
+            Token (StringLiteral "\"asdf\"")
+          ];
+          Token Cons;
+          Node [
+            Token (CapitalizedIdent "Nil");
+            Token (LowercaseIdent "c")
+          ]
+        ];
+        Token FunctionArrow;
+        Token (LowercaseIdent "c")
+      ]
+    ]);
+
+  make_parser_test
     "pattern matching cons associativity"
     "let 1::2::3 = []"
     (Node [
@@ -943,6 +1135,40 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token (Bool false);
         ];
       ];
+    ]);
+
+  make_parser_test
+    "pattern with variants"
+    "match t with | Cons (2) -> true | Nil -> true | _ -> false"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "t");
+      Token With;
+      Node [
+        Token VerticalBar;
+        Node [
+          Token (CapitalizedIdent "Cons");
+          Node [
+            Token LParen;
+            Token (Int 2);
+            Token RParen
+          ]
+        ];
+        Token FunctionArrow;
+        Token (Bool true);
+        Node [
+          Token VerticalBar;
+          Token (CapitalizedIdent "Nil");
+          Token FunctionArrow;
+          Token (Bool true);
+          Node [
+            Token VerticalBar;
+            Token Ignore;
+            Token FunctionArrow;
+            Token (Bool false)
+          ]
+        ]
+      ]
     ]);
 
   make_parser_test
