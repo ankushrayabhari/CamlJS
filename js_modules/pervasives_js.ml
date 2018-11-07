@@ -1,5 +1,6 @@
 let impl = {|
 const NativeString = global.String;
+const NativeArray = global.Array;
 const Pervasives = {
   min: a => b => Math.min(a, b),
   max: a => b => Math.max(a, b),
