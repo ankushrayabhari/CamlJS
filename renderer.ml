@@ -37,7 +37,7 @@ let render_defined_assertion target_var =
 
 let render_ranged_assertion target_var lower_bound upper_bound =
   sprintf
-    "if (%s >= %s && %s <= %s){throw new Error('Match failure');}"
+    "if (%s < %s || %s > %s){throw new Error('Match failure');}"
     target_var
     lower_bound
     target_var

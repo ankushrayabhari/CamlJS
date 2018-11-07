@@ -89,6 +89,11 @@ let rec convert_pattern = function
   | Token (Bool b) -> ConstantPattern (Bool b)
   | Token (Unit) -> ConstantPattern (Unit)
   | Node [
+      Token (CharLiteral s);
+      Token (DoublePeriod);
+      Token (CharLiteral e)
+    ] -> RangedCharacterPattern (s, e)
+  | Node [
       pat;
       Token (Token.As);
       Token (LowercaseIdent alias)
