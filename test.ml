@@ -12,11 +12,9 @@ let rec print_parse_tree (parse_tree:Parse_tree.t) : unit =
       print_string ("\n" ^ line_acc^"]")
   in rec_print_parse_tree "" parse_tree
 
-
 let print_program_parse_tree program : unit =
   print_parse_tree
     (Tokenizer.tokenize program |> Parser.parse)
-
 
 let make_tokenizer_test name program expected_value =
   name >:: (fun _ ->
@@ -308,7 +306,6 @@ let tokenizer_tests = Token.[
      Colon; LowercaseIdent "string"; SemiColon; LowercaseIdent "age";
      Colon; LowercaseIdent "int"; SemiColon; RCurlyBrace];
 ]
-
 
 let parser_tests = Parse_tree.(Tokenizer.[
   make_parser_test
@@ -1144,13 +1141,7 @@ let parser_tests = Parse_tree.(Tokenizer.[
         Token (Period);
         Token (LowercaseIdent "name");
     ]);
-
-
-
-
 ])
-
-
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
