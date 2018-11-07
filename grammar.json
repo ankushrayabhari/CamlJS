@@ -283,14 +283,17 @@
     ],
     "ConsPattern": [
       ["ParenPattern", "Cons", "ConsPattern"],
+      ["ConstructorPattern"],
       ["ParenPattern"]
+    ],
+    "ConstructorPattern": [
+      ["CapitalizedIdent"],
+      ["CapitalizedIdent", "ParenPattern"]
     ],
     "ParenPattern": [
       ["LParen", "Pattern", "RParen"],
       ["StartList", "OneOrMorePatternWithSemicolon", "EndList"],
       ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
-      ["CapitalizedIdent"],
-      ["CapitalizedIdent", "ParenPattern"],
       ["LowercaseIdent"],
       ["Constant"],
       ["Ignore"]
