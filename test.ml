@@ -406,10 +406,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token (Of);
           Node [
             Token (LowercaseIdent "int");
-            Node [
-              Token (Times);
-              Token (LowercaseIdent "t");
-            ]
+            Token (Times);
+            Token (LowercaseIdent "t");
           ]
         ];
         Node [
@@ -433,10 +431,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token (Of);
           Node [
             Token (LowercaseIdent "int");
-            Node [
-              Token (Times);
-              Token (LowercaseIdent "t");
-            ]
+            Token (Times);
+            Token (LowercaseIdent "t");
           ]
         ];
         Node [
@@ -458,31 +454,23 @@ let parser_tests = Parse_tree.(Tokenizer.[
         Token Of;
         Node [
           Token (LowercaseIdent "int");
+          Token Times;
           Node [
-            Token Times;
             Node [
+              Token LParen;
               Node [
-                Token LParen;
-                Node [
-                  Token (LowercaseIdent "l");
-                  Node [
-                    Token Times;
-                    Node [
-                      Token (LowercaseIdent "float");
-                      Node [
-                        Token Times;
-                        Token (LowercaseIdent "int")
-                      ];
-                    ];
-                  ];
-                ];
-                Token RParen;
-              ];
-              Node [
+                Token (LowercaseIdent "l");
                 Token Times;
-                Token (LowercaseIdent "bool")
-              ]
-            ]
+                Node [
+                  Token (LowercaseIdent "float");
+                  Token Times;
+                  Token (LowercaseIdent "int")
+                ];
+              ];
+              Token RParen;
+            ];
+            Token Times;
+            Token (LowercaseIdent "bool")
           ]
         ]
       ]

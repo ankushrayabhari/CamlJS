@@ -533,11 +533,11 @@ let rec convert_typexpr = function (* list of tuple items *)
     Token (Times);
     more_typexprs
   ] ->
-    let tl = match convert_typexpr more_typexprs with 
+    let tl = match convert_typexpr more_typexprs with
     | Type _ as tr -> [tr]
-    | Tuple lst -> lst 
+    | TypeTuple lst -> lst
     in
-    Tuple ((convert_typexpr typexpr)::tl)
+    TypeTuple ((convert_typexpr typexpr)::tl)
 | Token (LowercaseIdent constr) -> Type constr
 | _ -> failwith "not valid typexpr"
 
@@ -555,7 +555,7 @@ let rec convert_constr_decl_vert_bar_sep = function
     Token (VerticalBar);
     constr_tr;
     further_constr_decls;
-  ] -> 
+  ] ->
     (convert_constr_decl constr_tr)::
     (convert_constr_decl_vert_bar_sep further_constr_decls)
 | Node [
@@ -571,9 +571,9 @@ let rec convert_repr tr =
   | Node [
       constr_decl_tr;
       constr_decl_vert_bar_tr;
-    ] -> 
-      let lst = convert_constr_decl_vert_bar_sep constr_decl_vert_bar_tr in 
-      let constr = convert_constr_decl constr_decl_tr in 
+    ] ->
+      let lst = convert_constr_decl_vert_bar_sep constr_decl_vert_bar_tr in
+      let constr = convert_constr_decl constr_decl_tr in
       constr::lst
   | _ -> failwith "not a valid representation"
 
