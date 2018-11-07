@@ -1528,7 +1528,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "2-elt tuple"
     "1,2"
-    [Expr (TupleExpr [
+    [Expr (Tuple [
       Constant (Int 1);
       Constant (Int 2);
       ]
@@ -1537,7 +1537,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "5-elt tuple"
     "1,2,3,4,5"
-    [Expr (TupleExpr [
+    [Expr (Tuple [
       Constant (Int 1);
       Constant (Int 2);
       Constant (Int 3);
@@ -1549,7 +1549,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "tuple pattern precedence"
     "1,2::3,4"
-    [Expr (TupleExpr [
+    [Expr (Tuple [
       Constant (Int 1);
       InfixOp(
         Constant (Int 2),
@@ -1563,7 +1563,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "tuple expr precedence"
     "1,2 || 3,4"
-    [Expr (TupleExpr [
+    [Expr (Tuple [
       Constant (Int 1);
       InfixOp(
         Constant (Int 2),

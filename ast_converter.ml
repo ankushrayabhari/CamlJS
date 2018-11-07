@@ -98,7 +98,7 @@ let rec convert_pattern = function
       Token (Comma);
       one_or_more_pat;
     ] -> TuplePattern(
-      [convert_pattern pat] @ 
+      [convert_pattern pat] @
       List.rev (convert_one_or_more_patterns_comma_sep one_or_more_pat)
       )
   | Node [
@@ -324,9 +324,8 @@ and convert_tuple_body_expr acc = function
       one_or_more_expr;
       Token (Token.Comma);
       expr;
-    ] -> convert_tuple_body_expr ([convert_expr expr]@acc) one_or_more_expr
-   
-  | expr -> [convert_expr expr]@acc
+    ] -> convert_tuple_body_expr ((convert_expr expr)::acc) one_or_more_expr
+  | expr -> (convert_expr expr)::acc
 
 (**
  * [convert_pattern_matching acc t] is the AST list of tuples
@@ -519,16 +518,14 @@ and convert_expr tr = match tr with
         convert_expr cond_expr,
         convert_expr then_expr,
         Some (convert_expr else_expr)
-      )  
+      )
 
   | Node [
-      one_or_more_expr;
+      _;
       Token (Token.Comma);
-      expr;
-    ] ->
-      TupleExpr (convert_tuple_body_expr [] one_or_more_expr @ [convert_expr expr])
-
-
+      _;
+    ] as tr ->
+      Tuple (convert_tuple_body_expr [] tr)
 
   | Node [
       Token(Token.Fun);
