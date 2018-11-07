@@ -1562,6 +1562,78 @@ let parser_tests = Parse_tree.(Tokenizer.[
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
+    "pattern matching on tuple"
+    "match 1,2 with x,2 -> x | _,_ -> 0"
+    [Expr (MatchExpr (
+      Tuple [Constant (Int 1); Constant (Int 2);],
+      [
+        (TuplePattern [
+            ValueNamePattern "x";
+            ConstantPattern (Int 2);
+          ],
+          VarName "x",
+          None
+        );
+        (TuplePattern [
+            IgnorePattern;
+            IgnorePattern;
+          ],
+          Constant (Int 0),
+          None
+        );
+      ]
+    ))];
+
+  make_ast_converter_test
+    "2-elt tuple"
+    "1,2"
+    [Expr (Tuple [
+      Constant (Int 1);
+      Constant (Int 2);
+      ]
+    )];
+
+  make_ast_converter_test
+    "5-elt tuple"
+    "1,2,3,4,5"
+    [Expr (Tuple [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+      Constant (Int 4);
+      Constant (Int 5);
+      ]
+    )];
+
+  make_ast_converter_test
+    "tuple pattern precedence"
+    "1,2::3,4"
+    [Expr (Tuple [
+      Constant (Int 1);
+      InfixOp(
+        Constant (Int 2),
+        Cons,
+        Constant (Int 3)
+      );
+      Constant (Int 4);
+      ]
+    )];
+
+  make_ast_converter_test
+    "tuple expr precedence"
+    "1,2 || 3,4"
+    [Expr (Tuple [
+      Constant (Int 1);
+      InfixOp(
+        Constant (Int 2),
+        LogicalOr,
+        Constant (Int 3)
+      );
+      Constant (Int 4);
+      ]
+    )];
+
+  make_ast_converter_test
     "let concat 2 strings test"
     "let x = \"a\" in x ^ \"b\""
     [Expr (LetBinding (

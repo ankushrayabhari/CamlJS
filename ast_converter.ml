@@ -99,6 +99,14 @@ let rec convert_pattern = function
       Token (LowercaseIdent alias)
     ] -> AliasPattern (convert_pattern pat, alias)
   | Node [
+      pat;
+      Token (Comma);
+      one_or_more_pat;
+    ] -> TuplePattern(
+      [convert_pattern pat] @
+      List.rev (convert_one_or_more_patterns_comma_sep one_or_more_pat)
+      )
+  | Node [
       paren_pat;
       Token (Cons);
       cons_pat;
@@ -152,6 +160,29 @@ and convert_one_or_more_patterns_semicolon_sep = function
     ] ->
       convert_pattern pat::
       convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
+  | pat -> [convert_pattern pat]
+
+(**
+ * [convert_one_or_more_patterns_comma_sep tr] is the list of patterns
+ * contained in [tr].
+ * @raise Failure if [tr] does not correspond to one of the following
+ * structures:
+ * - [tr] is a valid pattern parse tree. {b See:} [convert_pattern]
+ * - [tr] is a [Node] with the following elements
+ * {ol
+ * {li a valid comma separated pattern parse tree}
+ * {li a [Comma] token}
+ * {li the pattern}
+ * }
+ *)
+and convert_one_or_more_patterns_comma_sep = function
+  | Node [
+      patterns_comma_sep;
+      Token (Comma);
+      pat;
+    ] ->
+      convert_pattern pat::
+      convert_one_or_more_patterns_comma_sep patterns_comma_sep
   | pat -> [convert_pattern pat]
 
 (**
@@ -261,6 +292,44 @@ and convert_list_body_expr acc = function
       Token (Token.SemiColon);
       expr;
     ] -> convert_list_body_expr ((convert_expr expr)::acc) one_or_more_expr
+  | expr -> (convert_expr expr)::acc
+
+(** [convert_tuple_body_expr acc t] is the list of AST expression nodes
+ * in the parse tree [t] preprended to acc, where all expressions are
+ * seperated by a comma.
+ *
+ * @raise Failure if [t] does not correspond to one of the following structures:
+ * - [t] is a parse tree with the elements of [Node]:
+ * {ol
+ * {li a tuple body expression that follows the structure of this definition.}
+ * {li a [Comma] token. }
+ * {li an expr parse tree that contains the last element of the tuple.
+ * {b See:} convert_expr}
+ * }
+ * - [t] is a valid expression. (b See:) [convert_expr]
+ *
+ * {b Example}: {v convert_list_body_expr
+ *   []
+ *    ( Node [
+ *       Node [
+ *         Token (Int 1);
+ *         Token (Comma);
+ *         Token (Int 2);
+ *       ];
+ *       Token (Comma);
+ *       Token (Int 3);
+ *     ];)
+
+ *  v}
+ * gives the AST list:
+ * [Expr Constant (Int 1), Expr Constant (Int 2), Expr Constant (Int 3)].
+ *)
+and convert_tuple_body_expr acc = function
+  | Node [
+      one_or_more_expr;
+      Token (Token.Comma);
+      expr;
+    ] -> convert_tuple_body_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
 (**
@@ -455,6 +524,14 @@ and convert_expr tr = match tr with
         convert_expr then_expr,
         Some (convert_expr else_expr)
       )
+
+  | Node [
+      _;
+      Token (Token.Comma);
+      _;
+    ] as tr ->
+      Tuple (convert_tuple_body_expr [] tr)
+
   | Node [
       Token(Token.Fun);
       one_or_more_patterns;
