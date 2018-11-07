@@ -313,7 +313,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
   | (ListPattern lst as pat) -> begin
       let pat_lst_length = List.length lst in
       let (_, bindings, constant_assertions) =
-        List.fold_left (fun (idx, bindings, constant_assertions) pat ->
+        List.fold_left (fun (idx, bindings, constant_assertions) _ ->
           let curr_idx = match pat with
             | ArrayPattern _ | TuplePattern _ -> idx
             | ListPattern _ -> pat_lst_length - 1 - idx
