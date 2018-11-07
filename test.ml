@@ -1,5 +1,23 @@
 open OUnit2
 
+let rec print_parse_tree (parse_tree:Parse_tree.t) : unit =
+  let rec rec_print_parse_tree line_acc (parse_tree:Parse_tree.t) =
+    match parse_tree with
+    | Token t -> print_string ("\n" ^ line_acc ^ "Token (" ^(Tokenizer.token_to_string t) ^ "),")
+    | Node children ->
+      let () = print_string ("\n" ^ line_acc ^ "Node [") in
+      let () = List.iter
+          (rec_print_parse_tree (line_acc ^ " "))
+        children in
+      print_string ("\n" ^ line_acc^"]")
+  in rec_print_parse_tree "" parse_tree
+
+
+let print_program_parse_tree program : unit =
+  print_parse_tree
+    (Tokenizer.tokenize program |> Parser.parse)
+
+
 let make_tokenizer_test name program expected_value =
   name >:: (fun _ ->
     let tokenized_program = try Tokenizer.tokenize program with _ -> [||] in
@@ -9,8 +27,13 @@ let make_tokenizer_test name program expected_value =
 
 let make_parser_test name program expected_tree =
   name >:: (fun _ ->
-    let parse_tr = Tokenizer.tokenize program |> Parser.parse in
-    assert_equal expected_tree parse_tr
+      let parse_tr = Tokenizer.tokenize program |> Parser.parse in
+      let () = if expected_tree = parse_tr
+        then ()
+        else let () = print_string ("failing parse tree: \n") in
+          (print_parse_tree (parse_tr))
+      in
+      assert_equal expected_tree parse_tr
   )
 
 let make_ast_converter_test name program expected_tree =
@@ -987,7 +1010,153 @@ let parser_tests = Parse_tree.(Tokenizer.[
         ];
       ];
     ]);
+
+  make_parser_test
+    "parsing a simple record definition"
+    "type animal = {name: string;}"
+    (Node [
+        Token (Type);
+        Token (LowercaseIdent "animal");
+        Token (Equal);
+        Node [
+          Token (LCurlyBrace);
+          Node [
+            Token (LowercaseIdent "name");
+            Token (Colon);
+            Token (LowercaseIdent "string");
+          ];
+          Token (SemiColon);
+          Token (RCurlyBrace);
+        ];
+      ]
+    );
+
+  make_parser_test
+    "parsing a more complex record definition"
+    "type animal = {name: string; age: int;}"
+    (Node [
+        Token (Type);
+        Token (LowercaseIdent "animal");
+        Token (Equal);
+        Node [
+          Token (LCurlyBrace);
+          Node [
+            Node [
+              Token (LowercaseIdent "name");
+              Token (Colon);
+              Token (LowercaseIdent "string");
+            ];
+            Token (SemiColon);
+            Node [
+              Token (LowercaseIdent "age");
+              Token (Colon);
+              Token (LowercaseIdent "int");
+            ]
+          ];
+          Token (SemiColon);
+          Token (RCurlyBrace);
+        ];
+      ]
+    );
+
+  make_parser_test
+    "parsing a simple record expression"
+    "let t = {name = \"Bill\";}"
+    (Node [
+        Token (Let);
+        Node [
+          Token (LowercaseIdent "t");
+          Token (Equal);
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Token (LowercaseIdent "name");
+              Token (Equal);
+              Token (StringLiteral "\"Bill\"");
+            ];
+            Token (SemiColon);
+            Token (RCurlyBrace);
+          ];
+        ];
+      ];
+    );
+
+  make_parser_test
+    "parsing a more complex record expression"
+    "let t = {name = \"Bill\"; age = 12}"
+    (Node [
+        Token (Let);
+        Node [
+          Token (LowercaseIdent "t");
+          Token (Equal);
+          Node [
+            Token (LCurlyBrace);
+            Node [
+              Node [
+                Token (LowercaseIdent "name");
+                Token (Equal);
+                Token (StringLiteral "\"Bill\"");
+              ];
+              Token (SemiColon);
+              Node [
+                Token (LowercaseIdent "age");
+                Token (Equal);
+                Token (Int 12);
+              ]
+            ];
+            Token (RCurlyBrace);
+          ];
+        ];
+      ]
+    );
+
+
+  make_parser_test
+    "parsing accessing a simple record field"
+    "t.name"
+    (Node [
+        Token (LowercaseIdent "t");
+        Token (Period);
+        Token (LowercaseIdent "name");
+      ]);
+
+  make_parser_test
+    "parsing accessing a more complex record field"
+    "{name = \"Bill\"; age = 12}.name"
+    (Node [
+        Node [
+          Token (LCurlyBrace);
+          Node [
+            Node [
+              Token (LowercaseIdent "name");
+              Token (Equal);
+              Token (StringLiteral "\"Bill\"");
+            ];
+            Token (SemiColon);
+            Node [
+              Token (LowercaseIdent "age");
+              Token (Equal);
+              Token (Int 12);
+            ]
+          ];
+          Token (RCurlyBrace);
+        ];
+        Token (Period);
+        Token (LowercaseIdent "name");
+    ]);
+
+
+  (*
+  make_parser_test
+    "parsing a record pattern"
+    ""
+    (Node [
+
+    ]);
+  *)
 ])
+
+
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
