@@ -43,6 +43,7 @@ and expr =
   | PrefixOp of prefix_symbol * expr
   | InfixOp of expr * infix_op * expr
   | Ternary of expr * expr * expr option
+  | TupleExpr of expr list
   | Function of pattern list * expr
   | Sequential of expr * expr
   | LetBinding of let_binding * expr

@@ -1526,6 +1526,55 @@ let parser_tests = Parse_tree.(Tokenizer.[
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
+    "2-elt tuple"
+    "1,2"
+    [Expr (TupleExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      ]
+    )];
+
+  make_ast_converter_test
+    "5-elt tuple"
+    "1,2,3,4,5"
+    [Expr (TupleExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+      Constant (Int 4);
+      Constant (Int 5);
+      ]
+    )];
+
+  make_ast_converter_test
+    "tuple pattern precedence"
+    "1,2::3,4"
+    [Expr (TupleExpr [
+      Constant (Int 1);
+      InfixOp(
+        Constant (Int 2),
+        Cons,
+        Constant (Int 3)
+      );
+      Constant (Int 4);
+      ]
+    )];
+
+  make_ast_converter_test
+    "tuple expr precedence"
+    "1,2 || 3,4"
+    [Expr (TupleExpr [
+      Constant (Int 1);
+      InfixOp(
+        Constant (Int 2),
+        LogicalOr,
+        Constant (Int 3)
+      );
+      Constant (Int 4);
+      ]
+    )];
+
+  make_ast_converter_test
     "let concat 2 strings test"
     "let x = \"a\" in x ^ \"b\""
     [Expr (LetBinding (
