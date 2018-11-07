@@ -142,8 +142,20 @@
       "regex": ";"
     },
     {
+      "name": "Colon",
+      "regex": ":"
+    },
+    {
       "name": "VerticalBar",
       "regex": "|"
+    },
+    {
+      "name": "LCurlyBrace",
+      "regex": "{"
+    },
+    {
+      "name": "RCurlyBrace",
+      "regex": "}"
     },
     {
       "name": "Period",
@@ -192,6 +204,10 @@
     {
       "name": "Let",
       "regex": "let"
+    },
+    {
+      "name": "Type",
+      "regex": "type"
     },
     {
       "name": "Rec",
@@ -263,7 +279,8 @@
     "Definition": [
       ["Let", "LetBinding"],
       ["Let", "Rec", "LetBinding"],
-      ["Open", "ModulePath"]
+      ["Open", "ModulePath"],
+      ["Type", "LowercaseIdent", "Equal", "Type-Representation"]
     ],
     "Pattern": [
       ["AsPattern"]
@@ -291,6 +308,20 @@
     "LetBinding": [
       ["Pattern", "Equal", "LetAnonFuncMatchExpr"],
       ["LowercaseIdent", "OneOrMorePattern", "Equal", "LetAnonFuncMatchExpr"]
+    ],
+    "Type-Representation": [
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedField-Decl", "RCurlyBrace"],
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedField-Decl", "SemiColon", "RCurlyBrace"]
+    ],
+    "OneOrMoreSemicolonSeparatedField-Decl": [
+      ["Field-Decl"],
+      ["OneOrMoreSemicolonSeparatedField-Decl", "SemiColon", "Field-Decl"]
+    ],
+    "Field-Decl": [
+      ["LowercaseIdent", "Colon", "Typexpr"]
+    ],
+    "Typexpr": [
+      ["LowercaseIdent"]
     ],
     "LetAnonFuncMatchExpr": [
       ["Let", "LetBinding", "In", "LetAnonFuncMatchExpr"],
@@ -376,7 +407,20 @@
       ["StartList", "OneOrMoreIfExprWithSemicolon", "SemiColon", "EndList"],
       ["LowercaseIdent"],
       ["ModulePath", "Period", "LowercaseIdent"],
-      ["Constant"]
+      ["RecordFieldGetter", "Period", "LowercaseIdent"],
+      ["Constant"],
+      ["RecordExpr"]
+    ],
+    "RecordExpr": [
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldBinding", "RCurlyBrace"],
+      ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldBinding", "SemiColon", "RCurlyBrace"]
+    ],
+    "OneOrMoreSemicolonSeparatedFieldBinding": [
+      ["FieldBinding"],
+      ["OneOrMoreSemicolonSeparatedFieldBinding", "SemiColon", "FieldBinding"]
+    ],
+    "FieldBinding": [
+      ["LowercaseIdent", "Equal", "IfExpr"]
     ],
     "OneOrMoreIfExprWithSemicolon": [
       ["IfExpr"],
@@ -384,6 +428,10 @@
     ],
     "ModulePath": [
       ["CapitalizedIdent"]
+    ],
+    "RecordFieldGetter": [
+      ["LowercaseIdent"],
+      ["RecordExpr"]
     ],
     "Constant": [
       ["Unit"],
