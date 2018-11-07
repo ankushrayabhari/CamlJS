@@ -294,12 +294,12 @@
       ["AsPattern"]
     ],
     "AsPattern": [
-      ["ConsPattern", "As", "LowercaseIdent"],
-      ["ConsPattern"]
+      ["TuplePattern", "As", "LowercaseIdent"],
+      ["TuplePattern"]
     ],
     "TuplePattern": [
-      ["ParenPattern", "Comma", "TuplePattern"],
-      ["ParenPattern"]
+      ["ConsPattern", "Comma", "TuplePattern"],
+      ["ConsPattern"]
     ],
     "ConsPattern": [
       ["ConstructorPattern", "Cons", "ConsPattern"],
