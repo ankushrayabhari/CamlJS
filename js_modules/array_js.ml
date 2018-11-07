@@ -18,7 +18,10 @@ const Array = {
       throw new Error("Invalid_argument")
     }
 
-    return Array.from({length: num}, (x, i) => JSON.parse(JSON.stringify(v)));
+    return NativeArray.from(
+      {length: num},
+      (x, i) => JSON.parse(JSON.stringify(v))
+    );
   },
   nth: a => n => {
     if (a.length <= n) {
@@ -32,15 +35,15 @@ const Array = {
       throw new Error("Invalid_argument")
     }
 
-    return Array.from({length: num}, (x, i) => f(i));
+    return NativeArray.from({length: num}, (x, i) => f(i));
   },
   make_matrix: dimx => dimy => e => {
     if (dimx < 0 || dimy < 0) {
       throw new Error("Invalid_argument")
     }
 
-    return Array.from({length: dimx}, (x, i) =>
-      Array.from({length: dimy}, JSON.parse(JSON.stringify(e)))
+    return NativeArray.from({length: dimx}, (x, i) =>
+      NativeArray.from({length: dimy}, JSON.parse(JSON.stringify(e)))
     );
   },
   append: a => b => {
@@ -71,7 +74,14 @@ const Array = {
     return arr;
   },
   iter: f => arr => {
-    arr.map(f);
+    for (let i = 0; i < arr.length; i++) {
+      f(arr[i]);
+    }
+  },
+  iteri: f => arr => {
+    for (let i = 0; i < arr.length; i++) {
+      f(i)(arr[i]);
+    }
   },
   map: f => a => {
     return a.map(e => JSON.parse(JSON.stringify(f(e))));
@@ -79,50 +89,55 @@ const Array = {
   mapi: f => a => {
     return a.map((e, idx) => JSON.parse(JSON.stringify(f(idx)(e))));
   },
-  fold_left: f => a => lst => lst.reduceRight((acc, curr) => f(acc)(curr), a),
-  fold_right: f => lst => a => lst.reduce((acc, curr) => f(curr)(acc), a),
-  mem: el => lst => {
-    for (let i = 0; i < lst.length; i++) {
-      if (compare(el)(lst[i]) == 0) {
+  fold_left: f => a => arr => {
+    return arr.reduce((acc, curr) => f(acc)(curr), a)
+  },
+  fold_right: f => arr => a => {
+    return lst.reduceRight((acc, curr) => f(curr)(acc), a);
+  },
+  mem: el => arr => {
+    for (let i = 0; i < arr.length; i++) {
+      if (compare(el)(arr[i]) == 0) {
         return true;
       }
     }
     return false;
   },
-  sort: f => lst => lst.slice().sort((el1, el2) => f(el1)(el2)).reverse(),
-  sort_uniq: f => lst => {
-    return lst.slice()
+  sort: f => arr => {
+    return arr.map(e => JSON.parse(JSON.stringify(e)))
+              .sort((el1, el2) => f(el1)(el2));
+  },
+  sort_uniq: f => arr => {
+    return arr.map(e => JSON.parse(JSON.stringify(e)))
               .sort((el1, el2) => f(el1)(el2))
-              .filter((el, idx, lst) => idx == 0 || f(el)(lst[idx - 1]) != 0)
-              .reverse();
+              .filter((el, idx, arr) => idx == 0 || f(el)(arr[idx - 1]) != 0);
   }
 };
 |}
 
 
 let destructure = {|
-const {
-  length,
-  cons,
-  hd,
-  tl,
-  nth,
-  nth_opt,
-  rev,
-  append,
-  flatten,
-  iter,
-  iteri,
-  map,
-  mapi,
-  fold_left,
-  fold_right,
-  mem,
-  memq,
-  find,
-  find_opt,
-  filter,
-  sort,
-  sort_uniq
-} = List;
+  const {
+    length,
+    get,
+    set,
+    make,
+    nth,
+    init,
+    make_matrix,
+    append,
+    concat,
+    sub,
+    to_list,
+    of_list,
+    iter,
+    iteri,
+    map,
+    mapi,
+    fold_left,
+    fold_right,
+    mem,
+    sort,
+    sort_uniq
+  } = Array;
 |}

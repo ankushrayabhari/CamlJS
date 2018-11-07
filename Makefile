@@ -1,4 +1,4 @@
-JS_MODULES=pervasives_js list_js char_js string_js
+JS_MODULES=pervasives_js list_js char_js string_js array_js
 MODULES=tokenizer grammar parser ast_converter curry_optimizer unused_binding_optimizer optimizer renderer file_helper
 OBJECTS=$(MODULES:=.cmo) $(JS_MODULES:=.cmo)
 MLS=$(MODULES:=.ml) $(JS_MODULES:%=js_modules/%.ml)
