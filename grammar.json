@@ -69,6 +69,10 @@
       "tag": "infix"
     },
     {
+      "name": "Comma",
+      "regex": ","
+    },
+    {
       "name": "DoubleSemicolon",
       "regex": ";;"
     },
@@ -293,6 +297,10 @@
       ["ConsPattern", "As", "LowercaseIdent"],
       ["ConsPattern"]
     ],
+    "TuplePattern": [
+      ["ParenPattern", "Comma", "TuplePattern"],
+      ["ParenPattern"]
+    ],
     "ConsPattern": [
       ["ConstructorPattern", "Cons", "ConsPattern"],
       ["ConstructorPattern"]
@@ -384,6 +392,10 @@
     "IfExpr": [
       ["If", "IfExpr", "Then", "IfExpr", "Else", "IfExpr"],
       ["If", "IfExpr", "Then", "IfExpr"],
+      ["TupleExpr"]
+    ],
+    "TupleExpr": [
+      ["TupleExpr", "Comma", "OrExpr"],
       ["OrExpr"]
     ],
     "OrExpr": [

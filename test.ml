@@ -59,6 +59,26 @@ let make_ast_optimizer_test optimizer_fn name program expected_tree =
 
 let tokenizer_tests = Token.[
   make_tokenizer_test
+    "1,2 tuple"
+    "1,2"
+    [Int 1; Comma; Int 2];
+
+  make_tokenizer_test
+    "1,2 tuple with parens"
+    "(1,2)"
+    [LParen; Int 1; Comma; Int 2; RParen];
+
+  make_tokenizer_test
+    "\"a\", \"b\" tuple"
+    "\"a\",\"b\""
+    [StringLiteral "\"a\""; Comma; StringLiteral "\"b\""];
+
+  make_tokenizer_test
+    "multi-element tuple"
+    "1,2,3"
+    [Int 1; Comma; Int 2; Comma; Int 3];
+
+  make_tokenizer_test
     "concatenate two strings"
     "\"a\" ^ \"b\""
     [StringLiteral "\"a\""; Concat; StringLiteral "\"b\""];
@@ -362,6 +382,15 @@ let tokenizer_tests = Token.[
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
+  make_parser_test
+    "1, 2 tuple"
+    "1,2"
+    (Node [     
+        Token (Int 1);
+        Token (Comma);
+        Token (Int 2);
+    ]);
+
   make_parser_test
     "arithmetic order of operations"
     "1*2/3+4-10/(2 +1)"
