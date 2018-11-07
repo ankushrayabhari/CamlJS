@@ -420,14 +420,6 @@ and convert_expr tr = match tr with
     ] ->
       ParenExpr (convert_expr expr)
   | Node [
-    expr1;
-    Token (Token.Comma);
-    expr2;
-    ] ->
-      Tuple ([convert_expr expr1;convert_expr expr2])
-
-
-  | Node [
       Token (pre);
       expr;
     ] when Tokenizer.has_tag pre "prefix" ->
