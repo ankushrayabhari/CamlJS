@@ -1,4 +1,4 @@
 open Ast
 
 let optimize tr =
-  failwith "tr"
+  failwith "not implemented"
