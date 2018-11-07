@@ -104,6 +104,13 @@ let rec convert_pattern = function
       Token (RParen);
     ] -> ParenPattern (convert_pattern pat)
   | Node [
+      Token (CapitalizedIdent constr)
+    ] -> VariantPattern (constr, None)
+  | Node [
+      Token (CapitalizedIdent constr);
+      pat
+    ] -> VariantPattern (constr, Some convert_pattern pat)
+  | Node [
       Token (StartList);
       patterns_semicolon_sep;
       Token (SemiColon);
@@ -479,6 +486,13 @@ and convert_expr tr = match tr with
         convert_let_binding false let_binding,
         convert_expr let_expr
       )
+  | Node [
+      Token (CapitalizedIdent constr)
+    ] -> VariantPattern (constr, None)
+  | Node [
+      Token (CapitalizedIdent constr);
+      var_expr
+    ] -> VariantPattern (constr, Some convert_expr var_expr)
   | Node [
       fun_expr;
       arg_expr;
