@@ -282,13 +282,13 @@
       ["ConsPattern"]
     ],
     "ConsPattern": [
-      ["ParenPattern", "Cons", "ConsPattern"],
-      ["ConstructorPattern"],
-      ["ParenPattern"]
+      ["ConstructorPattern", "Cons", "ConsPattern"],
+      ["ConstructorPattern"]
     ],
     "ConstructorPattern": [
       ["CapitalizedIdent"],
-      ["CapitalizedIdent", "ParenPattern"]
+      ["CapitalizedIdent", "ParenPattern"],
+      ["ParenPattern"]
     ],
     "ParenPattern": [
       ["LParen", "Pattern", "RParen"],

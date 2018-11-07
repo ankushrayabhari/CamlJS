@@ -23,7 +23,7 @@ let make_ast_converter_test name program expected_tree =
     assert_equal expected_tree ast
   )
 
-let tokenizer_tests = Token.[
+let tokenizer_tests = [
   make_tokenizer_test
     "concatenate two strings"
     "\"a\" ^ \"b\""
@@ -436,23 +436,23 @@ let parser_tests = Parse_tree.(Tokenizer.[
               Node [
                 Token LParen;
                 Node [
-                  Token (LowercaseIdent "l");
+                  Node [
+                    Token (LowercaseIdent "l");
+                    Node [
+                      Token Times;
+                      Token (LowercaseIdent "float")
+                    ]
+                  ];
                   Node [
                     Token Times;
-                    Node [
-                      Token (LowercaseIdent "float");
-                      Node [
-                        Token Times;
-                        Token (LowercaseIdent "int");
-                      ]
-                    ]
+                    Token (LowercaseIdent "int")
                   ]
                 ];
                 Token RParen
               ];
               Node [
                 Token Times;
-               Token (LowercaseIdent "bool")
+                Token (LowercaseIdent "bool")
               ]
             ]
           ]
@@ -1020,6 +1020,49 @@ let parser_tests = Parse_tree.(Tokenizer.[
         Token (Equal);
         Token (EmptyList);
       ];
+    ]);
+
+  make_parser_test
+    "precedence for variant expressions"
+    "Node \"asdf\"::Nil 1::[]"
+    (Node [
+      Node [
+        Token (CapitalizedIdent "Node");
+        Token (StringLiteral "\"asdf\"")
+      ];
+      Token Cons;
+      Node [
+        Node [
+          Token (CapitalizedIdent "Nil");
+          Token (Int 1)
+        ];
+        Token Cons; 
+        Token EmptyList
+      ]
+    ]);
+
+  make_parser_test
+    "precedence for pattern expressions"
+    "match lst with Node \"asdf\"::Nil c -> c"
+    (Node [
+      Token Match;
+      Token (LowercaseIdent "lst");
+      Token With;
+      Node [
+        Node [
+          Node [
+            Token (CapitalizedIdent "Node");
+            Token (StringLiteral "\"asdf\"")
+          ];
+          Token Cons;
+          Node [
+            Token (CapitalizedIdent "Nil");
+            Token (LowercaseIdent "c")
+          ]
+        ];
+        Token FunctionArrow;
+        Token (LowercaseIdent "c")
+      ]
     ]);
 
   make_parser_test
