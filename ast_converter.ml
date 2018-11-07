@@ -522,18 +522,18 @@ and convert_expr tr = match tr with
       )
   | _ -> failwith "not a valid expression"
 
-let rec convert_typexpr acc = function
+let rec convert_typexpr = function (* list of tuple items *)
 | Node [
     Token (LParen);
     typexpr;
     Token (RParen);
-  ] -> convert_typexpr acc typexpr
+  ] -> convert_typexpr typexpr
 | Node [
-    typexpr1;
+    typexpr;
     Token (Times);
-    typexpr2
-  ] -> (Tuple [(convert_typexpr acc typexpr1); (convert_typexpr acc typexpr2)])
-| Token (LowercaseIdent constr) -> 
+    more_typexprs
+  ] -> (convert_typexpr typexpr)@(convert_typexpr more_typexprs)
+| Token (LowercaseIdent constr) -> [String constr]
 | _ ->
 
 let convert_constr_decl = function
@@ -548,7 +548,7 @@ let convert_constr_decl = function
 let convert_repr = function
 | Node [
     constr_decl
-  ] -> [(convert_constr_decl constr_decl)]
+  ] -> [convert_constr_decl constr_decl]
 | Node [
     Token (VerticalBar);
     constr_decl
@@ -556,9 +556,8 @@ let convert_repr = function
 |  Node [
     Token (VerticalBar);
     constr_decl;
-    Token (VerticalBar);
     further_constr_decls
-  ] -> 
+  ] -> (convert_constr_decl constr_decl)::(convert_repr further_constr_decls)
 | _ -> failwith "not a valid representation"
 
 (**
@@ -596,7 +595,7 @@ let convert_definition = function
       Token (LowercaseIdent typ);
       Token (Equal);
       repr
-    ] -> VariantDecl [(typ, )]
+    ] -> VariantDecl (typ, convert_repr repr)
   | Node [
       Token(Token.Let);
       let_binding;
