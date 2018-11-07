@@ -313,7 +313,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
   | (ListPattern lst as pat) -> begin
       let pat_lst_length = List.length lst in
       let (_, bindings, constant_assertions) =
-        List.fold_left (fun (idx, bindings, constant_assertions) _ ->
+        List.fold_left (fun (idx, bindings, constant_assertions) curr ->
           let curr_idx = match pat with
             | ArrayPattern _ | TuplePattern _ -> idx
             | ListPattern _ -> pat_lst_length - 1 - idx
@@ -323,7 +323,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
             get_pattern_bindings
               curr_bind_idx
               (Printf.sprintf "%s[%d]" target_var curr_idx)
-              pat
+              curr
           in
           (idx + 1, bindings@r, constant_assertions@c)
         ) (0, [], []) lst
@@ -368,7 +368,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
         get_pattern_bindings
           curr_bind_idx
           (target_var^".$NAME")
-          (ConstantPattern (StringLiteral name))
+          (ConstantPattern (StringLiteral ("\"" ^ name ^ "\"")))
       in
       let (data_binding, data_assertion) = match data_pat with
         | None -> ([], [])

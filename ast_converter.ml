@@ -116,9 +116,7 @@ let rec convert_pattern = function
       pat;
       Token (RParen);
     ] -> ParenPattern (convert_pattern pat)
-  | Node [
-      Token (CapitalizedIdent constr)
-    ] -> VariantPattern (constr, None)
+  | Token (CapitalizedIdent constr) -> VariantPattern (constr, None)
   | Node [
       Token (CapitalizedIdent constr);
       pat
@@ -569,9 +567,7 @@ and convert_expr tr = match tr with
         convert_let_binding false let_binding,
         convert_expr let_expr
       )
-  | Node [
-      Token (CapitalizedIdent constr)
-    ] -> Variant (constr, None)
+  | Token (CapitalizedIdent constr) -> Variant (constr, None)
   | Node [
       Token (CapitalizedIdent constr);
       var_expr
