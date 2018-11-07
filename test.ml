@@ -385,7 +385,7 @@ let parser_tests = Parse_tree.(Tokenizer.[
   make_parser_test
     "2-elt tuple"
     "1,2"
-    (Node [     
+    (Node [
         Token (Int 1);
         Token (Comma);
         Token (Int 2);
@@ -423,6 +423,24 @@ let parser_tests = Parse_tree.(Tokenizer.[
       ];
       Token (Comma);
       Token (Int 5);
+    ]);
+
+  make_parser_test
+    "tuple precedence under or, above if"
+    "if true || false,true then ()"
+    (Node [
+      Token (If);
+      Node [
+        Node [
+          Token (Bool true);
+          Token (Or);
+          Token (Bool false);
+        ];
+        Token (Comma);
+        Token (Bool true);
+      ];
+      Token (Then);
+      Token (Unit);
     ]);
 
   make_parser_test
