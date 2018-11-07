@@ -3,7 +3,9 @@ open OUnit2
 let rec print_parse_tree (parse_tree:Parse_tree.t) : unit =
   let rec rec_print_parse_tree line_acc (parse_tree:Parse_tree.t) =
     match parse_tree with
-    | Token t -> print_string ("\n" ^ line_acc ^ "Token (" ^(Tokenizer.token_to_string t) ^ "),")
+    | Token t ->
+      print_string ("\n" ^ line_acc ^ "Token (" ^(Tokenizer.token_to_string t)
+                    ^ "),")
     | Node children ->
       let () = print_string ("\n" ^ line_acc ^ "Node [") in
       let () = List.iter
@@ -118,17 +120,21 @@ let tokenizer_tests = Token.[
   make_tokenizer_test
     "simple variant type t"
     "type t = Test | Nil"
-    [Type; LowercaseIdent "t"; Equal; CapitalizedIdent "Test"; VerticalBar; CapitalizedIdent "Nil"];
+    [Type; LowercaseIdent "t"; Equal; CapitalizedIdent "Test"; VerticalBar;
+     CapitalizedIdent "Nil"];
 
   make_tokenizer_test
     "simple variant type t with vertical bars before"
     "type t = | Test | Nil"
-    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Test"; VerticalBar; CapitalizedIdent "Nil"];
+    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Test";
+     VerticalBar; CapitalizedIdent "Nil"];
 
   make_tokenizer_test
     "simple variant type t with vertical bars before"
     "type t = | Cons of int * t | Nil"
-    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Cons"; Of; LowercaseIdent "int"; Times; LowercaseIdent "t"; VerticalBar; CapitalizedIdent "Nil"];
+    [Type; LowercaseIdent "t"; Equal; VerticalBar; CapitalizedIdent "Cons";
+     Of; LowercaseIdent "int"; Times; LowercaseIdent "t"; VerticalBar;
+     CapitalizedIdent "Nil"];
 
   make_tokenizer_test
     "let assign test"
