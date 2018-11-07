@@ -383,12 +383,46 @@ let tokenizer_tests = Token.[
 
 let parser_tests = Parse_tree.(Tokenizer.[
   make_parser_test
-    "1, 2 tuple"
+    "2-elt tuple"
     "1,2"
     (Node [     
         Token (Int 1);
         Token (Comma);
         Token (Int 2);
+    ]);
+
+  make_parser_test
+    "3-elt tuple"
+    "1,2,3"
+    (Node [
+      Node [
+        Token (Int 1);
+        Token (Comma);
+        Token (Int 2);
+      ];
+      Token (Comma);
+      Token (Int 3);
+    ]);
+
+  make_parser_test
+    "5-elt tuple"
+    "1,2,3,4,5"
+    (Node [
+      Node [
+        Node [
+          Node [
+            Token (Int 1);
+            Token (Comma);
+            Token (Int 2);
+          ];
+          Token (Comma);
+          Token (Int 3);
+        ];
+        Token (Comma);
+        Token (Int 4);
+      ];
+      Token (Comma);
+      Token (Int 5);
     ]);
 
   make_parser_test
