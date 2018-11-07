@@ -1526,6 +1526,29 @@ let parser_tests = Parse_tree.(Tokenizer.[
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
+    "pattern matching on tuple"
+    "match 1,2 with x,2 -> x | _,_ -> 0"
+    [Expr (MatchExpr (
+      Tuple [Constant (Int 1); Constant (Int 2);],
+      [
+        (TuplePattern [
+            ValueNamePattern "x";
+            ConstantPattern (Int 2);
+          ],
+          VarName "x",
+          None
+        );
+        (TuplePattern [
+            IgnorePattern;
+            IgnorePattern;
+          ],
+          Constant (Int 0),
+          None
+        );
+      ]
+    ))];
+
+  make_ast_converter_test
     "2-elt tuple"
     "1,2"
     [Expr (Tuple [
