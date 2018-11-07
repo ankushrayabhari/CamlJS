@@ -56,4 +56,4 @@ clean:
 	rm -rf grammar.ml tokenizer.ml tokenizer.mli token.mli temp.js temp.ml
 	rm -rf camljs_src.zip
 
-.PHONY: test, test-debug, bin, grammar
+.PHONY: test, temp-debug, bin, grammar, docs, docs-public, docs-private, build, e2e-test, zip
