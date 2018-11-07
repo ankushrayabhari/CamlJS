@@ -109,7 +109,7 @@ let rec convert_pattern = function
   | Node [
       Token (CapitalizedIdent constr);
       pat
-    ] -> VariantPattern (constr, Some convert_pattern pat)
+    ] -> VariantPattern (constr, Some (convert_pattern pat))
   | Node [
       Token (StartList);
       patterns_semicolon_sep;
@@ -488,11 +488,11 @@ and convert_expr tr = match tr with
       )
   | Node [
       Token (CapitalizedIdent constr)
-    ] -> VariantPattern (constr, None)
+    ] -> Variant (constr, None)
   | Node [
       Token (CapitalizedIdent constr);
       var_expr
-    ] -> VariantPattern (constr, Some convert_expr var_expr)
+    ] -> Variant (constr, Some (convert_expr var_expr))
   | Node [
       fun_expr;
       arg_expr;
@@ -521,6 +521,38 @@ and convert_expr tr = match tr with
         convert_pattern_matching [] pattern_matching |> List.rev
       )
   | _ -> failwith "not a valid expression"
+
+let convert_typexpr = function
+| Node [
+    Token (LParen);
+    typexpr;
+    Token (RParen);
+  ] ->
+
+let convert_constr_decl = function
+| Token (CapitalizedIdent constr) -> 
+| Node [
+    Token (CapitalizedIdent constr);
+    Token (Of);
+    typexpr
+  ] ->
+| _ -> failwith "not a valid constr decl"
+
+let convert_repr = function
+| Node [
+    Token (CapitalizedIdent constr)
+  ] -> 
+| Node [
+    Token (VerticalBar);
+    Token (CapitalizedIdent constr)
+  ] ->
+|  Node [
+    Token (VerticalBar);
+    Token (CapitalizedIdent constr);
+    Token (VerticalBar);
+    
+  ] ->
+| _ -> failwith "not a valid representation"
 
 (**
  * [convert_definition t] is the abstract syntax tree representing the
@@ -552,6 +584,12 @@ let convert_definition = function
       let_binding;
     ] ->
       LetDecl (convert_let_binding true let_binding)
+  | Node [
+      Token (Type);
+      Token (LowercaseIdent typ);
+      Token (Equal);
+      repr
+    ] -> VariantDecl [(typ, )]
   | Node [
       Token(Token.Let);
       let_binding;
