@@ -86,6 +86,7 @@ let rec convert_pattern = function
   | Token (CharLiteral v) -> ConstantPattern (CharLiteral v)
   | Token (StringLiteral v) -> ConstantPattern (StringLiteral v)
   | Token (EmptyList) -> ConstantPattern (EmptyList)
+  | Token (EmptyArray) -> ConstantPattern (EmptyArray)
   | Token (Bool b) -> ConstantPattern (Bool b)
   | Token (Unit) -> ConstantPattern (Unit)
   | Node [
@@ -132,6 +133,20 @@ let rec convert_pattern = function
       patterns_semicolon_sep;
       Token (EndList);
     ] -> ListPattern (
+        convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
+        |> List.rev
+      )
+  | Node [
+      Token (StartArray);
+      patterns_semicolon_sep;
+      Token (SemiColon);
+      Token (EndArray);
+    ]
+  | Node [
+      Token (StartArray);
+      patterns_semicolon_sep;
+      Token (EndArray);
+    ] -> ArrayPattern (
         convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
         |> List.rev
       )
@@ -477,6 +492,7 @@ and convert_expr tr = match tr with
   | Token (Token.CharLiteral v) -> Constant (CharLiteral v)
   | Token (Token.StringLiteral v) -> Constant (StringLiteral v)
   | Token (Token.EmptyList) -> Constant (EmptyList)
+  | Token (Token.EmptyArray) -> Constant (EmptyArray)
   | Token (Token.LowercaseIdent n) -> VarName n
   | Token (Token.Unit) -> Constant (Unit)
   | Node [
@@ -589,6 +605,18 @@ and convert_expr tr = match tr with
       Token (Token.EndList);
     ] ->
       ListExpr (convert_list_body_expr [] one_or_more_expr)
+  | Node [
+        Token (Token.StartArray);
+        one_or_more_expr;
+        Token (Token.EndArray);
+      ]
+    | Node [
+        Token (Token.StartArray);
+        one_or_more_expr;
+        Token (Token.SemiColon);
+        Token (Token.EndArray);
+      ] ->
+        ArrayExpr (convert_list_body_expr [] one_or_more_expr)
   | Node [
       Token (Match);
       target_expr;

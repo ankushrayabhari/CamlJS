@@ -1981,6 +1981,29 @@ let ast_converter_tests = Ast.[
     [Expr (PrefixOp (Negation, Constant (Int 1)))];
 
   make_ast_converter_test
+    "array list"
+    "[||]"
+    [Expr (Constant (EmptyArray))];
+
+  make_ast_converter_test
+    "array literal, no trailing semicolon"
+    "[|1;2;3|]"
+    [Expr (ArrayExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+    ])];
+
+  make_ast_converter_test
+    "array literal, trailing semicolon"
+    "[|1;2;3;|]"
+    [Expr (ArrayExpr [
+      Constant (Int 1);
+      Constant (Int 2);
+      Constant (Int 3);
+    ])];
+
+  make_ast_converter_test
     "empty list"
     "[]"
     [Expr (Constant (EmptyList))];
