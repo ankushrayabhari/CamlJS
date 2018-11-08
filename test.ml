@@ -1687,6 +1687,84 @@ let parser_tests = Parse_tree.(Tokenizer.[
 
 let ast_converter_tests = Ast.[
   make_ast_converter_test
+    "single-pattern match w/ function with first vertical bar"
+    "let m x = function | [] -> 2"
+    [LetDecl (
+      FunctionAssignment(
+        "m",
+        false,
+        [ValueNamePattern "x"],
+        Function(
+          [ValueNamePattern "BINDING"],
+          MatchExpr(
+            VarName("BINDING"),
+            [(ConstantPattern (EmptyList), Constant (Int 2), None)]
+          )
+        ),
+        true
+      )
+    )];
+
+  make_ast_converter_test
+    "single-pattern match w/ function without first vertical bar"
+    "let m x = function [] -> 2"
+    [LetDecl (
+      FunctionAssignment(
+        "m",
+        false,
+        [ValueNamePattern "x"],
+        Function(
+          [ValueNamePattern "BINDING"],
+          MatchExpr(
+            VarName("BINDING"),
+            [(ConstantPattern (EmptyList), Constant (Int 2), None)]
+          )
+        ),
+        true
+      )
+    )];
+
+  make_ast_converter_test
+    "multi-pattern match w/ function with first vertical bar"
+    "let m x = function | [] -> 2 | _ -> 0"
+    [LetDecl (
+      FunctionAssignment(
+        "m",
+        false,
+        [ValueNamePattern "x"],
+        Function(
+          [ValueNamePattern "BINDING"],
+          MatchExpr(
+            VarName("BINDING"),
+            [(ConstantPattern (EmptyList), Constant (Int 2), None);
+             (IgnorePattern, Constant (Int 0), None)]
+          )
+        ),
+        true
+      )
+    )];
+
+  make_ast_converter_test
+    "multi-pattern match w/ function without first vertical bar"
+    "let m x = function [] -> 2 | _ -> 0"
+    [LetDecl (
+      FunctionAssignment(
+        "m",
+        false,
+        [ValueNamePattern "x"],
+        Function(
+          [ValueNamePattern "BINDING"],
+          MatchExpr(
+            VarName("BINDING"),
+            [(ConstantPattern (EmptyList), Constant (Int 2), None);
+             (IgnorePattern, Constant (Int 0), None)]
+          )
+        ),
+        true
+      )
+    )];
+
+  make_ast_converter_test
     "pattern matching on tuple"
     "match 1,2 with x,2 -> x | _,_ -> 0"
     [Expr (MatchExpr (

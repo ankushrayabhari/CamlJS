@@ -651,6 +651,16 @@ and convert_expr tr = match tr with
       var_expr
     ] -> Variant (constr, Some (convert_expr var_expr))
   | Node [
+      Token (Token.Function);
+      pattern_matching;
+    ] -> 
+      Function( 
+        [ValueNamePattern "BINDING"], 
+        MatchExpr(
+          VarName("BINDING"),
+          convert_pattern_matching [] pattern_matching |> List.rev)
+        )
+  | Node [
       fun_expr;
       arg_expr;
     ] ->
