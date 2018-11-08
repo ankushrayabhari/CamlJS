@@ -533,9 +533,9 @@ let render_module_items_list lst =
   left ^ right
 
 let render ast =
-  Pervasives_js.impl ^
+  "{" ^ Pervasives_js.impl ^
   List_js.impl ^
   Char_js.impl ^
   String_js.impl ^
   Array_js.impl ^
-  render_module_items_list ((OpenDecl "Pervasives")::ast)
+  render_module_items_list ((OpenDecl "Pervasives")::ast) ^ "}"
