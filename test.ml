@@ -1763,6 +1763,43 @@ let ast_converter_tests = Ast.[
       ))];
 
   make_ast_converter_test
+    "variant ast precedence"
+    "Node \"asdf\"::Nil 1::[]"
+    [Expr (
+      InfixOp
+      (Variant (
+        "Node", 
+        Some (Constant (StringLiteral "\"asdf\"")
+      )),
+      Cons,
+      InfixOp (
+        Variant (
+          "Nil", 
+          Some (Constant (Int 1))
+        ),
+        Cons, 
+        Constant EmptyList)
+      )
+    )];
+
+  make_ast_converter_test
+    "pattern variant ast"
+    "match t with | Cons (2) -> true | Nil -> true | _ -> false"
+    [Expr
+    (MatchExpr (
+      VarName "t",
+      [(
+        VariantPattern (
+        "Cons",
+         Some (ParenPattern (ConstantPattern (Int 2)))
+         ),
+        Constant (Bool true), None
+        );
+       (VariantPattern ("Nil", None), Constant (Bool true), None);
+       (IgnorePattern, Constant (Bool false), None)])
+    )];
+
+  make_ast_converter_test
     "order of ops in infix expression parentheiszed"
     "let x = 1 in (x - 100) - (200 - x)"
     [Expr (LetBinding (
