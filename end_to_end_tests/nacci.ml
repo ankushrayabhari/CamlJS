@@ -1,5 +1,4 @@
-let rec nacci n =
-  match n with
+let rec nacci = function
   | 1 -> 1
   | 2 -> 1
   | n -> nacci (n - 1) + nacci (n - 2);;
