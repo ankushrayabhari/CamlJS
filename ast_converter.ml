@@ -44,8 +44,6 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
-
-
 (**
  * [convert_pattern tr] is the AST-representation of the pattern
  * production of the parse tree [tr].
@@ -152,8 +150,6 @@ let rec convert_pattern = function
         field_patterns_semicolon_sep
     )
   | _ -> failwith "not a valid pattern"
-
-
 
 and convert_field_binding_pattern = function
   | Node
@@ -367,7 +363,6 @@ and convert_tuple_body_expr acc = function
       expr;
     ] -> convert_tuple_body_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
-
 
 (**
  * [convert_pattern_matching acc t] is the AST list of tuples

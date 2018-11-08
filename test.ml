@@ -2577,7 +2577,6 @@ let ast_converter_tests = Ast.[
         )
       ];
 
-
     make_ast_converter_test
       "record patterns supported, AST"
       "match x with | {name = n; age = a} -> ()"
