@@ -243,11 +243,11 @@ let tokenizer_tests = Token.[
   make_tokenizer_test
     "pattern match range of chars"
     "match t with 'a'..'k' -> true | 'l'..'z' -> false"
-    [Match; LowercaseIdent "t"; With; CharLiteral "'a'"; DoublePeriod; 
-     CharLiteral "'k'"; FunctionArrow; Bool true; VerticalBar; 
-     CharLiteral "'l'"; DoublePeriod; CharLiteral "'z'"; FunctionArrow; 
+    [Match; LowercaseIdent "t"; With; CharLiteral "'a'"; DoublePeriod;
+     CharLiteral "'k'"; FunctionArrow; Bool true; VerticalBar;
+     CharLiteral "'l'"; DoublePeriod; CharLiteral "'z'"; FunctionArrow;
      Bool false];
-  
+
   make_tokenizer_test
     "anonymous function expression"
     "fun a b -> a + b"
@@ -1260,7 +1260,7 @@ let parser_tests = Parse_tree.(Tokenizer.[
     "match t with 'a'..'k' -> true | 'l'..'z' -> false"
     (Node [
       Token Match;
-      Token (LowercaseIdent "t"); 
+      Token (LowercaseIdent "t");
       Token With;
       Node [
         Node [
@@ -2359,12 +2359,12 @@ let ast_converter_tests = Ast.[
       VarName "t",
       [(
         RangedCharacterPattern ("'a'", "'k'"),
-        Constant (Bool true), 
+        Constant (Bool true),
         None
        );
        (
-        RangedCharacterPattern ("'l'", "'z'"), 
-        Constant (Bool false), 
+        RangedCharacterPattern ("'l'", "'z'"),
+        Constant (Bool false),
         None
        )
       ]
@@ -2601,6 +2601,83 @@ let ast_converter_tests = Ast.[
     "negation float"
     "~-.1.0"
     [Expr (PrefixOp (NegationFloat, Constant (Float 1.0)))];
+
+  make_ast_converter_test
+    "declaring a record type, AST"
+    "type x = {name: string; age: int * int}"
+    [
+      TypeDefinition
+        ("x",
+         RecordDecl
+           [("name", Type ("string"));
+            ("age", TypeTuple [Type ("int"); Type ("int")])
+        ])
+    ];
+
+    make_ast_converter_test
+      "declaring a more complex record type, AST"
+      "type x = {name: string; age: int * int; eats: string}"
+      [
+        TypeDefinition
+          ("x",
+           RecordDecl
+             [("name", Type ("string"));
+              ("age", TypeTuple [Type ("int"); Type ("int")]);
+              ("eats", Type ("string"))
+             ]
+          )
+      ];
+
+    make_ast_converter_test
+      "Record expr, AST"
+      "{name =\"Bill\"; age = 12}"
+      [
+        Expr (
+          Record [
+            ("name", Constant (StringLiteral "\"Bill\""));
+            ("age", Constant (Int 12))
+          ]
+        )
+      ];
+
+
+    make_ast_converter_test
+      "binding a variable to a record expr, AST"
+      "let x = {name =\"Bill\"; age = 12}"
+      [
+        LetDecl (
+          VarAssignment (
+            ValueNamePattern "x",
+            Record [
+              ("name", Constant (StringLiteral "\"Bill\""));
+              ("age", Constant (Int 12))
+            ]
+          )
+        )
+      ];
+  
+    make_ast_converter_test
+      "record expression precendence, AST"
+      "f {age = if true then 12 else 11}"
+      [
+        Expr (
+          FunctionCall (
+            VarName "f",
+            [
+              Record [
+                ("age",
+                 Ternary (
+                   Constant (Bool true),
+                   Constant (Int 12),
+                   Some (Constant (Int 11))
+                 )
+                )
+              ]
+            ],
+            true
+          )
+        )
+      ];
 ]
 
 let make_curry_optimizer_test =
