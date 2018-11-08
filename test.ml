@@ -58,6 +58,12 @@ let make_ast_optimizer_test optimizer_fn name program expected_tree =
   )
 
 let tokenizer_tests = Token.[
+
+  make_tokenizer_test
+    "function keyword pattern match"
+    "let x = function []"
+    [Let; LowercaseIdent "x"; Equal; Function; EmptyList];
+
   make_tokenizer_test
     "empty array in "
     "[||]"
@@ -405,7 +411,37 @@ let tokenizer_tests = Token.[
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
-    make_parser_test
+  make_parser_test
+    "pattern matching with function keyword"
+    "let m = function | [] -> \"Empty\" | h::t -> \"Long\""
+    (Node [
+      Token(Let);
+      Node [
+        Token(LowercaseIdent "m");
+        Token(Equal);
+        Node [
+          Token(Function);
+          Node [
+            Token(VerticalBar);
+            Token(EmptyList);
+            Token(FunctionArrow);
+            Token(StringLiteral "\"Empty\"");
+            Node [
+              Token(VerticalBar);
+              Node [
+                Token(LowercaseIdent "h");
+                Token(Cons);
+                Token(LowercaseIdent "t")
+              ];
+              Token(FunctionArrow);
+              Token(StringLiteral "\"Long\"")
+            ]
+          ]
+        ]
+      ]
+    ]);
+    
+  make_parser_test
     "array and if-expr precedence"
     "[| if true then 4 else 2,3|]"
     (Node [
@@ -566,6 +602,8 @@ let parser_tests = Parse_tree.(Tokenizer.[
       Token (Equal);
       Token (CapitalizedIdent "Test")
     ]);
+
+
 
   make_parser_test
     "type t parse with vertical bar in middle"
