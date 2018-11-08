@@ -62,7 +62,7 @@ let rec check_no_calls_or_references name = function
         acc && check_no_calls_or_references name arg
       ) true param_lst
   | Variant (_, Some expr) -> check_no_calls_or_references name expr
-  | LetBinding (VarAssignment (pat, assign_expr), in_expr) ->
+  | LetBinding (VarAssignment (pat, is_rec, assign_expr), in_expr) ->
       check_no_calls_or_references name assign_expr &&
       (name_bound_in_pat name pat || check_no_calls_or_references name in_expr)
   | LetBinding (FunctionAssignment (fn, is_rec, args, body, _), in_expr) ->
@@ -153,9 +153,9 @@ let rec optimize_expr = function
       Function (pat_lst, optimize_expr body_expr)
   | Sequential (expr1, expr2) ->
       Sequential (optimize_expr expr1, optimize_expr expr2)
-  | LetBinding (VarAssignment (pat, assign_expr), in_expr) ->
+  | LetBinding (VarAssignment (pat, is_rec, assign_expr), in_expr) ->
       LetBinding (
-        VarAssignment (pat, optimize_expr assign_expr),
+        VarAssignment (pat, is_rec, optimize_expr assign_expr),
         optimize_expr in_expr
       )
   | LetBinding (FunctionAssignment (name, is_rec, arg, body, curry), in_expr) ->

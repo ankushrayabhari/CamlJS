@@ -34,7 +34,7 @@ type pattern =
   | RecordPattern of (string * pattern) list
 
 type let_binding =
-  | VarAssignment of pattern * expr
+  | VarAssignment of pattern * bool * expr
   | FunctionAssignment of string * bool * pattern list * expr * bool
   | TailRecursiveFunctionAssignment of string * pattern list * expr
 and expr =

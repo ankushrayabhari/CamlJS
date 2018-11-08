@@ -1,7 +1,7 @@
 open Ast
 
 let rec optimize_let_binding = function
-  | VarAssignment (pat, expr) -> VarAssignment (pat, optimize_expr expr)
+  | VarAssignment (pat, is_rec, expr) -> VarAssignment (pat, is_rec, optimize_expr expr)
   | FunctionAssignment (name, is_rec, args, body, curry) ->
       FunctionAssignment (name, is_rec, args, optimize_expr body, curry)
   | TailRecursiveFunctionAssignment (name, args, body) ->

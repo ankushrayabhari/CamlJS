@@ -53,7 +53,7 @@ let render_ranged_assertion target_var lower_bound upper_bound =
  * anonymous function.
  *)
 let rec render_let_binding = function
-  | VarAssignment (pat, expr) ->
+  | VarAssignment (pat, _, expr) ->
     let rendered_target =
       Printf.sprintf "let TARGET = (%s);" (render_expr expr) in
     let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in

@@ -295,6 +295,7 @@ let rec convert_let_binding is_rec = function
     ] ->
       VarAssignment (
         convert_pattern bound_to_pattern,
+        is_rec,
         convert_expr let_expr
       )
   | _ -> failwith "not a valid convert let binding"
@@ -653,9 +654,9 @@ and convert_expr tr = match tr with
   | Node [
       Token (Token.Function);
       pattern_matching;
-    ] -> 
-      Function( 
-        [ValueNamePattern "BINDING"], 
+    ] ->
+      Function(
+        [ValueNamePattern "BINDING"],
         MatchExpr(
           VarName("BINDING"),
           convert_pattern_matching [] pattern_matching |> List.rev)
