@@ -407,6 +407,14 @@ let tokenizer_tests = Token.[
    [Match; LowercaseIdent "x"; With; LCurlyBrace; LowercaseIdent "name"; Equal;
     LowercaseIdent "a"; SemiColon; LowercaseIdent "age"; Equal; Ignore;
     RCurlyBrace; FunctionArrow; Unit];
+
+  make_tokenizer_test
+    "guard expressions tokenizeable"
+    "match x with (a,b) when true -> ()"
+    [Match; LowercaseIdent "x";  With;  LParen;
+       LowercaseIdent "a";  Comma;  LowercaseIdent "b";
+       RParen;  When;  Bool true;  FunctionArrow;
+       Unit];
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
@@ -1683,6 +1691,74 @@ let parser_tests = Parse_tree.(Tokenizer.[
         Token (Unit);
       ];
     ]);
+
+  make_parser_test
+    "guard expressions parseable with proper precedence 1"
+    "match x with (a,b) when if true then true else false -> ()"
+    (
+      Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LParen);
+            Node [
+              Token (LowercaseIdent "a");
+              Token (Comma);
+              Token (LowercaseIdent "b");
+            ];
+            Token (RParen);
+          ];
+          Token (When);
+          Node [
+            Token (If);
+            Token (Bool true);
+            Token (Then);
+            Token (Bool true);
+            Token (Else);
+            Token (Bool false)
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
+      ];
+    );
+
+  make_parser_test
+    "guard expressions parseable with proper precedence 2"
+    "match x with (a,b) when let p = true in p -> ()"
+    (
+      Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LParen);
+            Node [
+              Token (LowercaseIdent "a");
+              Token (Comma);
+              Token (LowercaseIdent "b");
+            ];
+            Token (RParen);
+          ];
+          Token (When);
+          Node [
+            Token (Let);
+            Node [
+              Token (LowercaseIdent "p");
+              Token (Equal);
+              Token (Bool true);
+            ];
+            Token (In);
+            Token (LowercaseIdent "p");
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
+      ];
+    );
 ])
 
 let ast_converter_tests = Ast.[
@@ -2880,6 +2956,85 @@ let ast_converter_tests = Ast.[
             )
          )
       ];
+
+    make_ast_converter_test
+      "guard expression precendence 1, AST"
+      "match x with (a,b) when if true then true else false -> ()"
+      [
+        Expr (
+          MatchExpr (
+            VarName "x",
+            [ParenPattern
+               (TuplePattern [
+                   ValueNamePattern "a"; ValueNamePattern "b"
+                 ]
+               ),
+             Constant (Unit),
+             Some (
+               Ternary (
+                 Constant (Bool true),
+                 Constant (Bool true),
+                 Some (Constant (Bool false))
+               )
+             )
+            ]
+          )
+        )
+      ];
+
+    make_ast_converter_test
+      "guard expression precendence 2, AST"
+      "match x with (a,b) when let p = true in p -> ()"
+      [
+        Expr (
+          MatchExpr (
+            VarName "x",
+            [ParenPattern
+               (TuplePattern [
+                   ValueNamePattern "a"; ValueNamePattern "b"
+                 ]
+               ),
+             Constant (Unit),
+             Some (
+               LetBinding (
+                 VarAssignment (
+                   ValueNamePattern "p",
+                   false,
+                   Constant (Bool true)
+                 ),
+                 VarName "p"
+               )
+             )
+            ]
+          )
+        )
+      ];
+
+  make_ast_converter_test
+    "guard expression precendence 2 matches, AST"
+    "match x with (a,b) when true -> () | (_, _) when false -> ()"
+    [
+      Expr (
+        MatchExpr (
+          VarName "x",
+          [(ParenPattern
+             (TuplePattern [
+                 ValueNamePattern "a"; ValueNamePattern "b"
+               ]
+             ),
+           Constant (Unit),
+           Some (Constant (Bool true)));
+           (ParenPattern
+              (TuplePattern [
+                  IgnorePattern; IgnorePattern
+                ]
+              ),
+            Constant (Unit),
+            Some (Constant (Bool false)));
+          ]
+        )
+      )
+    ];
 ]
 
 let make_curry_optimizer_test =
