@@ -464,24 +464,24 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token(FunctionArrow);
           Token(StringLiteral "\"Long\"");
         ]
-      ] 
+      ]
      ]
     ]
   ]);
-    
+
   make_parser_test
     "array and if-expr precedence"
     "[| if true then 4 else 2,3|]"
     (Node [
       Token (StartArray);
         Node [
-          Token(If); 
+          Token(If);
           Token (Bool true);
-          Token(Then); 
+          Token(Then);
           Token(Int 4);
           Token(Else);
           Node [
-            Token(Int 2); 
+            Token(Int 2);
             Token(Comma);
             Token(Int 3)
           ]
@@ -1842,6 +1842,7 @@ let ast_converter_tests = Ast.[
     [Expr (LetBinding (
       VarAssignment (
         ValueNamePattern "x",
+        false,
         Constant (StringLiteral "\"a\"")
       ),
       InfixOp (
@@ -1853,10 +1854,11 @@ let ast_converter_tests = Ast.[
 
   make_ast_converter_test
     "basic_test"
-    "let x = 1 in x + 100"
+    "let rec x = 1 in x + 100"
     [Expr (LetBinding (
       VarAssignment (
         ValueNamePattern "x",
+        true,
         Constant (Int 1)
       ),
       InfixOp (
@@ -1872,6 +1874,7 @@ let ast_converter_tests = Ast.[
     [Expr (LetBinding (
         VarAssignment (
           ValueNamePattern "x",
+          false,
           Constant (Int 1)
         ),
         InfixOp (
@@ -1891,6 +1894,7 @@ let ast_converter_tests = Ast.[
     [Expr (LetBinding (
         VarAssignment (
           ValueNamePattern "x",
+          false,
           Constant (Float 1.)
         ),
         InfixOp (
@@ -1910,6 +1914,7 @@ let ast_converter_tests = Ast.[
     [Expr (LetBinding (
         VarAssignment (
           ValueNamePattern "x",
+          false,
           Constant (Int 1)
         ),
         InfixOp (
@@ -1932,6 +1937,7 @@ let ast_converter_tests = Ast.[
     [Expr (LetBinding (
           VarAssignment (
             ValueNamePattern "x",
+            false,
             Constant (Int 1)
           ),
           InfixOp (
@@ -2260,7 +2266,7 @@ let ast_converter_tests = Ast.[
   make_ast_converter_test
     "compilation module ast, single let decl"
     "let x = 1"
-    [LetDecl (VarAssignment (ValueNamePattern "x", Constant (Int 1)))];
+    [LetDecl (VarAssignment (ValueNamePattern "x", false, Constant (Int 1)))];
 
   make_ast_converter_test
     "compilation module ast, single let rec decl"
@@ -2307,6 +2313,7 @@ let ast_converter_tests = Ast.[
       OpenDecl "Pervasives";
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         Constant (Int 1)
       ));
       Expr (FunctionCall (
@@ -2332,6 +2339,7 @@ let ast_converter_tests = Ast.[
       OpenDecl "Pervasives";
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         Constant (Int 1)
       ));
       OpenDecl "Pervasives";
@@ -2361,6 +2369,7 @@ let ast_converter_tests = Ast.[
         ConstantPattern (Int 1),
         ValueNamePattern "x"
       ),
+      false,
       ListExpr [
         Constant (Int 1);
         Constant (Int 2);
@@ -2379,6 +2388,7 @@ let ast_converter_tests = Ast.[
         IgnorePattern;
         IgnorePattern;
       ],
+      false,
       ArrayExpr [
         Constant (Int 1);
         Constant (Int 2);
@@ -2397,6 +2407,7 @@ let ast_converter_tests = Ast.[
         IgnorePattern;
         IgnorePattern;
       ],
+      false,
       ListExpr [
         Constant (Int 1);
         Constant (Int 2);
@@ -2410,6 +2421,7 @@ let ast_converter_tests = Ast.[
     "let 1 = 1"
     [LetDecl (VarAssignment (
       ConstantPattern (Int 1),
+      false,
       Constant (Int 1)
     ))];
 
@@ -2418,6 +2430,7 @@ let ast_converter_tests = Ast.[
     "let _ = 'a'"
     [LetDecl (VarAssignment (
       IgnorePattern,
+      false,
       Constant (CharLiteral "'a'")
     ))];
 
@@ -2426,6 +2439,7 @@ let ast_converter_tests = Ast.[
     "let (x) = \"asdfasdf\""
     [LetDecl (VarAssignment (
       ParenPattern (ValueNamePattern "x"),
+      false,
       Constant (StringLiteral "\"asdfasdf\"")
     ))];
 
@@ -2602,6 +2616,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         Constant (Unit)
       ));
     ];
@@ -2612,6 +2627,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           Constant (Bool true),
           LogicalAnd,
@@ -2626,6 +2642,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           Constant (Bool true),
           LogicalOr,
@@ -2640,6 +2657,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         FunctionCall (
           VarName "not",
           [Constant (Bool true)],
@@ -2654,6 +2672,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           FunctionCall (
             VarName "not",
@@ -2672,6 +2691,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           InfixOp (
             FunctionCall (
@@ -2694,6 +2714,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           Constant (Bool true),
           LogicalAnd,
@@ -2712,6 +2733,7 @@ let ast_converter_tests = Ast.[
     [
       LetDecl (VarAssignment (
         ValueNamePattern "x",
+        false,
         InfixOp (
           Constant (Bool true),
           LogicalOr,
@@ -2790,6 +2812,7 @@ let ast_converter_tests = Ast.[
         LetDecl (
           VarAssignment (
             ValueNamePattern "x",
+            false,
             Record [
               ("name", Constant (StringLiteral "\"Bill\""));
               ("age", Constant (Int 12))
