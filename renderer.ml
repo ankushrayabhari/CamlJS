@@ -273,7 +273,7 @@ and render_function_call f_expr args curry =
   let rendered_argument =
     List.map render_expr args
     |> (fun lst ->
-        if curry then "(" ^ String.concat "," lst ^ ")"
+        if not curry then "(" ^ String.concat "," lst ^ ")"
         else
           List.map (fun el -> "(" ^ el ^ ")") lst
           |> String.concat ""
