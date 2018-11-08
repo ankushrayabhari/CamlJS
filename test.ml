@@ -407,6 +407,14 @@ let tokenizer_tests = Token.[
    [Match; LowercaseIdent "x"; With; LCurlyBrace; LowercaseIdent "name"; Equal;
     LowercaseIdent "a"; SemiColon; LowercaseIdent "age"; Equal; Ignore;
     RCurlyBrace; FunctionArrow; Unit];
+
+  make_tokenizer_test
+    "guard expressions tokenizeable"
+    "match x with (a,b) when true -> ()"
+    [Match; LowercaseIdent "x";  With;  LParen;
+       LowercaseIdent "a";  Comma;  LowercaseIdent "b";
+       RParen;  When;  Bool true;  FunctionArrow;
+       Unit];
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
@@ -464,24 +472,24 @@ let parser_tests = Parse_tree.(Tokenizer.[
           Token(FunctionArrow);
           Token(StringLiteral "\"Long\"");
         ]
-      ] 
+      ]
      ]
     ]
   ]);
-    
+
   make_parser_test
     "array and if-expr precedence"
     "[| if true then 4 else 2,3|]"
     (Node [
       Token (StartArray);
         Node [
-          Token(If); 
+          Token(If);
           Token (Bool true);
-          Token(Then); 
+          Token(Then);
           Token(Int 4);
           Token(Else);
           Node [
-            Token(Int 2); 
+            Token(Int 2);
             Token(Comma);
             Token(Int 3)
           ]
@@ -1683,6 +1691,74 @@ let parser_tests = Parse_tree.(Tokenizer.[
         Token (Unit);
       ];
     ]);
+
+  make_parser_test
+    "guard expressions parseable with proper precedence 1"
+    "match x with (a,b) when if true then true else false -> ()"
+    (
+      Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LParen);
+            Node [
+              Token (LowercaseIdent "a");
+              Token (Comma);
+              Token (LowercaseIdent "b");
+            ];
+            Token (RParen);
+          ];
+          Token (When);
+          Node [
+            Token (If);
+            Token (Bool true);
+            Token (Then);
+            Token (Bool true);
+            Token (Else);
+            Token (Bool false)
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
+      ];
+    );
+
+  make_parser_test
+    "guard expressions parseable with proper precedence 2"
+    "match x with (a,b) when let p = true in p -> ()"
+    (
+      Node [
+        Token (Match);
+        Token (LowercaseIdent "x");
+        Token (With);
+        Node [
+          Node [
+            Token (LParen);
+            Node [
+              Token (LowercaseIdent "a");
+              Token (Comma);
+              Token (LowercaseIdent "b");
+            ];
+            Token (RParen);
+          ];
+          Token (When);
+          Node [
+            Token (Let);
+            Node [
+              Token (LowercaseIdent "p");
+              Token (Equal);
+              Token (Bool true);
+            ];
+            Token (In);
+            Token (LowercaseIdent "p");
+          ];
+          Token (FunctionArrow);
+          Token (Unit);
+        ];
+      ];
+    );
 ])
 
 let ast_converter_tests = Ast.[

@@ -376,6 +376,7 @@
     "PatternMatching": [
       ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr"],
       ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
+      ["Pattern", "When", "Expr", "FunctionArrow", "LetAnonFuncMatchExpr"],
       ["OneOrMorePatternMatchesWithVerticalBar"]
     ],
     "OneOrMorePatternMatchesWithVerticalBar": [
