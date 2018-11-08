@@ -2933,6 +2933,58 @@ let ast_converter_tests = Ast.[
             )
          )
       ];
+
+    make_ast_converter_test
+      "guard expression precendence 1, AST"
+      "match x with (a,b) when if true then true else false -> ()"
+      [
+        Expr (
+          MatchExpr (
+            VarName "x",
+            [ParenPattern
+               (TuplePattern [
+                   ValueNamePattern "a"; ValueNamePattern "b"
+                 ]
+               ),
+             Constant (Unit),
+             Some (
+               Ternary (
+                 Constant (Bool true),
+                 Constant (Bool true),
+                 Some (Constant (Bool false))
+               )
+             )
+            ]
+          )
+        )
+      ];
+
+    make_ast_converter_test
+      "guard expression precendence 2, AST"
+      "match x with (a,b) when let p = true in p -> ()"
+      [
+        Expr (
+          MatchExpr (
+            VarName "x",
+            [ParenPattern
+               (TuplePattern [
+                   ValueNamePattern "a"; ValueNamePattern "b"
+                 ]
+               ),
+             Constant (Unit),
+             Some (
+               LetBinding (
+                 VarAssignment (
+                   ValueNamePattern "p",
+                   Constant (Bool true)
+                 ),
+                 VarName "p"
+               )
+             )
+            ]
+          )
+        )
+      ];
 ]
 
 let make_curry_optimizer_test =

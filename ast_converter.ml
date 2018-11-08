@@ -399,6 +399,15 @@ and convert_tuple_body_expr acc = function
  *)
 and convert_pattern_matching acc = function
   | Node [
+      pat;
+      Token (When);
+      guard_expr;
+      Token (FunctionArrow);
+      value_expr;
+    ] -> (convert_pattern pat,
+          convert_expr value_expr,
+          Some (convert_expr guard_expr)) :: acc
+  | Node [
       Token (VerticalBar);
       pat;
       Token (FunctionArrow);
@@ -653,9 +662,9 @@ and convert_expr tr = match tr with
   | Node [
       Token (Token.Function);
       pattern_matching;
-    ] -> 
-      Function( 
-        [ValueNamePattern "BINDING"], 
+    ] ->
+      Function(
+        [ValueNamePattern "BINDING"],
         MatchExpr(
           VarName("BINDING"),
           convert_pattern_matching [] pattern_matching |> List.rev)
