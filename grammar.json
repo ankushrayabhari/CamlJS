@@ -377,9 +377,12 @@
       ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr"],
       ["Pattern", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
       ["Pattern", "When", "Expr", "FunctionArrow", "LetAnonFuncMatchExpr"],
+      ["Pattern", "When", "Expr", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
       ["OneOrMorePatternMatchesWithVerticalBar"]
     ],
     "OneOrMorePatternMatchesWithVerticalBar": [
+      ["VerticalBar", "Pattern", "When", "Expr", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
+      ["VerticalBar", "Pattern", "When", "Expr", "FunctionArrow", "LetAnonFuncMatchExpr"],
       ["VerticalBar", "Pattern", "FunctionArrow", "LetAnonFuncMatchExpr", "OneOrMorePatternMatchesWithVerticalBar"],
       ["VerticalBar", "Pattern", "FunctionArrow", "LetAnonFuncMatchExpr"]
     ],

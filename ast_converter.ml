@@ -399,6 +399,7 @@ and convert_tuple_body_expr acc = function
  *)
 and convert_pattern_matching acc = function
   | Node [
+      Token (VerticalBar);
       pat;
       Token (When);
       guard_expr;
@@ -407,6 +408,37 @@ and convert_pattern_matching acc = function
     ] -> (convert_pattern pat,
           convert_expr value_expr,
           Some (convert_expr guard_expr)) :: acc
+  | Node [
+      pat;
+      Token (When);
+      guard_expr;
+      Token (FunctionArrow);
+      value_expr;
+    ] -> (convert_pattern pat,
+          convert_expr value_expr,
+          Some (convert_expr guard_expr)) :: acc
+  | Node [
+      Token (VerticalBar);
+      pat;
+      Token (When);
+      guard_expr;
+      Token (FunctionArrow);
+      value_expr;
+      further_pattern_matching;
+    ]
+  | Node [
+      pat;
+      Token (When);
+      guard_expr;
+      Token (FunctionArrow);
+      value_expr;
+      further_pattern_matching;
+    ] ->
+      convert_pattern_matching
+      ((convert_pattern pat, convert_expr value_expr,
+        Some (convert_expr guard_expr)) :: acc)
+      further_pattern_matching
+
   | Node [
       Token (VerticalBar);
       pat;

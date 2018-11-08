@@ -2985,6 +2985,32 @@ let ast_converter_tests = Ast.[
           )
         )
       ];
+
+  make_ast_converter_test
+    "guard expression precendence 2 matches, AST"
+    "match x with (a,b) when true -> () | (_, _) when false -> ()"
+    [
+      Expr (
+        MatchExpr (
+          VarName "x",
+          [(ParenPattern
+             (TuplePattern [
+                 ValueNamePattern "a"; ValueNamePattern "b"
+               ]
+             ),
+           Constant (Unit),
+           Some (Constant (Bool true)));
+           (ParenPattern
+              (TuplePattern [
+                  IgnorePattern; IgnorePattern
+                ]
+              ),
+            Constant (Unit),
+            Some (Constant (Bool false)));
+          ]
+        )
+      )
+    ];
 ]
 
 let make_curry_optimizer_test =
