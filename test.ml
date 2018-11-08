@@ -405,6 +405,26 @@ let tokenizer_tests = Token.[
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
+    make_parser_test
+    "array and if-expr precedence"
+    "[| if true then 4 else 2,3|]"
+    (Node [
+      Token (StartArray);
+        Node [
+          Token(If); 
+          Token (Bool true);
+          Token(Then); 
+          Token(Int 4);
+          Token(Else);
+          Node [
+            Token(Int 2); 
+            Token(Comma);
+            Token(Int 3)
+          ]
+        ];
+      Token(EndArray);
+    ]);
+
   make_parser_test
     "2-elt tuple"
     "[||],[||]"
@@ -430,7 +450,6 @@ let parser_tests = Parse_tree.(Tokenizer.[
       ];
       Token (EndArray);
     ]);
-
 
   make_parser_test
     "2-elt tuple"
