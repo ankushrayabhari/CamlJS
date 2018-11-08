@@ -468,36 +468,6 @@ let parser_tests = Parse_tree.(Tokenizer.[
      ]
     ]
   ]);
-
-  make_parser_test
-    "pattern matching with function keyword"
-    "let m = function | [] -> \"Empty\" | h::t -> \"Long\""
-    (Node [
-      Token(Let);
-      Node [
-        Token(LowercaseIdent "m");
-        Token(Equal);
-        Node [
-          Token(Function);
-          Node [
-            Token(VerticalBar);
-            Token(EmptyList);
-            Token(FunctionArrow);
-            Token(StringLiteral "\"Empty\"");
-            Node [
-              Token(VerticalBar);
-              Node [
-                Token(LowercaseIdent "h");
-                Token(Cons);
-                Token(LowercaseIdent "t")
-              ];
-              Token(FunctionArrow);
-              Token(StringLiteral "\"Long\"")
-            ]
-          ]
-        ]
-      ]
-    ]);
     
   make_parser_test
     "array and if-expr precedence"
