@@ -21,8 +21,9 @@ let render_constant = function
   | Unit -> "null"
   | EmptyArray -> "[]"
 
-let render_binding_assignment target_var target_value =
-  sprintf "let %s = %s;" target_var target_value
+let render_binding_assignment reassign target_var target_value =
+  let reassign = if not reassign then "let " else "" in
+  sprintf "%s%s = %s;" reassign target_var target_value
 
 let render_equality_assertion target_var expected_value =
   sprintf
@@ -55,7 +56,7 @@ let rec render_let_binding = function
   | VarAssignment (pat, expr) ->
     let rendered_target =
       Printf.sprintf "let TARGET = (%s);" (render_expr expr) in
-    let (bindings, assertions) = get_pattern_bindings (ref 0) "TARGET" pat in
+    let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
     let rendered_match_case = render_match_case bindings assertions None in
     Printf.sprintf "%s%s"
       rendered_target
@@ -63,6 +64,46 @@ let rec render_let_binding = function
   | FunctionAssignment (function_name, _, arg_list, body_expr, curry) ->
       "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
       ^ render_fun arg_list body_expr curry ^  ";"
+  | TailRecursiveFunctionAssignment (function_name, arg_list, body_expr) ->
+      "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
+      ^ render_loop_fn function_name arg_list body_expr ^  ";"
+
+and render_loop_body_expr name = function
+  | Ternary (cond, then_body_expr, Some else_body_expr) ->
+      sprintf "if (%s) {%s} else {%s}"
+        (render_expr cond)
+        (render_loop_body_expr name then_body_expr)
+        (render_loop_body_expr name else_body_expr)
+  | MatchExpr (target_expr, pat_lst) ->
+      let rendered_target =
+        Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
+      let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
+        let rendered_value = render_loop_body_expr name expr in
+        let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
+        let rendered_match_case = render_match_case bindings assertions guard in
+        acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
+          rendered_match_case
+          rendered_value
+      ) "" pat_lst
+      in
+      Printf.sprintf "{%s%sthrow new Error('Match Failure');}"
+        rendered_target
+        rendered_match_cases
+  | FunctionCall (VarName name, arg_lst, true) ->
+      arg_lst
+      |> List.mapi (fun idx arg_expr ->
+        let arg_name = "A"^(string_of_int idx) in
+        render_binding_assignment false arg_name (render_expr arg_expr)
+      )
+      |> String.concat ""
+      |> (fun x -> x ^ "continue;")
+  | tr -> sprintf "return %s;" (render_expr tr)
+
+and render_loop_fn function_name arg_lst body_expr =
+  let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_lst in
+  let arguments = String.concat "," arg_names in
+  let rendered_body_expr = render_loop_body_expr function_name body_expr in
+  sprintf "((%s) => { while(true){%s} })" arguments rendered_body_expr
 
 (**
  * [render_match_case bindings constant] is the JavaScript equivalent code of
@@ -232,7 +273,7 @@ and render_function_call f_expr args curry =
   let rendered_argument =
     List.map render_expr args
     |> (fun lst ->
-        if curry then "(" ^ String.concat "," lst ^ ")"
+        if not curry then "(" ^ String.concat "," lst ^ ")"
         else
           List.map (fun el -> "(" ^ el ^ ")") lst
           |> String.concat ""
@@ -274,11 +315,11 @@ and render_module_accessor module_name value_name =
  * [target_var] is the value being matched and [curr_bind_idx] is a ref
  * containing the next index for a binding.
  *)
-and get_pattern_bindings curr_bind_idx target_var pattern =
+and get_pattern_bindings reassign curr_bind_idx target_var pattern =
   match pattern with
   | RangedCharacterPattern (start_char, end_char) ->
       let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
-      ([render_binding_assignment curr_bind_name target_var], [
+      ([render_binding_assignment reassign curr_bind_name target_var], [
         render_defined_assertion curr_bind_name;
         render_ranged_assertion curr_bind_name
           (sprintf "Char.code(%s)" start_char)
@@ -287,27 +328,27 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
   | IgnorePattern ->
       let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
       incr curr_bind_idx;
-      ([render_binding_assignment curr_bind_name target_var], [
+      ([render_binding_assignment reassign curr_bind_name target_var], [
         render_defined_assertion curr_bind_name
       ])
   | ConstantPattern c ->
       let curr_bind_name = "BINDING"^(string_of_int !curr_bind_idx) in
       incr curr_bind_idx;
-      ([render_binding_assignment curr_bind_name target_var], [
+      ([render_binding_assignment reassign curr_bind_name target_var], [
         render_defined_assertion curr_bind_name;
         render_equality_assertion curr_bind_name (render_constant c)
       ])
   | ValueNamePattern v ->
       let curr_bind_name = Str.global_replace (Str.regexp "'") "$" v in
-      ([render_binding_assignment curr_bind_name target_var], [
+      ([render_binding_assignment reassign curr_bind_name target_var], [
         render_defined_assertion curr_bind_name
       ])
   | AliasPattern (pat, alias) ->
       let (bindings, constant_assertions) =
-        get_pattern_bindings curr_bind_idx target_var pat in
-      ((render_binding_assignment alias target_var)::bindings,
+        get_pattern_bindings reassign curr_bind_idx target_var pat in
+      ((render_binding_assignment reassign alias target_var)::bindings,
        (render_defined_assertion alias)::constant_assertions)
-  | ParenPattern p -> get_pattern_bindings curr_bind_idx target_var p
+  | ParenPattern p -> get_pattern_bindings reassign curr_bind_idx target_var p
   | (ArrayPattern lst as pat)
   | (TuplePattern lst as pat)
   | (ListPattern lst as pat) -> begin
@@ -321,6 +362,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
           in
           let (r, c) =
             get_pattern_bindings
+              reassign
               curr_bind_idx
               (Printf.sprintf "%s[%d]" target_var curr_idx)
               curr
@@ -330,6 +372,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
       in
       let (length_binding, length_assertion) =
         get_pattern_bindings
+          reassign
           curr_bind_idx
           (target_var^".length")
           (ConstantPattern (Int pat_lst_length))
@@ -341,12 +384,14 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
       let tl_target_var = Printf.sprintf "(%s.slice(0, -1))" target_var in
       let (hd_bindings, hd_assertions) =
         get_pattern_bindings
+          reassign
           curr_bind_idx
           hd_target_var
           hd_pat
       in
       let (tl_bindings, tl_assertions) =
         get_pattern_bindings
+          reassign
           curr_bind_idx
           tl_target_var
           tl_pat
@@ -357,6 +402,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
         let prop_target_var = Printf.sprintf "%s.%s" target_var prop in
         let (prop_bindings, prop_assertions) =
           get_pattern_bindings
+            reassign
             curr_bind_idx
             prop_target_var
             pat
@@ -366,6 +412,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
   | VariantPattern (name, data_pat) ->
       let (name_binding, name_assertion) =
         get_pattern_bindings
+          reassign
           curr_bind_idx
           (target_var^".$NAME")
           (ConstantPattern (StringLiteral ("\"" ^ name ^ "\"")))
@@ -374,6 +421,7 @@ and get_pattern_bindings curr_bind_idx target_var pattern =
         | None -> ([], [])
         | Some pat ->
           get_pattern_bindings
+            reassign
             curr_bind_idx
             (target_var^".$DATA")
             pat
@@ -404,7 +452,7 @@ and render_match_expr target_expr pat_lst =
     Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
   let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
     let rendered_value = render_expr expr in
-    let (bindings, assertions) = get_pattern_bindings (ref 0) "TARGET" pat in
+    let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
     let rendered_match_case = render_match_case bindings assertions guard in
     acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
       rendered_match_case
