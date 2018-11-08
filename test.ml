@@ -2228,6 +2228,24 @@ let ast_converter_tests = Ast.[
     ))];
 
   make_ast_converter_test
+    "let declaration, pattern matching against array with array"
+    "let [|1;x;_;_|] = [|1;2;3;4|]"
+    [LetDecl (VarAssignment (
+      ArrayPattern [
+        ConstantPattern (Int 1);
+        ValueNamePattern "x";
+        IgnorePattern;
+        IgnorePattern;
+      ],
+      ArrayExpr [
+        Constant (Int 1);
+        Constant (Int 2);
+        Constant (Int 3);
+        Constant (Int 4);
+      ]
+    ))];
+
+  make_ast_converter_test
     "let declaration, pattern matching against list with list"
     "let [1;x;_;_] = [1;2;3;4]"
     [LetDecl (VarAssignment (
