@@ -44,6 +44,8 @@ let convert_infix = function
       (Tokenizer.token_to_string t)
     )
 
+
+
 (**
  * [convert_pattern tr] is the AST-representation of the pattern
  * production of the parse tree [tr].
@@ -135,7 +137,43 @@ let rec convert_pattern = function
         convert_one_or_more_patterns_semicolon_sep patterns_semicolon_sep
         |> List.rev
       )
+  | Node [
+      Token (LCurlyBrace);
+      field_patterns_semicolon_sep;
+      Token (SemiColon);
+      Token (RCurlyBrace);
+    ]
+  | Node [
+      Token (LCurlyBrace);
+      field_patterns_semicolon_sep;
+      Token (RCurlyBrace);
+    ] -> RecordPattern (
+      convert_one_or_more_semicolon_separated_field_binding_pattern []
+        field_patterns_semicolon_sep
+    )
   | _ -> failwith "not a valid pattern"
+
+
+
+and convert_field_binding_pattern = function
+  | Node
+      [Token (LowercaseIdent field_name);
+       Token (Equal);
+       pattern;
+      ] -> (field_name, convert_pattern pattern)
+  | _ -> failwith "convert_field_binding_pattern called on a non-field-binding-pattern"
+
+and convert_one_or_more_semicolon_separated_field_binding_pattern acc = function
+  | Node [
+      semicolon_sep_binding_pat;
+      Token (SemiColon);
+      field_binding_pat
+    ] ->
+    convert_one_or_more_semicolon_separated_field_binding_pattern
+      ((convert_field_binding_pattern field_binding_pat) :: acc )
+      semicolon_sep_binding_pat
+  | single_field_binding_pat ->
+    ((convert_field_binding_pattern single_field_binding_pat) :: acc)
 
 (**
  * [convert_one_or_more_patterns_semicolon_sep tr] is the list of patterns
@@ -330,6 +368,7 @@ and convert_tuple_body_expr acc = function
     ] -> convert_tuple_body_expr ((convert_expr expr)::acc) one_or_more_expr
   | expr -> (convert_expr expr)::acc
 
+
 (**
  * [convert_pattern_matching acc t] is the AST list of tuples
  * [(pattern, value, Some guard)] representing the match cases in [t]
@@ -399,25 +438,6 @@ and convert_one_or_more_semicolon_separated_field_binding acc = function
       semicolon_sep_binding
   | single_field_binding ->
     ((convert_field_binding single_field_binding) :: acc)
-
-and get_record_field_binding_pairs record_type_node =
-  match record_type_node with
-  | Node children ->
-    begin match children with
-      | [Token (LCurlyBrace);
-         semicolon_sep_fields;
-         Token (RCurlyBrace)]
-      | [Token (LCurlyBrace);
-         semicolon_sep_fields;
-         Token (RCurlyBrace);
-         Token (SemiColon)] ->
-        (convert_one_or_more_semicolon_separated_field_binding
-           []
-           semicolon_sep_fields)
-      | _ -> failwith ("get_record_field_binding_pairs called on node that "^
-                       "is not a record field body")
-    end
-  | _ -> failwith "get_record_field_binding_pairs called on leaf"
 
 
 (**

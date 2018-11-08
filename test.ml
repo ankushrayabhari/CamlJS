@@ -2553,7 +2553,7 @@ let ast_converter_tests = Ast.[
           )
         )
       ];
-  
+
     make_ast_converter_test
       "record expression precendence, AST"
       "f {age = if true then 12 else 11}"
@@ -2576,6 +2576,53 @@ let ast_converter_tests = Ast.[
           )
         )
       ];
+
+
+    make_ast_converter_test
+      "record patterns supported, AST"
+      "match x with | {name = n; age = a} -> ()"
+      [Expr
+         (MatchExpr
+            (VarName "x",
+             [
+               (RecordPattern
+                  [("name", ValueNamePattern "n");
+                   ("age", ValueNamePattern "a")],
+                Constant Unit,
+                None
+               )
+             ]
+            )
+         )
+      ];
+
+    make_ast_converter_test
+      "record patterns precedence, AST"
+      "match x with | {name = n as p; age = a} :: [] -> ()"
+      [Expr
+         (MatchExpr
+            (VarName "x",
+             [(ConsPattern
+                 (RecordPattern
+                    [("name", AliasPattern (ValueNamePattern "n", "p"));
+                     ("age", ValueNamePattern "a")],
+                  ConstantPattern EmptyList),
+               Constant Unit,
+               None
+              )
+             ]
+            )
+         )
+      ];
+
+
+  (*cons of record pattern without parens should work.
+Record pattern insides should be able to have alias pattern  *)
+    (*make_ast_converter_test
+      "record pattern precendence, AST"
+      ""
+      [
+      ];*)
 ]
 
 let make_curry_optimizer_test =
