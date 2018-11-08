@@ -33,7 +33,10 @@ let remove_binding binding =
   let binding_lst = Hashtbl.find binding_stack binding in
   begin match binding_lst with
     | _::[] -> Hashtbl.remove binding_stack binding
-    | _::t -> Hashtbl.add binding_stack binding t
+    | _::t -> begin
+      Hashtbl.remove binding_stack binding;
+      Hashtbl.add binding_stack binding t
+    end
     | _ -> failwith "should not be empty"
   end;
   binding
@@ -206,11 +209,13 @@ let optimize tr =
             let optimized_name = add_binding name in
             let optimized_pat_lst = List.map optimize_pattern pat_lst in
             let optimized_body = optimize_expr body in
+            List.map remove_pattern_bindings pat_lst |> ignore;
             (optimized_name, optimized_pat_lst, optimized_body)
           end else begin
             let optimized_pat_lst = List.map optimize_pattern pat_lst in
             let optimized_body = optimize_expr body in
             let optimized_name = add_binding name in
+            List.map remove_pattern_bindings pat_lst |> ignore;
             (optimized_name, optimized_pat_lst, optimized_body)
           end
         in

@@ -1,3 +1,3 @@
 let x = 10;;
-let x = 20;;
-print_int x
+let x = 20 in print_int x;;
+print_int x;;
