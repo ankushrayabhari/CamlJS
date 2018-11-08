@@ -129,6 +129,6 @@ match tr with
     let should_curry = check_for_curry name (List.length lst) rest in
     (LetDecl (FunctionAssignment (name, recur, lst, expr, should_curry)))::
     (if should_curry then optimize rest else optimize (uncurry name rest))
-  | _ -> optimize rest
+  | _ -> first::(optimize rest)
 end
 | [] -> tr
