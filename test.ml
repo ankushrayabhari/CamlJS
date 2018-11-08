@@ -59,6 +59,21 @@ let make_ast_optimizer_test optimizer_fn name program expected_tree =
 
 let tokenizer_tests = Token.[
   make_tokenizer_test
+    "empty array in "
+    "[||]"
+    [EmptyArray];
+
+  make_tokenizer_test
+    "1-elt array"
+    "[|1|]"
+    [StartArray; Int 1; EndArray];
+
+  make_tokenizer_test
+    "multi-elt array"
+    "[|1;2;3|]"
+    [StartArray; Int 1; SemiColon; Int 2; SemiColon; Int 3; EndArray];
+
+  make_tokenizer_test
     "1,2 tuple"
     "1,2"
     [Int 1; Comma; Int 2];
@@ -390,6 +405,33 @@ let tokenizer_tests = Token.[
 ]
 
 let parser_tests = Parse_tree.(Tokenizer.[
+  make_parser_test
+    "2-elt tuple"
+    "[||],[||]"
+    (Node [
+        Token (EmptyArray);
+        Token (Comma);
+        Token (EmptyArray);
+    ]);
+
+  make_parser_test
+    "3-elt array"
+    "[|1;2;3|]"
+    (Node [
+      Token (StartArray);
+      Node [
+        Node [
+          Token (Int 1);
+          Token (SemiColon);
+          Token (Int 2);
+        ];
+        Token (SemiColon);
+        Token (Int 3);
+      ];
+      Token (EndArray);
+    ]);
+
+
   make_parser_test
     "2-elt tuple"
     "1,2"
