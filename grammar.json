@@ -54,6 +54,10 @@
       "regex": "\\[\\]"
     },
     {
+      "name": "EmptyArray",
+      "regex": "\\[||\\]"
+    },
+    {
       "name": "Cons",
       "regex": "::",
       "tag": "infix"
@@ -93,6 +97,14 @@
     {
       "name": "EndList",
       "regex": "\\]"
+    },
+    {
+      "name": "StartArray",
+      "regex": "\\[|"
+    },
+    {
+      "name": "EndArray",
+      "regex": "|\\]"
     },
     {
       "name": "Plus",
@@ -325,6 +337,8 @@
       ["LParen", "Pattern", "RParen"],
       ["StartList", "OneOrMorePatternWithSemicolon", "EndList"],
       ["StartList", "OneOrMorePatternWithSemicolon", "SemiColon", "EndList"],
+      ["StartArray", "OneOrMorePatternWithSemicolon", "EndArray"],
+      ["StartArray", "OneOrMorePatternWithSemicolon", "SemiColon", "EndArray"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "RCurlyBrace"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldPattern", "SemiColon", "RCurlyBrace"],
       ["CharLiteral", "DoublePeriod", "CharLiteral"],
@@ -463,6 +477,8 @@
       ["LParen", "Expr", "RParen"],
       ["StartList", "OneOrMoreIfExprWithSemicolon", "EndList"],
       ["StartList", "OneOrMoreIfExprWithSemicolon", "SemiColon", "EndList"],
+      ["StartArray", "OneOrMoreIfExprWithSemicolon", "EndArray"],
+      ["StartArray", "OneOrMoreIfExprWithSemicolon", "SemiColon", "EndArray"],
       ["LowercaseIdent"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldBinding", "RCurlyBrace"],
       ["LCurlyBrace", "OneOrMoreSemicolonSeparatedFieldBinding", "SemiColon", "RCurlyBrace"],
@@ -489,7 +505,8 @@
       ["Float"],
       ["CharLiteral"],
       ["StringLiteral"],
-      ["EmptyList"]
+      ["EmptyList"],
+      ["EmptyArray"]
     ]
   }
 }
