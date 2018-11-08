@@ -2614,15 +2614,6 @@ let ast_converter_tests = Ast.[
             )
          )
       ];
-
-
-  (*cons of record pattern without parens should work.
-Record pattern insides should be able to have alias pattern  *)
-    (*make_ast_converter_test
-      "record pattern precendence, AST"
-      ""
-      [
-      ];*)
 ]
 
 let make_curry_optimizer_test =
