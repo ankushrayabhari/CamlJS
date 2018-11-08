@@ -58,7 +58,6 @@ let make_ast_optimizer_test optimizer_fn name program expected_tree =
   )
 
 let tokenizer_tests = Token.[
-
   make_tokenizer_test
     "function keyword pattern match"
     "let x = function []"
@@ -661,8 +660,6 @@ let parser_tests = Parse_tree.(Tokenizer.[
       Token (Equal);
       Token (CapitalizedIdent "Test")
     ]);
-
-
 
   make_parser_test
     "type t parse with vertical bar in middle"
