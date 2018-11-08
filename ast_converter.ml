@@ -379,6 +379,47 @@ and convert_pattern_matching acc = function
         further_pattern_matching
   | _ -> failwith "not a valid pattern matching"
 
+
+and convert_field_binding = function
+  | Node
+      [Token (LowercaseIdent field_name);
+       Token (Equal);
+       value;
+      ] -> (field_name, convert_expr value)
+  | _ -> failwith "convert_field_binding called on a non-field-binding"
+
+and convert_one_or_more_semicolon_separated_field_binding acc = function
+  | Node [
+      semicolon_sep_binding;
+      Token (SemiColon);
+      field_binding
+    ] ->
+    convert_one_or_more_semicolon_separated_field_binding
+      ((convert_field_binding field_binding):: acc )
+      semicolon_sep_binding
+  | single_field_binding ->
+    ((convert_field_binding single_field_binding) :: acc)
+
+and get_record_field_binding_pairs record_type_node =
+  match record_type_node with
+  | Node children ->
+    begin match children with
+      | [Token (LCurlyBrace);
+         semicolon_sep_fields;
+         Token (RCurlyBrace)]
+      | [Token (LCurlyBrace);
+         semicolon_sep_fields;
+         Token (RCurlyBrace);
+         Token (SemiColon)] ->
+        (convert_one_or_more_semicolon_separated_field_binding
+           []
+           semicolon_sep_fields)
+      | _ -> failwith ("get_record_field_binding_pairs called on node that "^
+                       "is not a record field body")
+    end
+  | _ -> failwith "get_record_field_binding_pairs called on leaf"
+
+
 (**
  * [convert_expr tr] is the abstract syntax tree representing the expression in
  * [tr].
@@ -588,7 +629,22 @@ and convert_expr tr = match tr with
       Token (Token.SemiColon);
       Token (Token.EndList);
     ] ->
-      ListExpr (convert_list_body_expr [] one_or_more_expr)
+    ListExpr (convert_list_body_expr [] one_or_more_expr)
+  | Node [
+      Token (Token.LCurlyBrace);
+      one_or_more_field_bindings;
+      Token (Token.RCurlyBrace);
+    ]
+  | Node [
+      Token (Token.LCurlyBrace);
+      one_or_more_field_bindings;
+      Token (Token.SemiColon);
+      Token (Token.RCurlyBrace);
+    ] -> Record
+           (convert_one_or_more_semicolon_separated_field_binding
+              []
+              one_or_more_field_bindings
+           )
   | Node [
       Token (Match);
       target_expr;
@@ -656,6 +712,47 @@ let rec convert_repr tr =
       constr::lst
   | _ -> failwith "not a valid representation"
 
+
+
+let convert_field_decl = function
+  | Node
+      [Token (LowercaseIdent field_name);
+       Token (Colon);
+       field_type;
+      ] -> (field_name, convert_typexpr field_type)
+  | _ -> failwith "convert_field_decl called on a non-field-decl"
+
+let rec convert_one_or_more_semicolon_separated_field_decl acc = function
+  | Node [
+      semicolon_sep_decl;
+      Token (SemiColon);
+      field_binding
+    ] ->
+    convert_one_or_more_semicolon_separated_field_decl
+      ((convert_field_decl field_binding):: acc )
+      semicolon_sep_decl
+  | single_field_binding ->
+    ((convert_field_decl single_field_binding) :: acc)
+
+let get_record_field_type_pairs record_type_node =
+  match record_type_node with
+  | Node children ->
+    begin match children with
+    | [Token (LCurlyBrace);
+       semicolon_sep_fields;
+       Token (RCurlyBrace)]
+    | [Token (LCurlyBrace);
+       semicolon_sep_fields;
+       Token (RCurlyBrace);
+       Token (SemiColon)] ->
+      (convert_one_or_more_semicolon_separated_field_decl
+         []
+         semicolon_sep_fields)
+    | _ -> failwith ("get_record_field_type_pairs called on node that "^
+                     "is not a record type declaration")
+    end
+  | _ -> failwith "get_record_field_pairs called on leaf"
+
 (**
  * [convert_definition t] is the abstract syntax tree representing the
  * a definition (an [open Module] or [let var_name = expr]) in the top level
@@ -691,7 +788,18 @@ let convert_definition = function
       Token (LowercaseIdent typ);
       Token (Equal);
       repr
-    ] -> TypeDefinition (typ, VariantDecl (convert_repr repr))
+    ] ->
+    (try
+       TypeDefinition (typ, VariantDecl (convert_repr repr))
+     with _ ->
+       TypeDefinition
+         (typ,
+          RecordDecl
+            (repr |>
+             get_record_field_type_pairs
+            )
+         )
+    )
   | Node [
       Token(Token.Let);
       let_binding;
