@@ -558,6 +558,12 @@ and convert_expr tr = match tr with
     ] ->
       ModuleAccessor (module_name, value_name)
   | Node [
+      rec_expr;
+      Token (Period);
+      Token (LowercaseIdent prop);
+    ] ->
+      PropertyAccessor (convert_expr rec_expr, prop)
+  | Node [
       Token (Token.LParen);
       expr;
       Token (Token.RParen);

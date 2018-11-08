@@ -299,12 +299,12 @@ and render_array_tuple_expr lst =
   render_list_expr (List.rev lst)
 
 (**
- * [render_module_accessor module value] is the JavaScript equivalent code of
+ * [render_accessor module value] is the JavaScript equivalent code of
  * accessing the property [value] in a object [module].
  *
  * Modules are represented by objects in JavaScript.
  *)
-and render_module_accessor module_name value_name =
+and render_accessor module_name value_name =
   module_name ^ "." ^ value_name
 
 (**
@@ -493,7 +493,8 @@ and render_expr = function
   | FunctionCall (fn, args, curry) -> render_function_call fn args curry
   | ParenExpr (expr) -> render_paren_expr expr
   | ListExpr expr_lst -> render_list_expr expr_lst
-  | ModuleAccessor (m, v) -> render_module_accessor m v
+  | ModuleAccessor (m, v) -> render_accessor m v
+  | PropertyAccessor (e, v) -> render_accessor (render_expr e) v
   | MatchExpr (expr, lst) -> render_match_expr expr lst
   | ArrayExpr expr_lst | Tuple expr_lst -> render_array_tuple_expr expr_lst
   | Record prop_lst -> render_record_expr prop_lst

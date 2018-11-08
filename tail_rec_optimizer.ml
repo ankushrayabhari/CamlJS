@@ -103,6 +103,7 @@ let rec check_no_calls_or_references name = function
         acc && valid_guard &&
         (name_bound_in_pat name pat || check_no_calls_or_references name value)
       ) true pat_lst
+  | PropertyAccessor (expr, _) -> check_no_calls_or_references name expr
 
 let rec valid_tail_rec_func name = function
   | Ternary (cond, then_body_expr, Some else_body_expr) ->
@@ -186,6 +187,7 @@ let rec optimize_expr = function
   | Record lst ->
       Record (List.map (fun (name, value) -> (name, optimize_expr value)) lst)
   | Variant (constr, Some arg) -> Variant (constr, Some (optimize_expr arg))
+  | PropertyAccessor (expr, prop) -> PropertyAccessor (optimize_expr expr, prop)
 
 
 let optimize tr =

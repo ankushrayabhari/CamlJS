@@ -41,6 +41,7 @@ and expr =
   | Constant of constant
   | VarName of string
   | ModuleAccessor of string * string
+  | PropertyAccessor of expr * string
   | PrefixOp of prefix_symbol * expr
   | InfixOp of expr * infix_op * expr
   | Ternary of expr * expr * expr option

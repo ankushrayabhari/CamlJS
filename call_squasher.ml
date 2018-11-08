@@ -54,6 +54,7 @@ and optimize_expr = function
   | Record lst ->
       Record (List.map (fun (name, value) -> (name, optimize_expr value)) lst)
   | Variant (constr, Some arg) -> Variant (constr, Some (optimize_expr arg))
+  | PropertyAccessor (expr, prop) -> PropertyAccessor (optimize_expr expr, prop)
 
 let optimize tr =
   List.map (fun module_item ->
