@@ -468,7 +468,7 @@ and render_record_expr prop_lst =
     sprintf "%s: %s" prop (render_expr val_expr)
   ) prop_lst
   |> String.concat ","
-  |> sprintf "{%s}"
+  |> sprintf "({%s})"
 
 and render_variant_expr name arg_expr =
   let rendered_arg = match arg_expr with
