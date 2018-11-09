@@ -1002,7 +1002,7 @@ let rec convert_one_or_more_semicolon_separated_field_decl acc = function
  * where the first element is the field name of a record and the second element
  * is the type expression of that field.
  *
- * @raises Failure if [record_type_node] does not correspond to one of the
+ * @raise Failure if [record_type_node] does not correspond to one of the
  * following
  * - [record_type_node] is a record type parse tree of the form:
  * {ol
