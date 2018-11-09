@@ -131,16 +131,19 @@ and populate_unused_variables = function
 let rec prune_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) -> begin
       match pat with
-      | ValueNamePattern str when Hashtbl.mem unused_variables str -> Expr (prune_expr assign_expr)
+      | ValueNamePattern str when Hashtbl.mem unused_variables str -> 
+        Expr (prune_expr assign_expr)
       | _ -> LetDecl (VarAssignment (pat, is_rec, prune_expr assign_expr))
     end
   | FunctionAssignment (name, is_rec, pat_lst, body, curry) -> begin
       if Hashtbl.mem unused_variables name then Expr (Constant (Int 1))
-      else LetDecl (FunctionAssignment (name, is_rec, pat_lst, prune_expr body, curry))
+      else LetDecl (FunctionAssignment (
+          name, is_rec, pat_lst, prune_expr body, curry))
     end
   | TailRecursiveFunctionAssignment (name, pat_lst, body) -> begin
       if Hashtbl.mem unused_variables name then Expr (Constant (Int 1))
-      else LetDecl (TailRecursiveFunctionAssignment (name, pat_lst, prune_expr body))
+      else LetDecl (TailRecursiveFunctionAssignment (
+        name, pat_lst, prune_expr body))
     end
 
 (**

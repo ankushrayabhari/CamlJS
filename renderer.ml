@@ -84,7 +84,8 @@ let rec render_let_binding = function
   | VarAssignment (pat, _, expr) ->
     let rendered_target =
       Printf.sprintf "let TARGET = (%s);" (render_expr expr) in
-    let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
+    let (bindings, assertions) = 
+      get_pattern_bindings false (ref 0) "TARGET" pat in
     let rendered_match_case = render_match_case bindings assertions None in
     Printf.sprintf "%s%s"
       rendered_target
@@ -116,7 +117,8 @@ and render_tail_rec_fn_body_expr name tr = match tr with
         Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
       let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
         let rendered_value = render_tail_rec_fn_body_expr name expr in
-        let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
+        let (bindings, assertions) = 
+          get_pattern_bindings false (ref 0) "TARGET" pat in
         let rendered_match_case = render_match_case bindings assertions guard in
         acc ^ Printf.sprintf "try {%s %s;} catch (err) {};"
           rendered_match_case
@@ -165,7 +167,8 @@ and render_tail_rec_fn function_name arg_lst body_expr =
     arg_names
     body_expr
   in
-  let rendered_body_expr = render_tail_rec_fn_body_expr function_name argument_match_expr in
+  let rendered_body_expr = 
+    render_tail_rec_fn_body_expr function_name argument_match_expr in
   sprintf "((%s) => { while(true){%s} })" arguments rendered_body_expr
 
 (**
@@ -518,7 +521,8 @@ and render_match_expr target_expr pat_lst =
     Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
   let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
     let rendered_value = render_expr expr in
-    let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
+    let (bindings, assertions) = 
+      get_pattern_bindings false (ref 0) "TARGET" pat in
     let rendered_match_case = render_match_case bindings assertions guard in
     acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
       rendered_match_case
