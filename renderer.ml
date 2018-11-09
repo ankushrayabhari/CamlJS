@@ -21,21 +21,49 @@ let render_constant = function
   | Unit -> "null"
   | EmptyArray -> "[]"
 
+(**
+ * [render_binding_assignment reassign target_var target_value] is the
+ * JavaScript equivalent code of assigining a variable [target_var] to
+ * [target_value].
+ *
+ * The variable is declared if [reassign] is false.
+ *)
 let render_binding_assignment reassign target_var target_value =
   let reassign = if reassign then ""  else "let " in
   sprintf "%s%s = %s;" reassign target_var target_value
 
+(**
+ * [render_equality_assertion target_var expected_value] is the
+ * JavaScript equivalent code of asserting that [target_var] is equal to
+ * [expected_value].
+ *
+ * A [Match_failure] is thrown in the generated code if they are not equal.
+ *)
 let render_equality_assertion target_var expected_value =
   sprintf
     "if (Pervasives.compare(%s)(%s)!==0){throw new Error('Match failure');}"
     target_var
     expected_value
 
+(**
+ * [render_defined_assertion target_var] is the JavaScript equivalent code of
+ * asserting that [target_var] is not [undefined].
+ *
+ * A [Match_failure] is thrown in the generated code if it is undefined.
+ *)
 let render_defined_assertion target_var =
   sprintf
     "if (%s === undefined) { throw new Error('Match failure');}"
     target_var
 
+(**
+ * [render_ranged_assertion target_var l u] is the JavaScript equivalent code of
+ * asserting that [target_var] is within the range [[l, u]].
+ *
+ * This is inclusive of both [l] and [u],
+ *
+ * A [Match_failure] is thrown in the generated code if it is undefined.
+ *)
 let render_ranged_assertion target_var lower_bound upper_bound =
   sprintf
     "if (%s < %s || %s > %s){throw new Error('Match failure');}"
@@ -66,19 +94,28 @@ let rec render_let_binding = function
       ^ render_fun arg_list body_expr curry ^  ";"
   | TailRecursiveFunctionAssignment (function_name, arg_list, body_expr) ->
       "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
-      ^ render_loop_fn function_name arg_list body_expr ^  ";"
+      ^ render_tail_rec_fn function_name arg_list body_expr ^  ";"
 
-and render_loop_body_expr name tr = match tr with
+(**
+ * [render_tail_rec_fn_body_expr name tr] is the JavaScript equivalent code of
+ * the body ([tr]) of a tail recursive function named [name].
+ *
+ * This is implemented in JavaScript as a loop where
+ * - the first thing the loop does is pattern match against the arguments
+ * - On a tail call, the loop executes again with the given arguments.
+ * - On reaching a value, the value is returned from the function.
+ *)
+and render_tail_rec_fn_body_expr name tr = match tr with
   | Ternary (cond, then_body_expr, Some else_body_expr) ->
       sprintf "if (%s) {%s} else {%s}"
         (render_expr cond)
-        (render_loop_body_expr name then_body_expr)
-        (render_loop_body_expr name else_body_expr)
+        (render_tail_rec_fn_body_expr name then_body_expr)
+        (render_tail_rec_fn_body_expr name else_body_expr)
   | MatchExpr (target_expr, pat_lst) ->
       let rendered_target =
         Printf.sprintf "let TARGET = (%s);" (render_expr target_expr) in
       let rendered_match_cases = List.fold_left (fun acc (pat, expr, guard) ->
-        let rendered_value = render_loop_body_expr name expr in
+        let rendered_value = render_tail_rec_fn_body_expr name expr in
         let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
         let rendered_match_case = render_match_case bindings assertions guard in
         acc ^ Printf.sprintf "try {%s %s;} catch (err) {};"
@@ -97,14 +134,24 @@ and render_loop_body_expr name tr = match tr with
       )
       |> String.concat ""
       |> (fun x -> x ^ "continue;")
-  | ParenExpr p -> "{" ^ render_loop_body_expr name p ^ "}"
+  | ParenExpr p -> "{" ^ render_tail_rec_fn_body_expr name p ^ "}"
   | Sequential (l, r) ->
       sprintf "%s;%s"
       (render_expr l)
-      (render_loop_body_expr name r)
+      (render_tail_rec_fn_body_expr name r)
   | tr -> sprintf "return %s;" (render_expr tr)
 
-and render_loop_fn function_name arg_lst body_expr =
+(**
+ * [render_tail_rec_fn name args tr] is the JavaScript equivalent code of
+ * declaring a tail recursive function [name] with arguments [args] and body
+ * [tr].
+ *
+ * This is implemented in JavaScript as a non curried function that uses
+ * O(1) stack space.
+ *
+ * {b See:} [render_tail_rec_fn_body_expr]
+ *)
+and render_tail_rec_fn function_name arg_lst body_expr =
   let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_lst in
   let arguments = String.concat "," arg_names in
   let argument_match_expr =
@@ -118,19 +165,21 @@ and render_loop_fn function_name arg_lst body_expr =
     arg_names
     body_expr
   in
-  let rendered_body_expr = render_loop_body_expr function_name argument_match_expr in
+  let rendered_body_expr = render_tail_rec_fn_body_expr function_name argument_match_expr in
   sprintf "((%s) => { while(true){%s} })" arguments rendered_body_expr
 
 (**
- * [render_match_case bindings constant] is the JavaScript equivalent code of
- * declaring a match case.
+ * [render_match_case bindings constant guard] is the JavaScript equivalent code
+ * of declaring a match case.
  * - [bindings] is a list of tuples where each tuple contains the target
  * varible identifier and the value it was bound to.
  * - [constant] is a list of tuples where each tuple contains the target
  * varible identifier and the value it was bound to and its expected value.
+ * - [guard] is the condition that guards the match.
  *
  * This is translated into JavaScript by:
  * - creating a list of binding statements
+ * - an assertion to check the truthiness of the guard
  * - a list of assertions to check that none of the bound variables were
  * [undefined].
  * - A list of constant assertions to check that each constant pattern matched
@@ -151,15 +200,16 @@ and render_match_case bindings assertions guard =
     rendered_guard_assertion
 
 (**
- * [render_fun arg_list body_expr] is the JavaScript equivalent code of
+ * [render_fun arg_list body_expr curry] is the JavaScript equivalent code of
  * declaring an anonymous function.
  * - [arg_list] is the list of patterns for each argument of the function.
  * - [body_expr] is the function body.
+ * - [curry] is whether or not the function should be curried.
  *
  * This is translated into JavaScript by:
  * - Creating a function that has the arguments labelled as A0 to AN.
- * - The function is declared as a curry to match OCaml's default behavior.
  * - Immediately, pattern matching each Ai against the ith pattern.
+ * - Executing the code for [body_expr]
  *)
 and render_fun arg_list body_expr curry =
   let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_list in
@@ -479,6 +529,14 @@ and render_match_expr target_expr pat_lst =
     rendered_target
     rendered_match_cases
 
+(**
+ * [render_record_expr prop_lst] is the JavaScript equivalent code of
+ * generating a record with the properties and values in [prop_lst]
+ *
+ * This is done in JavaScript by:
+ * - creating an native object with its properties as the keys in [prop_lst]
+ * - assigning each key to the corresponding value in [prop_lst]
+ *)
 and render_record_expr prop_lst =
   List.map (fun (prop, val_expr) ->
     sprintf "%s: %s" prop (render_expr val_expr)
@@ -486,6 +544,15 @@ and render_record_expr prop_lst =
   |> String.concat ","
   |> sprintf "({%s})"
 
+(**
+ * [render_variant_expr name arg_expr] is the JavaScript equivalent code of
+ * generating a variant with constructor name [name] and args [arg_expr].
+ *
+ * This is done in JavaScript by:
+ * - creating an native object with its properties as "$NAME" and "$DATA".
+ * - "$NAME" contains [name]
+ * - "$DATA" contains the equivalent JavaScript code of [arg_expr].
+ *)
 and render_variant_expr name arg_expr =
   let rendered_arg = match arg_expr with
     | Some arg -> render_expr arg
