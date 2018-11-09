@@ -1,3 +1,5 @@
+(** Parse Tree Nodes *)
+
 (**
  * A [parse_tree] is a representation of the program as a tree of its
  * components, where the leaves in the tree read from left to right are the

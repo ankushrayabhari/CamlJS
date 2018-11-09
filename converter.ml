@@ -1,4 +1,4 @@
-(** Autogeneration script of tokenizer/grammar metadata from an grammar file.
+(** Autogeneration script of tokenizer/grammar files.
  *
  * The grammar json file should be an association with a [tokens] and
  * a [productions] member, where each [tok] in [tokens] is a
@@ -57,13 +57,6 @@ type variable = {
   name: string;
   productions: string array array;
 }
-
-module IntSet = Set.Make (
-  struct
-    let compare = Pervasives.compare
-    type t = int
-  end
-)
 
 (**
  * [parse_token json] is the token record that contains the information in
