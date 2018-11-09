@@ -18,6 +18,9 @@
  * Note that you cannot have unit production cycles or epsilon productions in
  * your grammar.
  *
+ * Tokens that are in all caps and end in an apostrophe are reserved and may
+ * not be used.
+ *
  * Please see grammar.json for an example.
  *)
 
@@ -181,8 +184,13 @@ let (tokens_in_order, variables_in_order) =
     print_endline "Invalid arguments: invalid input file";
     exit 1
 
+(** The variable id of the EOF token *)
 let eof_token = 0;;
+
+(** The variable id of the epsilon (empty string) token *)
 let empty_token = 1;;
+
+(** The number of tokens defined in the grammar plus 2 (EOF/Epsilon tokens) *)
 let num_tokens = Array.length tokens_in_order
 let num_variables = Array.length variables_in_order
 let start_variable = num_tokens
@@ -191,22 +199,43 @@ let first_set = Hashtbl.create num_variables;;
 let variable_to_id_map =
   Hashtbl.create (num_tokens + num_variables);;
 
+(* Populate [variable_to_id_map] with the tokens *)
 for idx = 0 to num_tokens - 1 do
   let token = Array.get tokens_in_order idx in
   Hashtbl.add variable_to_id_map token.name idx
 done;;
 
+(* Populate [variable_to_id_map] with the variables *)
 for idx = start_variable to last_variable do
   let variable = Array.get variables_in_order (idx - start_variable) in
   Hashtbl.add variable_to_id_map variable.name idx
 done;;
 
+(**
+ * [is_token id] is whether or not the variable with [id] corresponds to a
+ * token.
+ *
+ * {b Requires:} [id >= 0]
+ *)
 let is_token var_id =
   var_id < num_tokens
 
+(**
+ * [get_variable_id var_name] is the variable id of the variable with name
+ * [var_name].
+ *
+ * @raise Not_found if no such [var_name] exists.
+ *)
 let get_variable_id var_name =
   Hashtbl.find variable_to_id_map var_name;;
 
+(**
+ * [get_variable var_id] is the variable record of the variable with id
+ * [var_id].
+ *
+ * @raise Invalid_argument if [var_id] does not correspond to a valid variable
+ * id.
+ *)
 let get_variable var_id =
   Array.get variables_in_order (var_id - start_variable);;
 
@@ -242,6 +271,23 @@ for idx = start_variable to last_variable do
 done;;
 
 (* Step #2: Compute item set 0. *)
+
+(**
+ * [closure initial_items] computes the item set closure of [initial_items]
+ *
+ * Each item in [initial_items] is of the form [(var, prod, pos, lookahead)].
+ * - [var] and [prod] are the identifiers for which production this is. It is
+ * the production at index [prod] in [var]'s productions.
+ * - [pos] refers to where the variables before [pos] in the production have
+ * been parsed.
+ * - [lookahead] refers to the the next possible token in the input so the
+ * parser knows whether to reduce or shift.
+ *
+ * This evaluates to [(canonical, items)] where:
+ * - [items] is the item set after the closure
+ * - [canonical] is the canonical set of items in [initial_items] that generate
+ * this closure.
+ *)
 let closure initial_items =
   let prods = Queue.create () in
   let initial_set = Hashtbl.create (List.length initial_items) in
@@ -287,21 +333,48 @@ let closure initial_items =
     Hashtbl.fold (fun item _ acc -> item::acc) visited []
   );;
 
+(* The initial item set closure and its canonical generation set *)
 let (item_set_0_canonical, item_set_0_items) =
   closure [(start_variable, 0, 0, empty_token)];;
+
+(**
+ * [items_sets] maps from the item set id to the pair [(canonical, items)]
+ * where:
+ * - [canonical] is the canonical set of items that generated the closure
+ * - [items] contains the full closure
+ *)
 let item_sets = Hashtbl.create 10000;;
+
+(**
+ * [reverse_item_set_lookup] maps from a canonical set of items to the item
+ * set id.
+ *)
 let reverse_item_set_lookup = Hashtbl.create 10000;;
+
+(** [item_set_id] is the next valid item id that can be used. *)
 let item_set_id = ref 0;;
 
 Hashtbl.add item_sets !item_set_id (item_set_0_canonical, item_set_0_items);;
 Hashtbl.add reverse_item_set_lookup item_set_0_canonical !item_set_id;;
 incr item_set_id;;
 
+(**
+ * [transitions] maps a given [(item_set, var_id)] to the [next] parser state.
+ *
+ * This means there exists a transition from [item_set] to [next] on reading
+ * [var_id].
+ *)
 let transitions = Hashtbl.create 10000;;
-let item_set_construction = Queue.create ();;
-let visited = Hashtbl.create 10000;;
-Queue.push 0 item_set_construction;;
-Hashtbl.add visited 0 true;;
+
+(*
+ * Generate all item sets by computing transitions and then using the FIRST
+ * set to generate all possible look aheads for the generated closure.
+ *)
+begin
+let item_set_construction = Queue.create () in
+let visited = Hashtbl.create 10000 in
+Queue.push 0 item_set_construction;
+Hashtbl.add visited 0 true;
 while not (Queue.is_empty item_set_construction) do
   let curr_item_set_id = Queue.pop item_set_construction in
   let (canonical, items) = Hashtbl.find item_sets curr_item_set_id in
@@ -342,9 +415,10 @@ while not (Queue.is_empty item_set_construction) do
         incr item_set_id;
       end
     )
-done;;
+done
+end;;
 
-
+(** The actions for the parser. {b See}: [Lr_action] for its documentation. *)
 type action =
   | Shift of int
   | Reduce of int * int
@@ -352,16 +426,25 @@ type action =
   | Goto of int
   | Error;;
 
+(** [last_item] is the item set id of the last generated item set *)
 let last_item = !item_set_id - 1;;
+
+(** [num_items] is the number of item sets generated. *)
 let num_items = !item_set_id;;
 
+(**
+ * [action_table.(state).(tok)] is the [action] to take in [state] after
+ * reading [tok].
+ *)
 let action_table = Array.init num_items (fun _ ->
   Array.make (num_variables + num_tokens) Error);;
 
+(* Add all transitions as [Goto] actions *)
 Hashtbl.iter (fun (from_state, tok) to_state ->
   action_table.(from_state).(tok) <- Goto to_state
 ) transitions;;
 
+(* Add all [Accept], [Reduce], and [Shift] actions. *)
 for item_id = 0 to last_item do
   let (_, items) = Hashtbl.find item_sets item_id in
   List.iter (fun (var_id, prod_id, pos, lookahead) ->
@@ -388,6 +471,11 @@ for item_id = 0 to last_item do
   ) items;
 done;;
 
+(**
+ * [action_table_arr ()] is the OCaml code of the [action_table] array.
+ *
+ * {b See:} [Grammar] for documentation of this value.
+ *)
 let action_table_arr () =
   Array.map (fun el ->
     Array.mapi (fun idx el ->
@@ -406,6 +494,11 @@ let action_table_arr () =
   |> String.concat ";\n"
   |> sprintf "let action_table = [|\n%s\n|]\n"
 
+(**
+ * [token_decl ()] is the OCaml code of the [token_to_var_id] function.
+ *
+ * {b See:} [Grammar] for documentation of this function.
+ *)
 let token_to_var_id_fn () =
   Array.mapi (fun idx el ->
     match el.parameter with
@@ -419,7 +512,7 @@ let token_to_var_id_fn () =
 (**
  * [token_decl ()] is the OCaml code of the [Token.t] variant.
  *
- * {b See:} Token for documentation of this type.
+ * {b See:} [Token] for documentation of this type.
  *)
 let token_decl () =
   Array.map (fun el ->
@@ -434,7 +527,7 @@ let token_decl () =
 (**
  * [tokenize_sig ()] is the OCaml code of the signature for Tokenizer.
  *
- * {b See:} Tokenizer for documentation of these methods.
+ * {b See:} [Tokenizer] for documentation of these methods.
  *)
 let tokenize_sig () = {|
 (**
@@ -465,7 +558,7 @@ val token_to_string : Token.t -> string
 (**
  * [regexp_of_token_fn ()] is the OCaml code of the [regexp_of_token] function.
  *
- * {b See:} Tokenizer for documentation of these methods.
+ * {b See:} [Tokenizer] for documentation of these methods.
  *)
 let regexp_of_token_fn () =
   Array.map (fun el ->
@@ -488,7 +581,7 @@ let regexp_of_token tok = Str.regexp (match tok with
 (**
  * [precedence_arr ()] is the OCaml code of the [precedence] list of tokens.
  *
- * {b See:} Tokenizer for documentation of this property.
+ * {b See:} [Tokenizer] for documentation of this property.
  *)
 let precedence_arr () =
   Array.map (fun el ->
@@ -517,7 +610,7 @@ let precedence = [
 (**
  * [parametrize_tok_fn ()] is the OCaml code of the [parametrize_tok] function.
  *
- * {b See:} Tokenizer for documentation of this method.
+ * {b See:} [Tokenizer] for documentation of this method.
  *)
 let parametrize_tok_fn () =
   Array.to_list tokens_in_order
@@ -552,7 +645,7 @@ let parametrize_tok str = function
 (**
  * [tokenize_impl ()] is the OCaml code of the [tokenize] function.
  *
- * {b See:} Tokenizer for documentation of this method.
+ * {b See:} [Tokenizer] for documentation of this method.
  *)
 let tokenize_impl = {|
 (**
@@ -597,7 +690,7 @@ let tokenize str =
 (**
  * [has_tag_fn ()] is the OCaml code of the [has_tag] function.
  *
- * {b See:} Tokenizer for documentation of this method.
+ * {b See:} [Tokenizer] for documentation of this method.
  *)
 let has_tag_fn () =
   Array.to_list tokens_in_order
@@ -619,7 +712,7 @@ let has_tag_fn () =
 (**
  * [token_to_string_fn ()] is the OCaml code of the [token_to_string] function.
  *
- * {b See:} Tokenizer for documentation of this method.
+ * {b See:} [Tokenizer] for documentation of this method.
  *)
 let token_to_string_fn () =
   Array.map (fun el ->
@@ -680,6 +773,9 @@ let tokenizer_text =
     (has_tag_fn ())
     (token_to_string_fn ());;
 
+(**
+ * [grammar_text] is the content of grammar implementation file.
+ *)
 let grammar_text =
   sprintf "%s%s%s%s"
     header
