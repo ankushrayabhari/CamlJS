@@ -22,7 +22,7 @@ let render_constant = function
   | EmptyArray -> "[]"
 
 let render_binding_assignment reassign target_var target_value =
-  let reassign = if not reassign then "let " else "" in
+  let reassign = if reassign then ""  else "let " in
   sprintf "%s%s = %s;" reassign target_var target_value
 
 let render_equality_assertion target_var expected_value =
@@ -68,7 +68,7 @@ let rec render_let_binding = function
       "let " ^ (Str.global_replace (Str.regexp "'") "$" function_name) ^ " = "
       ^ render_loop_fn function_name arg_list body_expr ^  ";"
 
-and render_loop_body_expr name = function
+and render_loop_body_expr name tr = match tr with
   | Ternary (cond, then_body_expr, Some else_body_expr) ->
       sprintf "if (%s) {%s} else {%s}"
         (render_expr cond)
@@ -81,7 +81,7 @@ and render_loop_body_expr name = function
         let rendered_value = render_loop_body_expr name expr in
         let (bindings, assertions) = get_pattern_bindings false (ref 0) "TARGET" pat in
         let rendered_match_case = render_match_case bindings assertions guard in
-        acc ^ Printf.sprintf "try {%sreturn %s;} catch (err) {};"
+        acc ^ Printf.sprintf "try {%s %s;} catch (err) {};"
           rendered_match_case
           rendered_value
       ) "" pat_lst
@@ -89,20 +89,36 @@ and render_loop_body_expr name = function
       Printf.sprintf "{%s%sthrow new Error('Match Failure');}"
         rendered_target
         rendered_match_cases
-  | FunctionCall (VarName name, arg_lst, true) ->
+  | FunctionCall (VarName name, arg_lst, false) ->
       arg_lst
       |> List.mapi (fun idx arg_expr ->
         let arg_name = "A"^(string_of_int idx) in
-        render_binding_assignment false arg_name (render_expr arg_expr)
+        render_binding_assignment true arg_name (render_expr arg_expr)
       )
       |> String.concat ""
       |> (fun x -> x ^ "continue;")
+  | ParenExpr p -> "{" ^ render_loop_body_expr name p ^ "}"
+  | Sequential (l, r) ->
+      sprintf "%s;%s"
+      (render_expr l)
+      (render_loop_body_expr name r)
   | tr -> sprintf "return %s;" (render_expr tr)
 
 and render_loop_fn function_name arg_lst body_expr =
   let arg_names = List.mapi (fun idx _ -> "A"^(string_of_int idx)) arg_lst in
   let arguments = String.concat "," arg_names in
-  let rendered_body_expr = render_loop_body_expr function_name body_expr in
+  let argument_match_expr =
+    List.fold_right2 (fun arg_pat arg_name prev_expr ->
+      MatchExpr (
+        VarName arg_name,
+        [(arg_pat, prev_expr, None)]
+      )
+    )
+    arg_lst
+    arg_names
+    body_expr
+  in
+  let rendered_body_expr = render_loop_body_expr function_name argument_match_expr in
   sprintf "((%s) => { while(true){%s} })" arguments rendered_body_expr
 
 (**
