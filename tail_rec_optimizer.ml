@@ -21,7 +21,8 @@ let rec check_no_calls_or_references name = function
       check_no_calls_or_references name then_body_expr &&
       begin match else_body_expr with
         | None -> true
-        | Some else_body_expr -> check_no_calls_or_references name else_body_expr
+        | Some else_body_expr -> 
+            check_no_calls_or_references name else_body_expr
       end
   | Function (pat_lst, body) ->
       check_no_calls_or_references name body
@@ -177,7 +178,8 @@ let rec optimize_let_decl = function
  *)
 and optimize_expr = function
   | FunctionCall (fun_expr, arg_lst, curried) ->
-      FunctionCall (optimize_expr fun_expr, List.map optimize_expr arg_lst, curried)
+      FunctionCall (
+          optimize_expr fun_expr, List.map optimize_expr arg_lst, curried)
   | LetBinding (let_decl, in_expr) ->
       LetBinding (
         optimize_let_decl let_decl,

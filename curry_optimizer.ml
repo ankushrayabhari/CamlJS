@@ -100,12 +100,14 @@ and optimize_expr = function
       if Hashtbl.mem functions str then begin
         let args = Array.of_list (List.map optimize_expr arg_lst) in
         let uncurried_arg_length = Hashtbl.find functions str in
-        let uncurried_args = Array.sub args 0 uncurried_arg_length |> Array.to_list in
+        let uncurried_args = 
+            Array.sub args 0 uncurried_arg_length |> Array.to_list in
         if Array.length args > uncurried_arg_length then begin
           let curried_args =
             Array.sub args uncurried_arg_length
             (Array.length args - uncurried_arg_length) |> Array.to_list in
-          FunctionCall (FunctionCall (VarName str, uncurried_args, false), curried_args, true)
+          FunctionCall (FunctionCall (
+              VarName str, uncurried_args, false), curried_args, true)
         end else begin
           FunctionCall (VarName str, uncurried_args, false)
         end
@@ -113,7 +115,8 @@ and optimize_expr = function
         FunctionCall (VarName str, List.map optimize_expr arg_lst, true)
       end
   | FunctionCall (fun_expr, arg_lst, curried) ->
-      FunctionCall (optimize_expr fun_expr, List.map optimize_expr arg_lst, curried)
+      FunctionCall (
+          optimize_expr fun_expr, List.map optimize_expr arg_lst, curried)
   | LetBinding (let_decl, in_expr) ->
       LetBinding (
         optimize_let_decl let_decl,
