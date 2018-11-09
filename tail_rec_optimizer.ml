@@ -1,7 +1,12 @@
 open Ast
 
+(** [functions] is the set of functions identified to be tail recursive. *)
 let functions = Hashtbl.create 1000;;
 
+(**
+ * [check_no_calls_or_references name tr] is whether that there are no calls
+ * or references to [name] in [tr].
+ *)
 let rec check_no_calls_or_references name = function
   | Constant _
   | ModuleAccessor (_, _)
@@ -56,6 +61,10 @@ let rec check_no_calls_or_references name = function
       ) true pat_lst
   | PropertyAccessor (expr, _) -> check_no_calls_or_references name expr
 
+(**
+ * [check_function_body name tr] is whether or not the function named
+ * [name] and body [tr] is a valid tail recursive function.
+ *)
 let rec check_function_body name = function
   | Ternary (cond, then_body_expr, Some else_body_expr) ->
       check_no_calls_or_references name cond &&
@@ -80,6 +89,10 @@ let rec check_function_body name = function
       check_function_body name r
   | t -> check_no_calls_or_references name t
 
+(**
+ * [detect_let_decl tr] populates [functions] with any tail recursive
+ * function let declarations in [tr].
+ *)
 let rec detect_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) ->
       detect_expr assign_expr
@@ -89,6 +102,10 @@ let rec detect_let_decl = function
   | TailRecursiveFunctionAssignment (name, pat_lst, body) ->
       detect_expr body
 
+(**
+ * [detect_expr tr] populates [functions] with any tail recursive
+ * function let declarations in [tr].
+ *)
 and detect_expr = function
   | LetBinding (let_bind, in_expr) ->
       detect_let_decl let_bind;
@@ -135,6 +152,12 @@ and detect_expr = function
   | ModuleAccessor (_, _)
   | Variant (_, None) -> ()
 
+(**
+ * [optimize_let_decl tr] converts any [FunctionAssignment] let declarations
+ * that are in [functions] to a [TailRecursiveFunctionAssignment] in [tr].
+ *
+ * Any other node is not modified in the tree.
+ *)
 let rec optimize_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) ->
       VarAssignment (pat, is_rec, optimize_expr assign_expr)
@@ -146,6 +169,12 @@ let rec optimize_let_decl = function
   | TailRecursiveFunctionAssignment (name, pat_lst, body) ->
       TailRecursiveFunctionAssignment (name, pat_lst, optimize_expr body)
 
+(**
+ * [optimize_expr tr] converts any [FunctionAssignment] let declarations
+ * that are in [functions] to a [TailRecursiveFunctionAssignment] in [tr].
+ *
+ * Any other node is not modified in the tree.
+ *)
 and optimize_expr = function
   | FunctionCall (fun_expr, arg_lst, curried) ->
       FunctionCall (optimize_expr fun_expr, List.map optimize_expr arg_lst, curried)
