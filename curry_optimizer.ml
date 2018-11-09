@@ -1,7 +1,12 @@
 open Ast
 
+(** [functions] is the set of functions that don't need to be curried *)
 let functions = Hashtbl.create 1000;;
 
+(**
+ * [detect_let_decl tr] adds any valid non-curry function in [tr] to
+ * [functions].
+ *)
 let rec detect_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) ->
       detect_expr assign_expr
@@ -10,6 +15,10 @@ let rec detect_let_decl = function
       Hashtbl.add functions name (List.length pat_lst);
       detect_expr body
 
+(**
+ * [detect_expr tr] adds any valid non-curry function in [tr] to
+ * [functions].
+ *)
 and detect_expr = function
   | LetBinding (let_bind, in_expr) ->
       detect_let_decl let_bind;
@@ -65,6 +74,12 @@ and detect_expr = function
   | ModuleAccessor (_, _)
   | Variant (_, None) -> ()
 
+(**
+ * [optimize_let_decl tr] sets the curry parameter on any [FunctionAssignment]
+ * in [tr] for any function in [functions].
+ *
+ * Any [FunctionCall] for those functions is also set to be curried.
+ *)
 let rec optimize_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) ->
       VarAssignment (pat, is_rec, optimize_expr assign_expr)
@@ -74,6 +89,12 @@ let rec optimize_let_decl = function
   | TailRecursiveFunctionAssignment (name, pat_lst, body) ->
       TailRecursiveFunctionAssignment (name, pat_lst, optimize_expr body)
 
+(**
+ * [optimize_expr tr] sets the curry parameter on any [FunctionAssignment]
+ * in [tr] for any function in [functions].
+ *
+ * Any [FunctionCall] for those functions is also set to be curried.
+ *)
 and optimize_expr = function
   | FunctionCall (VarName str, arg_lst, curried) ->
       if Hashtbl.mem functions str then begin
