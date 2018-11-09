@@ -1,12 +1,21 @@
 open Ast
 
+(**
+ * [optimize_let_binding tr] is an equivalent let binding to [tr] where any
+ * function call tree is squashed.
+ *)
 let rec optimize_let_binding = function
-  | VarAssignment (pat, is_rec, expr) -> VarAssignment (pat, is_rec, optimize_expr expr)
+  | VarAssignment (pat, is_rec, expr) ->
+      VarAssignment (pat, is_rec, optimize_expr expr)
   | FunctionAssignment (name, is_rec, args, body, curry) ->
       FunctionAssignment (name, is_rec, args, optimize_expr body, curry)
   | TailRecursiveFunctionAssignment (name, args, body) ->
       TailRecursiveFunctionAssignment (name, args, optimize_expr body)
 
+(**
+ * [optimize_expr tr] is an equivalent expression to [tr] where any function
+ * call tree is squashed.
+ *)
 and optimize_expr = function
   | FunctionCall (fun_expr, args, curry) ->
       let optimized_fun = optimize_expr fun_expr in
@@ -30,7 +39,8 @@ and optimize_expr = function
   | Function (args, body) ->
       Function (args, optimize_expr body)
   | Sequential (l, r) -> Sequential (optimize_expr l, optimize_expr r)
-  | LetBinding (l, in_expr) -> LetBinding (optimize_let_binding l, optimize_expr in_expr)
+  | LetBinding (l, in_expr) ->
+      LetBinding (optimize_let_binding l, optimize_expr in_expr)
   | ParenExpr expr -> ParenExpr (optimize_expr expr)
   | ((ListExpr lst) as tr)
   | ((ArrayExpr lst) as tr)
@@ -53,8 +63,10 @@ and optimize_expr = function
       )
   | Record lst ->
       Record (List.map (fun (name, value) -> (name, optimize_expr value)) lst)
-  | Variant (constr, Some arg) -> Variant (constr, Some (optimize_expr arg))
-  | PropertyAccessor (expr, prop) -> PropertyAccessor (optimize_expr expr, prop)
+  | Variant (constr, Some arg) ->
+      Variant (constr, Some (optimize_expr arg))
+  | PropertyAccessor (expr, prop) ->
+      PropertyAccessor (optimize_expr expr, prop)
 
 let optimize tr =
   List.map (fun module_item ->
