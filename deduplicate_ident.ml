@@ -1,9 +1,28 @@
 open Ast
 
+(**
+ * [binding_stack] is mapping from identifer to a stack of unique bindings
+ * that refer to this identifier.
+ *
+ * Once an element is out of scope, it's binding should be popped from its list.
+ *
+ * Once a new binding is created, it should be added to its corresponding list.
+ *)
 let binding_stack = Hashtbl.create 10000;;
 
+(**
+ * [curr_binding] refers to the next binding name that can be used by the
+ * deduplicator.
+ *)
 let curr_binding = ref "a";;
 
+(**
+ * [incr_binding ()] updates [curr_binding] to contain its lexicographic
+ * successor. Only lowercase names are used.
+ *
+ * {b Example:} Calling [incr_binding ()] when [curr_binding] is ["z"] will
+ * result in [curr_binding] containing ["aa"].
+ *)
 let incr_binding () =
   let last_idx = String.length !curr_binding - 1 in
   let curr_last_char = String.get !curr_binding last_idx in
@@ -18,6 +37,13 @@ let incr_binding () =
       String.make 1 next_last_char
     ]
 
+(**
+ * [add_binding bind] updates [bind]'s [binding_stack] to contain a new unique
+ * identifier ([curr_binding]).
+ *
+ * It updates [curr_binding] to contain its successor and evaluates to the
+ * binding assigned to [bind].
+ *)
 let add_binding binding =
   let new_binding = !curr_binding in
   begin try
@@ -29,6 +55,12 @@ let add_binding binding =
   incr_binding ();
   new_binding
 
+(**
+ * [remove_binding bind] removes the latest binding added to [bind]'s
+ * [binding_stack].
+ *
+ * It evalutates to [bind] so this method can be used in map style methods.
+ *)
 let remove_binding binding =
   let binding_lst = Hashtbl.find binding_stack binding in
   begin match binding_lst with
@@ -41,12 +73,22 @@ let remove_binding binding =
   end;
   binding
 
+(**
+ * [get_most_recent_binding ident] is the most recent binding that was
+ * assigned to [ident] (the head of its [binding_stack]).
+ *
+ * If no such element exists, it evalutes to [ident].
+ *)
 let get_most_recent_binding ident =
   try
     Hashtbl.find binding_stack ident |> List.hd
   with _ ->
     ident
 
+(**
+ * [pattern_binding_fold f tr] applies [f] on any binding created in the
+ * pattern tree [tr]. No call order is guaranteed.
+ *)
 let rec pattern_binding_fold f = function
   | AliasPattern (pat, alias) ->
       AliasPattern (pattern_binding_fold f pat, f alias)
@@ -72,9 +114,26 @@ let rec pattern_binding_fold f = function
   | (ConstantPattern _ as tr)
   | (VariantPattern (_, None) as tr) -> tr
 
+(**
+ * [optimize_pattern tr] applies [add_binding] on any binding created in the
+ * pattern tree [tr]. No call order is guaranteed.
+ *)
 let optimize_pattern = pattern_binding_fold add_binding;;
+
+(**
+ * [remove_pattern_bindings tr] applies [remove_binding] on any binding
+ * created in the pattern tree [tr]. No call order is guaranteed.
+ *)
 let remove_pattern_bindings = pattern_binding_fold remove_binding;;
 
+(**
+ * [optimize_expr tr] transforms any binding or variable name reference in [tr]
+ * to a unique name.
+ *
+ * The structure of the tree is not modified in any other way.
+ *
+ * {b See:} the example in [optimize] for reference
+ *)
 let rec optimize_expr = function
   | VarName str ->
       VarName (get_most_recent_binding str)
