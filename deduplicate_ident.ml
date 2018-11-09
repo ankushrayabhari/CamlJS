@@ -53,9 +53,12 @@ let rec pattern_binding_fold f = function
   | ValueNamePattern str ->
       ValueNamePattern (f str)
   | ParenPattern pat -> pattern_binding_fold f pat
-  | ListPattern pat_lst -> ListPattern (List.map (pattern_binding_fold f) pat_lst)
-  | TuplePattern pat_lst -> TuplePattern (List.map (pattern_binding_fold f) pat_lst)
-  | ArrayPattern pat_lst -> ArrayPattern (List.map (pattern_binding_fold f) pat_lst)
+  | ListPattern pat_lst ->
+      ListPattern (List.map (pattern_binding_fold f) pat_lst)
+  | TuplePattern pat_lst ->
+      TuplePattern (List.map (pattern_binding_fold f) pat_lst)
+  | ArrayPattern pat_lst ->
+      ArrayPattern (List.map (pattern_binding_fold f) pat_lst)
   | ConsPattern (pat1, pat2) ->
       ConsPattern (pattern_binding_fold f pat1, pattern_binding_fold f pat2)
   | VariantPattern (constr, Some pat) ->
@@ -103,7 +106,8 @@ let rec optimize_expr = function
       ) in
       remove_pattern_bindings pat |> ignore;
       optimized
-  | LetBinding (FunctionAssignment (name, is_rec, pat_lst, body, curry), in_expr) ->
+  | LetBinding (
+      FunctionAssignment (name, is_rec, pat_lst, body, curry), in_expr) ->
       let (optimized_name, optimized_pat_lst, optimized_body) =
         if is_rec then begin
           let optimized_name = add_binding name in
@@ -120,22 +124,27 @@ let rec optimize_expr = function
         end
       in
       let optimized_in_expr = optimize_expr in_expr in
-      let optimized = LetBinding (
-        FunctionAssignment (optimized_name, is_rec, optimized_pat_lst, optimized_body, curry),
-        optimized_in_expr
-      ) in
+      let optimized =
+        LetBinding (
+          FunctionAssignment
+            (optimized_name, is_rec, optimized_pat_lst, optimized_body, curry),
+          optimized_in_expr
+        ) in
       remove_binding name |> ignore;
       optimized
-  | LetBinding (TailRecursiveFunctionAssignment (name, pat_lst, body), in_expr) ->
+  | LetBinding (
+      TailRecursiveFunctionAssignment (name, pat_lst, body), in_expr) ->
       let optimized_name = add_binding name in
       let optimized_pat_lst = List.map optimize_pattern pat_lst in
       let optimized_body = optimize_expr body in
       List.map remove_pattern_bindings pat_lst |> ignore;
       let optimized_in_expr = optimize_expr in_expr in
-      let optimized = LetBinding (
-        TailRecursiveFunctionAssignment (optimized_name, optimized_pat_lst, optimized_body),
-        optimized_in_expr
-      ) in
+      let optimized =
+        LetBinding (
+          TailRecursiveFunctionAssignment
+            (optimized_name, optimized_pat_lst, optimized_body),
+          optimized_in_expr
+        ) in
       remove_binding name |> ignore;
       optimized
   | MatchExpr (target, match_cases) ->
@@ -220,14 +229,16 @@ let optimize tr =
           end
         in
         LetDecl (
-          FunctionAssignment (optimized_name, is_rec, optimized_pat_lst, optimized_body, curry)
+          FunctionAssignment
+            (optimized_name, is_rec, optimized_pat_lst, optimized_body, curry)
         )
     | LetDecl (TailRecursiveFunctionAssignment (name, pat_lst, body)) ->
         let optimized_name = add_binding name in
         let optimized_pat_lst = List.map optimize_pattern pat_lst in
         let optimized_body = optimize_expr body in
         LetDecl (
-          TailRecursiveFunctionAssignment (optimized_name, optimized_pat_lst, optimized_body)
+          TailRecursiveFunctionAssignment
+            (optimized_name, optimized_pat_lst, optimized_body)
         )
     | t -> t
   ) tr
