@@ -36,7 +36,7 @@ tokenizer.ml tokenizer.mli grammar.ml: token.mli
 
 grammar: token.mli tokenizer.ml tokenizer.mli grammar.ml
 
-zip: grammar
+zip: clean
 	zip camljs_src.zip *.ml *.mli end_to_end_tests/* js_modules/* *.json _tags Makefile README.md
 
 docs-public: build
