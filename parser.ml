@@ -1,10 +1,21 @@
 open Lr_action
 open Parse_tree
 
+(**
+ * [stack_data] are containers for items on the shift reduce parse stack:
+ * - [State t] represents the parser state [t]
+ * - [ParseTree tr] represents the parse tree [tr].
+ *)
 type stack_data =
   | State of int
   | ParseTree of Parse_tree.t
 
+(**
+ * [remove_unit_productions tr] prunes any unit production [Node]s in any
+ * subtree:
+ * - [Node [Token t]] gets pruned to [Token t].
+ * - [Node [Node lst]] gets pruned to [Node lst]
+ *)
 let rec remove_unit_productions tr =
   let updated_tr = match tr with
   | Token t -> Token t
