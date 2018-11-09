@@ -166,16 +166,17 @@ let rec convert_pattern = function
     )
   | _ -> failwith "not a valid pattern"
 
-(** 
+(**
  * [convert_field_binding_pattern tr] is the AST-representation of the field
  * binding pattern production of the parse tree [tr].
  *
- * @raise Failure if [tr] is not a field binding pattern parse tree with 
+ * @raise Failure if [tr] is not a field binding pattern parse tree with
  * the elements of [Node] being
  * {ol
  * {li a [LowercaseIdent] token that is the field name}
  * {li the [Equal] token}
  * {li a pattern that the field is being bound to}
+ * }
  *)
 and convert_field_binding_pattern = function
   | Node
@@ -183,27 +184,29 @@ and convert_field_binding_pattern = function
        Token (Equal);
        pattern;
       ] -> (field_name, convert_pattern pattern)
-  | _ -> failwith 
+  | _ -> failwith
         "convert_field_binding_pattern called on a non-field-binding-pattern"
 
-(** 
- * [convert_one_or_more_semicolon_separated_field_binding_pattern acc tr] 
- * is the AST-representation of one or more field binding patterns separated 
+(**
+ * [convert_one_or_more_semicolon_separated_field_binding_pattern acc tr]
+ * is the AST-representation of one or more field binding patterns separated
  * by semicolons production of the parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
  * structures:
- * - [tr] is a field binding pattern parse tree with 
+ * - [tr] is a field binding pattern parse tree with
  * the elements of [Node] being
  * {ol
  * {li a valid semicolon separated pattern parse tree}
  * {li the [SemiColon] token}
  * {li a field binding pattern on the end}
+ * }
  * - [tr] is a single field binding pattern of the form
  * {ol
  * {li the [LowercaseIdent] token that is the field name}
  * {li the [Equal] token}
  * {li the pattern that the field is being bound to}
+ * }
  *)
 and convert_one_or_more_semicolon_separated_field_binding_pattern acc = function
   | Node [
@@ -501,16 +504,17 @@ and convert_pattern_matching acc = function
         further_pattern_matching
   | _ -> failwith "not a valid pattern matching"
 
-(** 
+(**
  * [convert_field_binding tr] is the AST-representation of the field-
  * value binding production of the parse tree [tr].
  *
- * @raise Failure if [tr] is not a field-value binding parse tree with 
+ * @raise Failure if [tr] is not a field-value binding parse tree with
  * the elements of [Node] being
  * {ol
  * {li a [LowercaseIdent] token that is the field name}
  * {li the [Equal] token}
  * {li a value that the field is being bound to}
+ * }
  *)
 and convert_field_binding = function
   | Node
@@ -520,24 +524,26 @@ and convert_field_binding = function
       ] -> (field_name, convert_expr value)
   | _ -> failwith "convert_field_binding called on a non-field-binding"
 
-(** 
- * [convert_one_or_more_semicolon_separated_field_binding acc tr] 
- * is the AST-representation of one or more field-value bindings separated 
+(**
+ * [convert_one_or_more_semicolon_separated_field_binding acc tr]
+ * is the AST-representation of one or more field-value bindings separated
  * by semicolons production of the parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
  * structures:
- * - [tr] is a field binding pattern parse tree with 
+ * - [tr] is a field binding pattern parse tree with
  * the elements of [Node] being
  * {ol
  * {li a valid semicolon separated field-value binding parse tree}
  * {li the [SemiColon] token}
  * {li a field-value binding}
+ * }
  * - [tr] is a single field-value binding of the form
  * {ol
  * {li a [LowercaseIdent] token that is the field name}
  * {li the [Equal] token}
  * {li a value that the field is being bound to}
+ * }
  *)
 and convert_one_or_more_semicolon_separated_field_binding acc = function
   | Node [
@@ -818,24 +824,26 @@ and convert_expr tr = match tr with
       )
   | _ -> failwith "not a valid expression"
 
-(** 
- * [convert_typexpr tr] is the AST-representation of a type expression 
+(**
+ * [convert_typexpr tr] is the AST-representation of a type expression
  * production parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
  * structures:
- * - [tr] is a parenthesized type expression with 
+ * - [tr] is a parenthesized type expression with
  * the elements of [Node] being
  * {ol
  * {li the [LParen] token}
  * {li a valid type expression parse tree}
  * {li the [RParen] token}
- * - [tr] is a tuple of type expressions with 
+ * }
+ * - [tr] is a tuple of type expressions with
  * the elements of [Node] being
  * {ol
  * {li a valid type expression parse tree}
  * {li the [Times] token}
  * {li a valid parse tree of more type expressions}
+ * }
  * - [tr] is a [LowercaseIdent constr] token where [constr] is a type
  *)
 let rec convert_typexpr = function (* list of tuple items *)
@@ -857,19 +865,20 @@ let rec convert_typexpr = function (* list of tuple items *)
 | Token (LowercaseIdent constr) -> Type constr
 | _ -> failwith "not valid typexpr"
 
-(** 
- * [convert_constr_decl tr] is the AST-representation of a constructor 
+(**
+ * [convert_constr_decl tr] is the AST-representation of a constructor
  * declaration production parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
  * structures:
  * - [tr] is a token [CapitalizedIdent constr]
- * - [tr] is a constructor declaration with 
+ * - [tr] is a constructor declaration with
  * the elements of [Node] being
  * {ol
  * {li a token [CapitalizedIdent constr]}
  * {li the [Of] token}
  * {li a valid parse tree of a type expression}
+ * }
  *)
 let convert_constr_decl = function
 | Token (CapitalizedIdent constr) -> (constr, None)
@@ -880,23 +889,25 @@ let convert_constr_decl = function
   ] -> (constr, Some (convert_typexpr typexpr))
 | _ -> failwith "not a valid constr decl"
 
-(** 
+(**
  * [convert_constr_decl_vert_bar_sep tr] is the AST-representation of a
  * constructor declaration separated by vertical bar production parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
  * structures:
- * - [tr] is a constructor declarations separated by vertical bars parse tree 
+ * - [tr] is a constructor declarations separated by vertical bars parse tree
  * with the elements of [Node] being
  * {ol
  * {li the [VerticalBar] token}
  * {li a valid constructor declaration parse tree}
  * {li a valid parse tree of more constructor declarations}
- * - [tr] is a vertical bar constructor declaration parse tree with 
+ * }
+ * - [tr] is a vertical bar constructor declaration parse tree with
  * the elements of [Node] being
  * {ol
  * {li the [VerticalBar] token}
  * {li a valid constructor declaration parse tree}
+ * }
  *)
 let rec convert_constr_decl_vert_bar_sep = function
 | Node [
@@ -912,8 +923,8 @@ let rec convert_constr_decl_vert_bar_sep = function
   ] -> [convert_constr_decl constr_tr]
 | _ -> failwith "not valid constr decls with vertical bar sep"
 
-(** 
- * [convert_repr tr] is the AST-representation of a type representation 
+(**
+ * [convert_repr tr] is the AST-representation of a type representation
  * production parse tree [tr].
  *
  * @raise Failure if [tr] does not correspond to one of the following
@@ -925,8 +936,8 @@ let rec convert_constr_decl_vert_bar_sep = function
  * in the middle only with elements of [Node] being
  * {ol
  * {li a valid construction declaration parse tree}
- * {li a valid parse tree of more constructor declarations separated by vertical
- * bars}
+ * {li a valid parse tree of more constr decls separated by vertical bars}
+ * }
  *)
 let rec convert_repr tr =
   try [convert_constr_decl tr] with _ ->
@@ -941,16 +952,17 @@ let rec convert_repr tr =
       constr::lst
   | _ -> failwith "not a valid representation"
 
-(** 
+(**
  * [convert_field_decl tr] is the AST-representation of a
  * field declaration parse tree.
  *
- * @raise Failure if [tr] does not correspond to a field declaration parse tree 
+ * @raise Failure if [tr] does not correspond to a field declaration parse tree
  * with the elements of [Node] being
  * {ol
  * {li the [LowercaseIdent field_name] token representing the field name}
  * {li the [Colon] token}
  * {li a valid type expression representing the field type}
+ * }
  *)
 let convert_field_decl = function
   | Node
@@ -985,11 +997,11 @@ let rec convert_one_or_more_semicolon_separated_field_decl acc = function
   | single_field_binding ->
     ((convert_field_decl single_field_binding) :: acc)
 
-(** 
- * [get_record_field_type_pairs record_type_node] is a list of record pairs 
- * where the first element is the field name of a record and the second element 
+(**
+ * [get_record_field_type_pairs record_type_node] is a list of record pairs
+ * where the first element is the field name of a record and the second element
  * is the type expression of that field.
- * 
+ *
  * @raises Failure if [record_type_node] does not correspond to one of the
  * following
  * - [record_type_node] is a record type parse tree of the form:
