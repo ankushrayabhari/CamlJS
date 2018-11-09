@@ -2,6 +2,9 @@ open Ast
 
 let unused_variables = Hashtbl.create 10000;;
 
+(**
+* [pattern_binding_iter f tr] applies [f] to every pattern binding in [tr].
+*)
 let rec pattern_binding_iter f = function
   | AliasPattern (pat, alias) ->
       f alias;
@@ -26,14 +29,28 @@ let rec pattern_binding_iter f = function
   | ConstantPattern _
   | VariantPattern (_, None) -> ()
 
+(**
+* [add_binding name] adds [name] to unused_variables.
+*)
 let add_binding name =
   Hashtbl.add unused_variables name ()
 
+(**
+* [remove_binding name] removes [name] from unused_variables.
+*)
 let remove_binding name =
   Hashtbl.remove unused_variables name
 
+(**
+* [add_pattern_bindings tr] adds all pattern bindings in [tr] to 
+* unused_variables.
+*)
 let add_pattern_bindings = pattern_binding_iter add_binding
 
+(**
+* [populate_unused_variables_let_binding tr] adds all pattern bindings in let 
+statement [tr] to unused_variables.
+*)
 let rec populate_unused_variables_let_binding = function
   | VarAssignment (pat, is_rec, assign_expr) ->
       add_pattern_bindings pat;
@@ -47,6 +64,10 @@ let rec populate_unused_variables_let_binding = function
       List.iter add_pattern_bindings pat_lst;
       populate_unused_variables body;
 
+(**
+* [populate_unused_variables tr] adds all unusted variables in [tr] to 
+* unused_variables.
+*)
 and populate_unused_variables = function
   | VarName str ->
       remove_binding str
@@ -97,6 +118,9 @@ and populate_unused_variables = function
   | ModuleAccessor (_, _)
   | Variant (_, None) -> ()
 
+(** 
+* [prune_let_decl tr] removes unused declaration bindings from [tr]
+*)
 let rec prune_let_decl = function
   | VarAssignment (pat, is_rec, assign_expr) -> begin
       match pat with
@@ -112,6 +136,9 @@ let rec prune_let_decl = function
       else LetDecl (TailRecursiveFunctionAssignment (name, pat_lst, prune_expr body))
     end
 
+(** 
+* [prune_expr tr] removes unused expression bindings from [tr]
+*)
 and prune_expr = function
   | LetBinding (let_bind, in_expr) -> begin
       match prune_let_decl let_bind with
