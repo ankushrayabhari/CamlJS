@@ -3,15 +3,16 @@ PARSER=tokenizer grammar parser ast_converter
 OPTIMIZER=deduplicate_ident curry_optimizer unused_binding_optimizer \
 				  tail_rec_optimizer call_squasher optimizer
 TYPES=parser/ast.mli parser/token.mli parser/lr_action.mli parser/parse_tree.mli
-MISC=file_helper
+UTIL=file_helper
 OBJECTS=$(MISC:=.cmo) $(RENDERER:=.cmo) $(PARSER:=.cmo) $(OPTIMIZER:=.cmo)
-MLS=$(MISC:=.ml) $(RENDERER:%=renderer/%.ml) $(PARSER:%=parser/%.ml) \
+MLS=$(UTIL:%=util/%.ml) $(RENDERER:%=renderer/%.ml) $(PARSER:%=parser/%.ml) \
 		$(OPTIMIZER:%=optimizer/%.ml)
 MLIS=$(MODULES:=.mli)  $(TYPES)
 TEST=test.byte
 E2ETEST=end_to_end_test.byte
 MAIN=main.byte
-OCAMLBUILD=ocamlbuild -use-ocamlfind -I "renderer" -I "parser" -I "optimizer"
+OCAMLBUILD=ocamlbuild -use-ocamlfind -I "renderer" -I "parser" -I "optimizer" \
+					 -I "test" -I "util"
 PKGS=oUnit,str,yojson
 EXEC=camljs
 CONVERTER=converter.byte
@@ -49,18 +50,21 @@ zip: clean
 docs-public: build
 	mkdir -p doc.public
 	ocamlfind ocamldoc -I _build  -I "_build/renderer" -I "_build/parser" \
-		-I "_build/optimizer" -package $(PKGS) -html -stars -d doc.public $(MLIS)
+		-I "_build/optimizer" -I "_build/test" -I "_build/util" -package $(PKGS) \
+		-html -stars -d doc.public $(MLIS)
 
 docs-private: build
 	mkdir -p doc.private
 	ocamlfind ocamldoc -I _build -I "_build/renderer" -I "_build/parser" \
-	 	-I "_build/optimizer" -package $(PKGS) -html -stars -d doc.private \
-		-inv-merge-ml-mli -m A $(MLIS) $(MLS) converter.ml
+	 	-I "_build/optimizer" -I "_build/test" -I "_build/util" -package $(PKGS) \
+		-html -stars -d doc.private -inv-merge-ml-mli -m A $(MLIS) $(MLS) \
+		converter.ml
 
 clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private
-	rm -rf parser/grammar.ml parser/tokenizer.ml parser/tokenizer.mli parser/token.mli
+	rm -rf parser/grammar.ml parser/tokenizer.ml parser/tokenizer.mli \
+				 parser/token.mli
 	rm -rf temp.js temp.ml
 	rm -rf camljs_src.zip
 
