@@ -793,7 +793,7 @@ let write_to_file f txt =
   close_out oc;
   print_endline (f ^ " updated!");;
 
-write_to_file "grammar.ml" grammar_text;;
-write_to_file "token.mli" token_mli_text;;
-write_to_file "tokenizer.mli" tokenizer_mli_text;;
-write_to_file "tokenizer.ml" tokenizer_text;;
+write_to_file "parser/grammar.ml" grammar_text;;
+write_to_file "parser/token.mli" token_mli_text;;
+write_to_file "parser/tokenizer.mli" tokenizer_mli_text;;
+write_to_file "parser/tokenizer.ml" tokenizer_text;;

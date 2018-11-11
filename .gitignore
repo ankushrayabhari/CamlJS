@@ -14,10 +14,10 @@ _build
 camljs
 temp.ml
 temp.js
-grammar.ml
-tokenizer.ml
-tokenizer.mli
-token.mli
+parser/grammar.ml
+parser/tokenizer.ml
+parser/tokenizer.mli
+parser/token.mli
 e2e-compiled.js
 e2e-js-result.txt
 e2e-ml-result.txt
