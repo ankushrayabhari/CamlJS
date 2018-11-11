@@ -1,5 +1,10 @@
 # CamlJS
 
+## Requirements
+This project was built with OCaml version 4.06.1 and OUnit 2.0.8.
+You must be running on a UNIX OS and have executables named ```node```
+and ```ocaml``` located in your PATH to run the E2E tests.
+
 ## Building and Running the Transpiler
 Running ``` make ``` will generate an executable named ```camljs```.
 This might take a while on your first time as the grammar needs to be converted
@@ -10,16 +15,16 @@ To compile a file, run:
 ```
 
 ## Running Tests
-Running ``` make test ``` will run the unit test suite. The standard OCaml
-installation of all assignments is required.
+Running ``` make test ``` will run the unit test suite.
 
 ## Running End to End Tests
 Running ``` make e2e-test ``` will run the end to end test suite.
-Note that you must be on MacOS and have a recent version of NodeJS
-(with an executable named ```node``` located in your PATH) and an OCaml runtime
-(with an executable named ```ocaml``` located in your PATH) in order to execute
-the test suite.
 
 ## Generating Docs
-Running ``` make docs ``` will generate the documentation in a folder called
-```doc.private``` and ```doc.public``` folders.
+Running ``` make docs ``` will generate the documentation in the
+folders ``` doc.private ``` and ``` doc.public ```.
+
+## Making the LR(1) Parser Generator
+For converting your own grammars to parse trees, update ```grammar.json``` and
+run ```make grammar```. This will run the converter script and generate the
+necessary source files in ```parser/```.
