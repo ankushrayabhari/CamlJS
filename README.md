@@ -1,4 +1,5 @@
 # CamlJS
+An OCaml to JS transpiler, complete with an LR(1) parser generator.
 
 ## Requirements
 This project was built with OCaml version 4.06.1 and OUnit 2.0.8.
